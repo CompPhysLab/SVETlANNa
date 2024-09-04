@@ -54,7 +54,8 @@ class DetectorProcessorClf(nn.Module):
         super().__init__()
         self.num_classes = num_classes
         self.segmented_detector = segmented_detector  # markup of a detector by classes zones
-        if segmented_detector:  # if a detector segmentation is not defined
+        if segmented_detector is not None:  # if a detector segmentation is not defined
+            self.segmented_detector = self.segmented_detector.int()
             self.segments_weights = self.weight_segments()
         self.segmentation_type = segmentation_type
 
@@ -70,14 +71,14 @@ class DetectorProcessorClf(nn.Module):
 
         Returns
         -------
-        detector_markup : torch.tensor()
+        detector_markup : torch.tensor(torch.int32)
             A tensor of the same shape as detector, where
             1) each pixel in the mask is marked by a class number from 0 to self.num_classes;
             2) if pixel is marked as -1 it is not belonging to any class during a computation of probabilities;
             3) each class zone can be highlighted as torch.where(detector_markup == ind_class, 1, 0).
         """
         detector_y, detector_x = detector_shape
-        detector_markup = (-1) * torch.ones(size=detector_shape)
+        detector_markup = (-1) * torch.ones(size=detector_shape, dtype=torch.int32)
 
         if self.segmentation_type == 'strips':
             # segments are vertical strips, symmetrically arranged relative to the detector center!
@@ -105,7 +106,7 @@ class DetectorProcessorClf(nn.Module):
                         x_center_right_ind = int(detector_x // 2 + strip_width // 2)
                     else:  # should make a center strip of even width
                         # Strips: |.11122|22333.|
-                        center_strip_width = strip_width - 1  # becomes even!
+                        center_strip_width = strip_width + 1  # becomes even!
                         x_center_left_ind = int(detector_x // 2 - center_strip_width // 2)
                         x_center_right_ind = int(detector_x // 2 + center_strip_width // 2)
                         # update width for other strips except the center one
@@ -113,7 +114,7 @@ class DetectorProcessorClf(nn.Module):
                 else:  # odd number of detector "pixels" in x-direction
                     if strip_width % 2 == 0:  # should make a center strip of odd width for symmetry
                         # Strips: |11112|2|23333|
-                        center_strip_width = strip_width - 1  # becomes odd!
+                        center_strip_width = strip_width + 1  # becomes odd!
                         x_center_left_ind = int(detector_x // 2 - center_strip_width // 2)
                         x_center_right_ind = int(detector_x // 2 + 1 + center_strip_width // 2)
                         # update width for other strips except the center one
@@ -187,7 +188,6 @@ class DetectorProcessorClf(nn.Module):
             mask_class = torch.where(self.segmented_detector == ind_class, 1, 0)
             integrals_by_classes[0, ind_class] = (
                     detector_data * mask_class
-                    * self.segments_weights[0, ind_class]
             ).sum().item()
 
         integrals_by_classes = integrals_by_classes * self.segments_weights
