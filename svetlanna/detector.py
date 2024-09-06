@@ -3,6 +3,7 @@ from torch import nn
 
 
 class SimpleDetector(nn.Module):
+    # TODO: Must an Element be a parent class?
     """
     Object that plays a role of a physical detector in an optical system:
     transforms incident field to intensities for further image analysis
@@ -11,7 +12,7 @@ class SimpleDetector(nn.Module):
         super().__init__()
         # TODO: add some normalization for the output tensor of intensities? or not?
 
-    def forward(self, input_field):
+    def forward(self, input_field:torch.Tensor) -> torch.Tensor:
         """
         Method that returns the image obtained from the incident field by a detector
         (in the simplest case the image on a detector is an intensities image)
@@ -27,7 +28,7 @@ class SimpleDetector(nn.Module):
         torch.tensor()
             The field after propagating through the aperture
         """
-        # TODO: add some normalization for intensities? What is with units?
+        # TODO: add some normalization for intensities? what is with units?
         detector_intensities = input_field.abs().pow(2)  # field absolute values squared
         return detector_intensities
 
@@ -37,13 +38,13 @@ class DetectorProcessorClf(nn.Module):
     The necessary layer to solve a classification task. Must be placed after a detector.
     This layer process an image from the detector and calculates probabilities of belonging to classes.
     """
-    def __init__(self, num_classes, segmented_detector=None, segmentation_type='strips'):
+    def __init__(self, num_classes: int, segmented_detector=None, segmentation_type='strips'):
         """
         Parameters
         ----------
         num_classes : int
             Number of classes in a classification task.
-        segmented_detector : torch.tensor()
+        segmented_detector : torch.Tensor
             A tensor of the same shape as detector, where
             each pixel in the mask is marked by a class number from 0 to self.num_classes
         segmentation_type : str
@@ -56,10 +57,11 @@ class DetectorProcessorClf(nn.Module):
         self.segmented_detector = segmented_detector  # markup of a detector by classes zones
         if segmented_detector is not None:  # if a detector segmentation is not defined
             self.segmented_detector = self.segmented_detector.int()
+            # TODO: weights could be custom!
             self.segments_weights = self.weight_segments()
         self.segmentation_type = segmentation_type
 
-    def detector_segmentation(self, detector_shape):
+    def detector_segmentation(self, detector_shape: torch.Size) -> torch.Tensor:
         """
         Function that markups a detector area by classes zones.
         ...
@@ -71,7 +73,7 @@ class DetectorProcessorClf(nn.Module):
 
         Returns
         -------
-        detector_markup : torch.tensor(torch.int32)
+        detector_markup : torch.Tensor(dtype=torch.int32)
             A tensor of the same shape as detector, where
             1) each pixel in the mask is marked by a class number from 0 to self.num_classes;
             2) if pixel is marked as -1 it is not belonging to any class during a computation of probabilities;
@@ -145,7 +147,7 @@ class DetectorProcessorClf(nn.Module):
 
         return detector_markup
 
-    def weight_segments(self):
+    def weight_segments(self) -> torch.Tensor:
         """
         Calculates weights for segments if segments having different areas.
         Comment: weight_i * area_i = const
@@ -153,29 +155,31 @@ class DetectorProcessorClf(nn.Module):
 
         Returns
         -------
-        torch.tensor([1, self.num_classes])
+        torch.Tensor
             A tensor of weights for further calculation of integrals.
+            shape=(1, self.num_classes)
         """
         classes_areas = torch.zeros(size=(1, self.num_classes))
         for ind_class in range(self.num_classes):
-            classes_areas[0, ind_class] = torch.where(self.segmented_detector == ind_class, 1, 0).sum().item()
+            classes_areas[0, ind_class] = torch.where(ind_class == self.segmented_detector, 1, 0).sum().item()
         min_class_area = classes_areas.min().item()
         return min_class_area / classes_areas
 
-    def forward(self, detector_data):
+    def forward(self, detector_data: torch.Tensor) -> torch.Tensor:
         """
         Calculates probabilities of belonging to classes by detector image.
         ...
 
         Parameters
         ----------
-        detector_data : torch.tensor()
-            Tensor that represents an image on a detector.
+        detector_data : torch.Tensor
+            A tensor that represents an image on a detector.
 
         Returns
         -------
-        torch.tensor([1, self.num_classes])
+        torch.Tensor
             A tensor of probabilities of element belonging to classes for further calculation of loss.
+            shape=(1, self.num_classes)
         """
         if self.segmented_detector is None:  # there is no predefined segments of a detector for classes
             # TODO: must we make it in __init__? But we need a detector (detector_data) shape for it!
@@ -185,12 +189,12 @@ class DetectorProcessorClf(nn.Module):
         integrals_by_classes = torch.zeros(size=(1, self.num_classes))
         # TODO: what to do with multiple wavelengths?
         for ind_class in range(self.num_classes):
-            mask_class = torch.where(self.segmented_detector == ind_class, 1, 0)
+            mask_class = torch.where(ind_class == self.segmented_detector, 1, 0)
             integrals_by_classes[0, ind_class] = (
                     detector_data * mask_class
             ).sum().item()
 
         integrals_by_classes = integrals_by_classes * self.segments_weights
-        # TODO: maybe some function like SoftMax? But integrals can be large!
+        # TODO: maybe some function like SoftMax? but integrals can be large!
         return integrals_by_classes / integrals_by_classes.sum().item()
 

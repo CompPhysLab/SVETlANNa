@@ -6,6 +6,7 @@ from svetlanna.detector import SimpleDetector, DetectorProcessorClf
 def test_simple_detector():
     detector = SimpleDetector()
     assert isinstance(detector, torch.nn.Module)
+    # assert isinstance(detector, Element)
     input_field = torch.rand(size=[7, 9])
     detector_image = detector.forward(input_field)
     assert input_field.shape == detector_image.shape
@@ -71,7 +72,7 @@ def test_detector_weight_segments(num_classes, segmented_detector, expected_weig
     num_classes
         Number of classes.
     segmented_detector
-        Segmentized detector.
+        A segmentized detector.
     expected_weights
         Expected weights for segments.
     """
