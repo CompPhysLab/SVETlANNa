@@ -12,10 +12,15 @@ readme = "README.md"
 python = "^3.11,<3.12"
 numpy = "<2.0"
 torch = "^2.4.0"
+matplotlib = "^3.9.2"
 
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
+jupyter = "^1.1.1"
+tqdm = "^4.66.5"
+scipy = "^1.14.1"
+
 
 [build-system]
 requires = ["poetry-core"]
