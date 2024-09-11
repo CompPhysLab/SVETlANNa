@@ -1,6 +1,6 @@
 from enum import Enum
 
-
+# SI prefixes
 _G = 1e9
 _M = 1e6
 _k = 1e3
@@ -15,6 +15,13 @@ _a = 1e-18
 
 
 class ureg(Enum):
+    """Unit registry.
+    To use it one should multiply variable by the units:
+    .. code-block:: python
+
+        var = 10
+        assert var * ureg.mm == 10*1e-2
+    """
     Gm = _G
     Mm = _M
     km = _k
