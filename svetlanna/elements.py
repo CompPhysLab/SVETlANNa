@@ -7,31 +7,33 @@ from typing import Iterable, Literal
 from .parameters import BoundedParameter, Parameter
 import torch
 
-
 INNER_PARAMETER_SUFFIX = '_svtlnn_inner_parameter'
 
 
+# TODO: check docstring
 class Element(nn.Module, metaclass=ABCMeta):
-
     """A class that describes each element of the system
 
-    :param nn: _description_
-    :type nn: _type_
-    :param metaclass: _description_, defaults to ABCMeta
-    :type metaclass: _type_, optional
+    Parameters
+    ----------
+    nn : _type_
+        _description_
+    metaclass : _type_, optional
+        _description_, by default ABCMeta
     """
 
     def __init__(
         self,
         simulation_parameters: SimulationParameters
     ) -> None:
-
         """Constructor method
 
-        :param simulation_parameters: Class exemplar, that describes optical
-        system
-        :type simulation_parameters: SystemParameters
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar that describes the optical system
         """
+
         super().__init__()
 
         self.simulation_parameters = simulation_parameters
@@ -52,6 +54,7 @@ class Element(nn.Module, metaclass=ABCMeta):
             self._x_linspace, self._y_linspace, indexing='xy'
         )
 
+    # TODO: check doctrings
     @abstractmethod
     def forward(self, Ein: Tensor) -> Tensor:
 
@@ -86,13 +89,15 @@ class Element(nn.Module, metaclass=ABCMeta):
         return super().__setattr__(name, value)
 
 
+# TODO: check docstring
 class Aperture(Element):
-
-    """Aperture of the optical element with transmissin function, which takes
+    """Aperture of the optical element with transmission function, which takes
     the value 0 or 1
 
-    :param Element: Parent class for class Aperture
-    :type Element: class
+    Parameters
+    ----------
+    Element : _type_
+        _description_
     """
 
     def __init__(
@@ -100,52 +105,59 @@ class Aperture(Element):
         simulation_parameters: SimulationParameters,
         mask: torch.Tensor
     ):
-
         """Constructor method
 
-        :param simulation_parameters: Class exemplar, that describes optical
-        system
-        :type simulation_parameters: SimulationParameters
-        :param mask: Tensor that describes transmission function
-        :type mask: torch.Tensor
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar that describes the optical system
+        mask : torch.Tensor
+            Tensor that describes 2d transmission function
         """
 
         super().__init__(simulation_parameters)
+
         self.mask = mask
 
     def forward(self, input_field: torch.Tensor) -> torch.Tensor:
-
-        """Method that callulates the field after propagating through the
+        """Method that calculates the field after propagating through the
         aperture
 
-        :param input_field: The incident field in the plane on an aperture of
-                            the system(field before the aperture)
-        :type input_field: torch.Tensor
-        :return: The field after propagating through the aperture
-        :rtype: torch.Tensor
+        Parameters
+        ----------
+        input_field : torch.Tensor
+            Field incident on the aperture
+
+        Returns
+        -------
+        torch.Tensor
+            The field after propagating through the aperture
         """
 
         return input_field * self.mask
 
     def get_transmission_function(self) -> torch.Tensor:
-
         """Method which returns the transmission function of
         the aperture
 
-        :return: transmission function of the aperture
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            transmission function of the aperture
         """
 
         return self.mask
 
 
+# TODO" check docstring
 class RectangularAperture(Element):
-
-    """A rectangle-shaped aperture with a transmittance function taking either
+    """A rectangle-shaped aperture with a transmission function taking either
       a value of 0 or 1
 
-    :param Element: Parent class for class RectangularAperture
-    :type Element: class
+    Parameters
+    ----------
+    Element : _type_
+        _description_
     """
 
     def __init__(
@@ -154,73 +166,80 @@ class RectangularAperture(Element):
         height: float,
         width: float
     ):
-
         """Constructor method
 
-        :param simulation_parameters: Class exemplar, that describes optical
-        system
-        :type simulation_parameters: SimulationParameters
-        :param height: height of the rectangle
-        :type length: float
-        :param width: width of the rectangle
-        :type width: float
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar, that describes optical system
+        height : float
+            aperture height
+        width : float
+            aperture width
         """
 
         super().__init__(simulation_parameters)
+
         self.height = height
         self.width = width
+
         self.transmission_function = ((torch.abs(
             self._x_grid) <= self.width/2) * (torch.abs(
                 self._y_grid) <= self.height/2)).float()
 
     def forward(self, input_field: torch.Tensor) -> torch.Tensor:
-
         """Method that calculates the field after propagating through the
         rectangular aperture
 
-        :param input_field: The incident field in the plane on an aperture of
-                            the system(field before the aperture)
-        :type input_field: torch.Tensor
-        :return: The field after propagating through the aperture
-        :rtype: torch.Tensor
+        Parameters
+        ----------
+        input_field : torch.Tensor
+            Field incident on the rectangular aperture
+
+        Returns
+        -------
+        torch.Tensor
+            The field after propagating through the rectangular aperture
         """
 
         return input_field * self.transmission_function
 
     def get_transmission_function(self) -> torch.Tensor:
-
         """Method which returns the transmission function of
         the rectangular aperture
 
-        :return: transmission function of the rectangular aperture
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            transmission function of the rectangular aperture
         """
 
         return self.transmission_function
 
 
+# TODO: check docstrings
 class RoundAperture(Element):
-
-    """A round-shaped aperture with a transmittance function taking either
+    """A round-shaped aperture with a transmission function taking either
       a value of 0 or 1
 
-    :param Element: Parent class for class RoundAperture
-    :type Element: class
+    Parameters
+    ----------
+    Element : _type_
+        _description_
     """
-
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
         radius: float
     ):
-
         """Constructor method
 
-        :param simulation_parameters: Class exemplar, that describes optical
-        system
-        :type simulation_parameters: SimulationParameters
-        :param radius: circle radius
-        :type length: float
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar, that describes optical system
+        radius : float
+            Radius of the round-shaped aperture
         """
 
         super().__init__(simulation_parameters)
@@ -230,38 +249,44 @@ class RoundAperture(Element):
             self._y_grid, 2)) <= self.radius**2).float()
 
     def forward(self, input_field: torch.Tensor) -> torch.Tensor:
-
         """Method that calculates the field after propagating through the
-        round aperture
+        round-shaped aperture
 
-        :param input_field: The incident field in the plane on an aperture of
-                            the system(field before the aperture)
-        :type input_field: torch.Tensor
-        :return: The field after propagating through the aperture
-        :rtype: torch.Tensor
+        Parameters
+        ----------
+        input_field : torch.Tensor
+            Field incident on the round-shaped aperture
+
+        Returns
+        -------
+        torch.Tensor
+            The field after propagating through the round-shaped aperture
         """
 
         return input_field * self.transmission_function
 
     def get_transmission_function(self) -> torch.Tensor:
-
         """Method which returns the transmission function of
-        the round aperture
+        the round-shaped aperture
 
-        :return: transmission function of the round aperture
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            transmission function of the round-shaped aperture
         """
 
         return self.transmission_function
 
 
+# TODO: check docstrings
 class ThinLens(Element):
-
-    """ A class that described the field after propagating through the
+    """A class that described the field after propagating through the
     thin lens
 
-    :param Element: Parent class for class Thin Lens
-    :type Element: class
+    Parameters
+    ----------
+    Element : _type_
+        _description_
     """
 
     def __init__(
@@ -270,75 +295,88 @@ class ThinLens(Element):
         focal_length: float,
         radius: float
     ):
-
         """Constructor method
 
-        :param simulation_parameters: Class exemplar, that describes optical
-        system
-        :type simulation_parameters: SimulationParameters
-        :param focal_length: focal length of the lens, greater than 0 for the
-                             collecting lens
-        :type focal_length: float
-        :param radius: radius of the thin lens
-        :type radius: float
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar, that describes optical system
+        focal_length : float
+            focal length of the lens, greater than 0 for the collecting lens
+        radius : float
+            radius of the thin lens
         """
 
         super().__init__(simulation_parameters)
 
         self.focal_length = focal_length
         self.radius = radius
-        self._wave_number = 2 * torch.pi/self._wavelength
+
+        self._wave_number = 2 * torch.pi / self._wavelength
         self._radius_squared = torch.pow(self._x_grid, 2) + torch.pow(
             self._y_grid, 2)
-        # TODO: check if .float is required
+
         self.transmission_function = torch.exp(1j * (-self._wave_number/(
             2 * self.focal_length) * self._radius_squared * (
                 (self._radius_squared <= self.radius**2))))
 
     def forward(self, input_field: torch.Tensor) -> torch.Tensor:
-
         """Method that calculates the field after propagating through the
         thin lens
 
-        :param input_field: The incident field in the plane on a thin lens of
-                            the system(field before the thin lens)
-        :type input_field: torch.Tensor
-        :return: The field after propagating through the thin lens
-        :rtype: torch.Tensor
+        Parameters
+        ----------
+        input_field : torch.Tensor
+            Field incident on the thin lens
+
+        Returns
+        -------
+        torch.Tensor
+            The field after propagating through the thin lens
         """
 
         return input_field * self.transmission_function
 
-    # TODO: docstrings
     def reverse(self, transmission_field: torch.Tensor) -> torch.tensor:
-        """_summary_
+        """Method that calculates the field after passing the lens in back
+        propagation
 
-        :param transmission_field: _description_
-        :type transmission_field: torch.Tensor
-        :return: _description_
-        :rtype: torch.tensor
+        Parameters
+        ----------
+        transmission_field : torch.Tensor
+            Field incident on the lens in back propagation
+            (transmitted field in forward propagation)
+
+        Returns
+        -------
+        torch.tensor
+            Field transmitted on the lens in back propagation
+            (incident field in forward propagation)
         """
         return transmission_field * torch.conj(self.transmission_function)
 
     def get_transmission_function(self):
-
-        """Method which returns the complex-valued transmission function of
+        """Method which returns the transmission function of
         the thin lens
 
-        :return: transmission function of the thin lens
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            transmission function of the thin lens
         """
 
         return self.transmission_function
 
 
+# TODO: check docstrings
 class SpatialLightModulator(Element):
-
     """A class that described the field after propagating through the
-    Spatial Light Modulator with a given phase function
+    Spatial Light Modulator with a given phase mask
 
-    :param Element: Parent class for the class SpatialLightModulator
-    :type Element: class
+    Parameters
+    ----------
+    Element : _type_
+        _description_
     """
 
     def __init__(
@@ -347,17 +385,16 @@ class SpatialLightModulator(Element):
         mask: torch.Tensor,
         number_of_levels: int = 256
     ):
-
         """Constructor method
 
-        :param simulation_parameters: Class exemplar, that describes optical
-        system
-        :type simulation_parameters: SimulationParameters
-        :param mask: phase mask in grey format for the SLM
-        :type mask: torch.Tensor
-        :param number_of_levels: number of phase quantisation levels for the
-                                 SLM, default=256
-        :type number_of_levels: int
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar, that describes optical system
+        mask : torch.Tensor
+            Phase mask in grey format for the SLM, every element must be int
+        number_of_levels : int, optional
+            Number of phase quantization levels for the SLM, by default 256
         """
 
         super().__init__(simulation_parameters)
@@ -370,42 +407,62 @@ class SpatialLightModulator(Element):
         )
 
     def forward(self, input_field: torch.Tensor) -> torch.Tensor:
-
         """Method that calculates the field after propagating through the SLM
 
-        :param input_field: The incident field in the plane on a thin lens of
-                            the system(field before the thin lens)
-        :type input_field: torch.Tensor
-        :return: The field after propagating through the SLM
-        :rtype: torch.Tensor
+        Parameters
+        ----------
+        input_field : torch.Tensor
+            Field incident on the SLM
+
+        Returns
+        -------
+        torch.Tensor
+            The field after propagating through the SLM
         """
 
         return input_field * self.transmission_function
 
-    # TODO: docstrings
     def reverse(self, transmission_field: torch.Tensor) -> torch.tensor:
+        """Method that calculates the field after passing the SLM in back
+        propagation
+
+        Parameters
+        ----------
+        transmission_field : torch.Tensor
+            Field incident on the SLM in back propagation
+            (transmitted field in forward propagation)
+
+        Returns
+        -------
+        torch.tensor
+            Field transmitted on the SLM in back propagation
+            (incident field in forward propagation)
+        """
 
         return transmission_field * torch.conj(self.transmission_function)
 
     def get_transmission_function(self):
+        """Method which returns the transmission function of
+        the SLM
 
-        """Method which returns the complex-valued transmission function of
-        the Spatial Light Modulator, which takes values from 0 to 2*pi
-
-        :return: transmission function of the SLM
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            transmission function of the SLM
         """
 
         return self.transmission_function
 
 
+# TODO: check docstrings
 class FreeSpace(Element):
-
     """A class that describes the propagating of the field in free space
     before two optical elements
 
-    :param Element: Parent class for class FreeSpace
-    :type Element: class
+    Parameters
+    ----------
+    Element : _type_
+        _description_
     """
 
     def __init__(
@@ -414,19 +471,17 @@ class FreeSpace(Element):
         distance: float,
         method: Literal['auto', 'fresnel', 'AS']
     ):
-
         """Constructor method
 
-        :param simulation_parameters: Class exemplar, that describes optical
-        system
-        :type simulation_parameters: SimulationParameters
-        :param distance: distance between two optical elements
-        :type distance: float
-        :param wavelength: wavelength of the incident beam
-        :type wavelength: float
-        :param method: method for calculating the field after propagating,
-                       default = 'fresnel'
-        :type method: str
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar, that describes optical system
+        distance : float
+            distance between two optical elements
+        method : Literal[&#39;auto&#39;, &#39;fresnel&#39;, &#39;AS&#39;]
+            Method describing propagation in free space(AS - angular
+            spectrum method, fresnel - fresnel approximation, auto - auto mode)
         """
 
         super().__init__(simulation_parameters)
@@ -434,7 +489,7 @@ class FreeSpace(Element):
         self.distance = distance
         self.method = method
 
-        self._wave_number = 2*torch.pi / self._wavelength
+        self._wave_number = 2 * torch.pi / self._wavelength
 
         # spatial frequencies
         self._kx_linear = torch.fft.fftfreq(self._x_nodes, torch.diff(
@@ -444,15 +499,17 @@ class FreeSpace(Element):
         self._kx_grid, self._ky_grid = torch.meshgrid(
             self._kx_linear, self._ky_linear, indexing='xy')
 
+        # low-pass filter
         self.low_pass_filter = 1. * (torch.pow(self._kx_grid, 2) + torch.pow(
             self._ky_grid, 2) <= self._wave_number**2)
 
     def impulse_response_angular_spectrum(self) -> torch.Tensor:
-
         """Create the impulse response function for angular spectrum method
 
-        :return: 2d-impulse response function
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            2d impulse response function for angular spectrum method
         """
 
         wave_number_z = torch.sqrt(
@@ -466,11 +523,12 @@ class FreeSpace(Element):
         return impulse_response_fft
 
     def impulse_response_fresnel(self) -> torch.Tensor:
-
         """Create the impulse response function for fresnel approximation
 
-        :return: 2d-impulse response function
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            2d impulse response function for fresnel approximation
         """
 
         wave_number_in_plane = torch.pow(self._kx_grid, 2) + torch.pow(self._ky_grid, 2)  # noqa: E501
@@ -481,19 +539,30 @@ class FreeSpace(Element):
         )
         return impulse_response_fft
 
+    # TODO: ask for tol parameter
     def forward(
         self,
         input_field: torch.Tensor,
         tol: float = 1e-3
     ) -> torch.Tensor:
-
         """Method that calculates the field after propagating in the free space
 
-        :param input_field: The incident field in the plane on a thin lens of
-                            the system(field before the thin lens)
-        :type input_field: torch.Tensor
-        :return: The field after propagating in the free space
-        :rtype: torch.Tensor
+        Parameters
+        ----------
+        input_field : torch.Tensor
+            Field before propagation in free space
+        tol : float, optional
+            tolerance for Fresnel approximation, by default 1e-3
+
+        Returns
+        -------
+        torch.Tensor
+            Field after propagation in free space
+
+        Raises
+        ------
+        ValueError
+            Occurs when a non-existent direct distribution method is chosen
         """
 
         input_field_fft = torch.fft.fft2(input_field)
@@ -511,6 +580,7 @@ class FreeSpace(Element):
             radius_squared = torch.pow(self._x_grid, 2) + torch.pow(
                 self._y_grid, 2)
 
+            # criterion for Fresnel approximation
             fresnel_criterion = torch.pi * torch.max(
                 torch.pow(radius_squared, 2)
             ) / (
@@ -532,17 +602,30 @@ class FreeSpace(Element):
 
         return output_field
 
-    # TODO: rewrite function
     def reverse(self, transmission_field: torch.Tensor) -> torch.Tensor:
+        """Method that calculates the field after propagating in the free space
+        in back propagation
+
+        Parameters
+        ----------
+        transmission_field : torch.Tensor
+            Field before propagation in free space in back propagation
+
+        Returns
+        -------
+        torch.Tensor
+            Field after propagation in free space in back propagation
+        """
 
         transmission_field_fft = torch.fft.fft2(transmission_field)
 
+        # square of the modulus of the wave vector in the plane oXY
         wave_number_in_plane = torch.pow(self._kx_grid, 2) + torch.pow(self._ky_grid, 2)  # noqa: E501
 
         impulse_response = self.low_pass_filter * torch.exp(
-            -1j * self._wave_number * self.distance
-        ) * torch.exp(
-            1j * (self.distance / (2 * self._wave_number)) * (wave_number_in_plane)  # noqa: E501
+            1j * self.distance * (
+                -self._wave_number + wave_number_in_plane / (2 * self._wave_number)  # noqa: E501
+            )
         )
 
         incident_field_fft = impulse_response * transmission_field_fft

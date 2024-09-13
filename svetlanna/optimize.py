@@ -3,10 +3,10 @@ import torch
 from svetlanna import SimulationParameters
 
 
-class Optimiser:
-
+class Optimizer:
     """Class for solving the phase retrieval problem
     """
+
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
@@ -14,8 +14,19 @@ class Optimiser:
         source_intensity: torch.Tensor,
         number_of_levels: int = 256
     ):
-
         """Constructor method
+
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar that describes the optical system
+        target_intensity : torch.Tensor
+            The intensity distribution to be obtained
+        source_intensity : torch.Tensor
+            Intensity distribution in front of the optimized diffractive
+            optical element
+        number_of_levels : int, optional
+            Number of phase quantization levels for the SLM, by default 256
         """
 
         self.simulation_parameters = simulation_parameters
@@ -51,6 +62,27 @@ class Optimiser:
             tol: float = 1e-3,
             maxiter: int = 500
     ):
+        """Gerchberg Saxton's optimization algorithm
+
+        Parameters
+        ----------
+        forward : _type_
+            Function returning field at direct passage of the optical system
+        reverse : _type_
+            Function returning field at return passage of the optical system
+        initial_approximation : torch.Tensor
+            Initial approximation for the phase mask
+        tol : float, optional
+            Exit criterion of the optimization algorithm, by default 1e-3
+        maxiter : int, optional
+            maximum number of iterations for the algorithm, by default 500
+
+        Returns
+        -------
+        torch.Tensor, torch.Tensor
+            Phase function in the range from 0 to 2pi and phase mask in grey
+            format with selected number of quantization levels
+        """
 
         incident_field = self._source_amplitude * torch.exp(
             1j * initial_approximation
@@ -96,7 +128,7 @@ class Optimiser:
         phase_function = phase_function % (2 * torch.pi)
 
         step = 2 * torch.pi / self._number_of_levels
-        binary_mask = phase_function // step
-        phase_function = binary_mask * step
+        phase_mask = phase_function // step
+        phase_function = phase_mask * step
 
-        return phase_function, binary_mask
+        return phase_function, phase_mask

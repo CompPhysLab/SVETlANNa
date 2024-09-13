@@ -12,14 +12,14 @@ class Beam:
         simulation_parameters: SimulationParameters,
         amplitude: float = 1.
     ):
+        """Constructor method
 
-        """Constructor class
-
-        :param simulation_parameters: Class exemplar, that describes optical
-        system
-        :type simulation_parameters: SystemParameters
-        :param amplitude: Amplitude of the field from the source, default=1
-        :type amplitude: float
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar that describes the optical system
+        amplitude : float, optional
+            Amplitude of the field from the source, by default 1.
         """
 
         self.simulation_parameters = simulation_parameters
@@ -29,6 +29,7 @@ class Beam:
         self._x_nodes = simulation_parameters.x_nodes
         self._y_nodes = simulation_parameters.y_nodes
         self._wavelength = simulation_parameters.wavelength
+
         self.amplitude = amplitude
 
         self._x_linspace = torch.linspace(
@@ -42,27 +43,30 @@ class Beam:
         )
 
 
+# TODO: check docstring
 class GaussianBeam(Beam):
 
-    """A class describing gaussian beam
+    """A class that describes the Gaussian Beam
 
-    :param Beam: parent class
-    :type Beam: class
+    Returns
+    -------
+    _type_
+        _description_
     """
-    # TODO: create docstring
 
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
         amplitude: float = 1
     ):
-
         """Constructor method
 
-        :param simulation_parameters: _description_
-        :type simulation_parameters: SimulationParameters
-        :param amplitude: _description_, defaults to 1
-        :type amplitude: float, optional
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar that describes the optical system
+        amplitude : float, optional
+            Amplitude of the field from the source, by default 1
         """
 
         super().__init__(simulation_parameters, amplitude)
@@ -73,17 +77,21 @@ class GaussianBeam(Beam):
         waist_radius: float,
         refractive_index: float = 1.
     ) -> torch.Tensor:
+        """Method that describes propagation of the Gaussian beam
 
-        """method describes Gaussian beam
+        Parameters
+        ----------
+        distance : float
+            Field propagation distance
+        waist_radius : float
+            Waist radius of the beam
+        refractive_index : float, optional
+            Refractive index of the medium, by default 1.
 
-        :param distance: Distance over which the beam propagates
-        :type distance: float
-        :param waist_radius: Waist radius of the beam
-        :type waist_radius: float
-        :param refractive_index: Refractive index of the medium, defaults to 1
-        :type refractive_index: float
-        :return: Beam field in the plane oXY propagated over the distance
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            Beam field in the plane oXY propagated over the distance
         """
 
         wave_number = 2 * torch.pi * refractive_index / self._wavelength
@@ -111,13 +119,14 @@ class GaussianBeam(Beam):
         return field
 
 
-# TODO: create docstring
+# TODO: check docstring
 class PlaneWave(Beam):
+    """A class that describes the plane wave
 
-    """A class describing plane wave
-
-    :param Beam: _description_
-    :type Beam: _type_
+    Parameters
+    ----------
+    Beam : _type_
+        _description_
     """
 
     def __init__(
@@ -125,13 +134,14 @@ class PlaneWave(Beam):
         simulation_parameters: SimulationParameters,
         amplitude: float = 1
     ):
-
         """Constructor method
 
-        :param simulation_parameters: _description_
-        :type simulation_parameters: SimulationParameters
-        :param amplitude: _description_, defaults to 1
-        :type amplitude: float, optional
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar that describes the optical system
+        amplitude : float, optional
+            Amplitude of the field from the source, by default 1
         """
 
         super().__init__(simulation_parameters, amplitude)
@@ -142,17 +152,21 @@ class PlaneWave(Beam):
         wave_vector: torch.Tensor,
         initial_phase: float = 0.
     ) -> torch.Tensor:
+        """Method that describes propagation of the plane wave
 
-        """Method generates the planar wave
+        Parameters
+        ----------
+        distance : float
+            Field propagation distance
+        wave_vector : torch.Tensor
+            Wave vector of the planar wave
+        initial_phase : float, optional
+            Initial phase of the planar wave, by default 0.
 
-        :param distance: Distance over which the beam propagates
-        :type distance: float
-        :param wave_vector: wave vector of the planar wave
-        :type wave_vector: torch.Tensor
-        :param initial_phase: initial phase of the planar wave, defaults to 0
-        :type initial_phase: float, optional
-        :return: Field in the plane oXY propagated over the distance
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            Field in the plane oXY propagated over the distance
         """
 
         field = self.amplitude * torch.exp(
@@ -165,12 +179,14 @@ class PlaneWave(Beam):
         return field
 
 
-# TODO: create docstrings
+# TODO: check docstring
 class SphericalWave(Beam):
-    """_summary_
+    """A class that describes spherical wave
 
-    :param Beam: _description_
-    :type Beam: _type_
+    Parameters
+    ----------
+    Beam : _type_
+        _description_
     """
 
     def __init__(
@@ -178,13 +194,14 @@ class SphericalWave(Beam):
         simulation_parameters: SimulationParameters,
         amplitude: float = 1
     ):
-
         """Constructor method
 
-        :param simulation_parameters: _description_
-        :type simulation_parameters: SimulationParameters
-        :param amplitude: _description_, defaults to 1
-        :type amplitude: float, optional
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Class exemplar that describes the optical system
+        amplitude : float, optional
+            Amplitude of the field from the source, by default 1
         """
 
         super().__init__(simulation_parameters, amplitude)
@@ -195,16 +212,21 @@ class SphericalWave(Beam):
         wave_vector: torch.Tensor,
         initial_phase: float = 0.
     ) -> torch.Tensor:
+        """Method that describes propagation of the spherical wave
 
-        """Method that generates the spherical wave
+        Parameters
+        ----------
+        distance : float
+            Field propagation distance
+        wave_vector : torch.Tensor
+            Wave vector of the spherical wave
+        initial_phase : float, optional
+            Initial phase of the spherical wave, by default 0.
 
-        :param wave_vector: wave vector of the spherical wave
-        :type wave_vector: torch.Tensor
-        :param initial_phase: initial phase of the spherical wave, defaults
-                              to 0
-        :type initial_phase: float, optional
-        :return: Field in the plane oXY propagated over the distance
-        :rtype: torch.Tensor
+        Returns
+        -------
+        torch.Tensor
+            Field in the plane oXY propagated over the distance
         """
 
         radius = torch.sqrt(
