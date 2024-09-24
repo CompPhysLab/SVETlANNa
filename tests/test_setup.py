@@ -85,3 +85,10 @@ def test_to_cuda_device():
 
     assert el2.a.device.type == device
     assert el2.a.inner_parameter.device.type == device
+
+
+def test_reverse_empty():
+    setup = LinearOpticalSetup(elements=[])
+
+    a = torch.Tensor([2., 3.])
+    assert setup.reverse(a) is a
