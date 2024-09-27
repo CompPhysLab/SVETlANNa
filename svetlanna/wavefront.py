@@ -82,13 +82,15 @@ class Wavefront(torch.Tensor):
         """
         # by default the wave propagates along z direction
         if wave_direction is None:
-            wave_direction = [0, 0, 1]
+            wave_direction = [0., 0., 1.]
 
         numerical_mesh = NumericalMesh(
             simulation_parameters=simulation_parameters
         )
 
-        wave_direction = torch.tensor(wave_direction)
+        wave_direction = torch.tensor(wave_direction, dtype=torch.float32)
+        if wave_direction.shape != torch.Size([3]):
+            raise ValueError("wave_direction should contain exactly three components")
         wave_direction = wave_direction / torch.norm(wave_direction)
 
         wave_number = 2 * torch.pi / simulation_parameters.wavelength
@@ -146,8 +148,8 @@ class Wavefront(torch.Tensor):
         phase = wave_number * (distance + radial_distance_squared * inverse_radius_of_curvature / 2)
 
         field = waist_radius / hyperbolic_relation
-        field *= torch.exp(-radial_distance_squared / (hyperbolic_relation)**2)
-        field *= torch.exp(-1j * (phase - gouy_phase))
+        field = field * torch.exp(-radial_distance_squared / (hyperbolic_relation)**2)
+        field = field * torch.exp(-1j * (phase - gouy_phase))
 
         field = cls(field)
 
