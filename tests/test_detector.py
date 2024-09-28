@@ -10,19 +10,19 @@ def test_detector_types():
     Test on types for a detector.
     """
     detector = Detector(
-        SimulationParameters(1e-2, 1e-2, 5, 5)
+        SimulationParameters(1e-2, 1e-2, 5, 5, 1e-6)
     )
     assert isinstance(detector, torch.nn.Module)
     assert isinstance(detector, Element)
 
 
 @pytest.mark.parametrize(
-    "x_size, y_size, x_nodes, y_nodes", [
-        (10e-2, 10e-2, 10, 10),
-        (15e-2, 20e-2, 15, 20),
+    "x_size, y_size, x_nodes, y_nodes, wavelength", [
+        (10e-2, 10e-2, 10, 10, 1e-6),
+        (15e-2, 20e-2, 15, 20, 1e-6),
     ]
 )
-def test_detector_intensity(x_size, y_size, x_nodes, y_nodes):
+def test_detector_intensity(x_size, y_size, x_nodes, y_nodes, wavelength):
     """
     Check a detector that returns a map of intensities (func='intensity').
 
@@ -33,7 +33,7 @@ def test_detector_intensity(x_size, y_size, x_nodes, y_nodes):
         Simulation parameters for detector.
     """
     detector = Detector(
-        SimulationParameters(x_size, y_size, x_nodes, y_nodes),
+        SimulationParameters(x_size, y_size, x_nodes, y_nodes, wavelength),
         func='intensity'
     )
     input_field = torch.rand(size=[y_nodes, x_nodes])
