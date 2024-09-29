@@ -1,13 +1,43 @@
 import pytest
 import torch
-from svetlanna.detector import SimpleDetector, DetectorProcessorClf
+from svetlanna.elements import Element
+from svetlanna import SimulationParameters
+from svetlanna.detector import Detector, DetectorProcessorClf
 
 
-def test_simple_detector():
-    detector = SimpleDetector()
+def test_detector_types():
+    """
+    Test on types for a detector.
+    """
+    detector = Detector(
+        SimulationParameters(1e-2, 1e-2, 5, 5, 1e-6)
+    )
     assert isinstance(detector, torch.nn.Module)
-    # assert isinstance(detector, Element)
-    input_field = torch.rand(size=[7, 9])
+    assert isinstance(detector, Element)
+
+
+@pytest.mark.parametrize(
+    "x_size, y_size, x_nodes, y_nodes, wavelength", [
+        (10e-2, 10e-2, 10, 10, 1e-6),
+        (15e-2, 20e-2, 15, 20, 1e-6),
+    ]
+)
+def test_detector_intensity(x_size, y_size, x_nodes, y_nodes, wavelength):
+    """
+    Check a detector that returns a map of intensities (func='intensity').
+
+    Parameters
+    ----------
+    x_size, y_size : float
+    x_nodes, y_nodes : int
+        Simulation parameters for detector.
+    """
+    detector = Detector(
+        SimulationParameters(x_size, y_size, x_nodes, y_nodes, wavelength),
+        func='intensity'
+    )
+    input_field = torch.rand(size=[y_nodes, x_nodes])
+
     detector_image = detector.forward(input_field)
     assert input_field.shape == detector_image.shape
     assert torch.allclose(detector_image, input_field.abs().pow(2))
