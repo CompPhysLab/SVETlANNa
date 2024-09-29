@@ -1,6 +1,6 @@
 from svetlanna import elements
 from svetlanna import SimulationParameters
-from svetlanna import beam_generator
+from svetlanna import Wavefront
 from examples import analytical_solutions as anso
 import pytest
 import torch
@@ -26,8 +26,6 @@ def test_rectangle_fresnel(
     error_energy: float
 ):
 
-    wave_number = 2 * torch.pi / wavelength_test
-
     params = SimulationParameters(
         x_size=ox_size,
         y_size=oy_size,
@@ -39,10 +37,10 @@ def test_rectangle_fresnel(
     dx = ox_size / ox_nodes
     dy = oy_size / oy_nodes
 
-    incident_field = beam_generator.PlaneWave(
-        simulation_parameters=params
-    ).forward(
-        distance=distance_test, wave_vector=torch.tensor([0., 0., wave_number])
+    incident_field = Wavefront.plane_wave(
+        simulation_parameters=params,
+        distance=distance_test,
+        wave_direction=[0, 0, 1]
     )
 
     # field after the square aperture
@@ -114,7 +112,7 @@ def test_gaussian_beam_propagation(
     dx = ox_size / ox_nodes
     dy = oy_size / oy_nodes
 
-    rayleigh_range = torch.pi * (waist_radius_test**2)  / wavelength_test
+    rayleigh_range = torch.pi * (waist_radius_test**2) / wavelength_test
 
     radial_distance_squared = torch.pow(x_grid, 2) + torch.pow(y_grid, 2)
 
@@ -146,9 +144,11 @@ def test_gaussian_beam_propagation(
 
     distance_start = distance_total - distance_end
 
-    field_gb_start = beam_generator.GaussianBeam(
-        simulation_parameters=params
-    ).forward(distance=distance_start, waist_radius=waist_radius_test)
+    field_gb_start = Wavefront.gaussian_beam(
+        simulation_parameters=params,
+        distance=distance_start,
+        waist_radius=waist_radius_test
+    )
     field_gb_end = elements.FreeSpace(
         simulation_parameters=params, distance=distance_end, method='fresnel'
     ).forward(input_field=field_gb_start)

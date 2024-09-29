@@ -1,18 +1,25 @@
 import torch
 from torch import nn
+from svetlanna import SimulationParameters
+from .elements import Element
 
 
-class SimpleDetector(nn.Module):
+class Detector(Element):
     # TODO: Must an Element be a parent class?
     """
     Object that plays a role of a physical detector in an optical system:
     transforms incident field to intensities for further image analysis
     """
-    def __init__(self):
-        super().__init__()
+    def __init__(
+            self,
+            simulation_parameters: SimulationParameters,
+            func='intensity'
+    ):
+        super().__init__(simulation_parameters)
         # TODO: add some normalization for the output tensor of intensities? or not?
+        self.func = func
 
-    def forward(self, input_field:torch.Tensor) -> torch.Tensor:
+    def forward(self, input_field: torch.Tensor) -> torch.Tensor:
         """
         Method that returns the image obtained from the incident field by a detector
         (in the simplest case the image on a detector is an intensities image)
@@ -28,9 +35,11 @@ class SimpleDetector(nn.Module):
         torch.tensor()
             The field after propagating through the aperture
         """
+        detector_output = None
         # TODO: add some normalization for intensities? what is with units?
-        detector_intensities = input_field.abs().pow(2)  # field absolute values squared
-        return detector_intensities
+        if self.func == 'intensity':
+            detector_output = input_field.abs().pow(2)  # field absolute values squared
+        return detector_output
 
 
 class DetectorProcessorClf(nn.Module):
