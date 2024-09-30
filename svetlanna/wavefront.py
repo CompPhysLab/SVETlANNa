@@ -22,10 +22,11 @@ class NumericalMesh:
 
 
 class Wavefront(torch.Tensor):
-    """Class that stores """
+    """Class that represents wavefront"""
     @staticmethod
     def __new__(cls, data, *args, **kwargs):
         # see https://github.com/albanD/subclass_zoo/blob/ec47458346c2a1cfcd5e676926a4bbc6709ff62e/base_tensor.py
+        data = torch.as_tensor(data)
         return super(cls, Wavefront).__new__(cls, data)
 
     @property
@@ -46,7 +47,7 @@ class Wavefront(torch.Tensor):
         Returns
         -------
         torch.Tensor
-            phase from $0$ to $2\pi$
+            phase from $0$ to $2\\pi$
         """
         res = torch.angle(torch.Tensor(self))
         res[res < 0] += 2 * torch.pi
@@ -145,11 +146,11 @@ class Wavefront(torch.Tensor):
         # Gouy phase
         gouy_phase = torch.arctan(torch.tensor(distance / rayleigh_range))
 
-        phase = wave_number * (distance + radial_distance_squared * inverse_radius_of_curvature / 2)
-
-        field = waist_radius / hyperbolic_relation
-        field = field * torch.exp(-radial_distance_squared / (hyperbolic_relation)**2)
-        field = field * torch.exp(-1j * (phase - gouy_phase))
+        field = torch.exp(-1j * wave_number * radial_distance_squared * inverse_radius_of_curvature / 2)
+        field *= torch.exp(torch.tensor(-1j * wave_number * distance))
+        field *= torch.exp(1j * gouy_phase)
+        field *= torch.exp(-radial_distance_squared / (hyperbolic_relation)**2)
+        field *= waist_radius / hyperbolic_relation
 
         field = cls(field)
 
