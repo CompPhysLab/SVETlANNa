@@ -3,8 +3,8 @@ from torch import nn
 from torch import Tensor
 from ..simulation_parameters import SimulationParameters
 from ..specs import ReprRepr, ParameterSpecs
-from typing import Iterable, Literal
-from ..parameters import BoundedParameter, Parameter
+from typing import Iterable
+from ..parameters import ConstrainedParameter, Parameter
 import torch
 
 INNER_PARAMETER_SUFFIX = '_svtlnn_inner_parameter'
@@ -81,7 +81,7 @@ class Element(nn.Module, metaclass=ABCMeta):
 
         # BoundedParameter and Parameter are handled by pointing
         # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
-        if isinstance(value, (BoundedParameter, Parameter)):
+        if isinstance(value, (ConstrainedParameter, Parameter)):
             super().__setattr__(
                 name + INNER_PARAMETER_SUFFIX, value.inner_parameter
             )

@@ -1,6 +1,5 @@
 from svetlanna.specs import SaveContexts
 from pathlib import Path
-import os
 import random
 
 

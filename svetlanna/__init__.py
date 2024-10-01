@@ -1,4 +1,4 @@
-from .parameters import Parameter, BoundedParameter
+from .parameters import Parameter, ConstrainedParameter
 from .setup import LinearOpticalSetup
 from .simulation_parameters import SimulationParameters
 from .wavefront import Wavefront
@@ -6,7 +6,7 @@ from .wavefront import Wavefront
 
 __all__ = [
     'Parameter',
-    'BoundedParameter',
+    'ConstrainedParameter',
     'LinearOpticalSetup',
     'SimulationParameters',
     'Wavefront'
