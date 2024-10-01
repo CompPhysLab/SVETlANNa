@@ -91,7 +91,9 @@ class Wavefront(torch.Tensor):
 
         wave_direction = torch.tensor(wave_direction, dtype=torch.float32)
         if wave_direction.shape != torch.Size([3]):
-            raise ValueError("wave_direction should contain exactly three components")
+            raise ValueError(
+                "wave_direction should contain exactly three components"
+            )
         wave_direction = wave_direction / torch.norm(wave_direction)
 
         wave_number = 2 * torch.pi / simulation_parameters.wavelength
@@ -196,3 +198,17 @@ class Wavefront(torch.Tensor):
         field = cls(field)
 
         return field
+
+    # === methods below are added for typing only ===
+
+    def __mul__(self, other: Any) -> Self:
+        return super().__mul__(other=other)  # type: ignore
+
+    def __rmul__(self, other: Any) -> Self:
+        return super().__rmul__(other=other)  # type: ignore
+
+    def __truediv__(self, other: Any) -> Self:
+        return super().__truediv__(other=other)  # type: ignore
+
+    def __rtruediv__(self, other: Any) -> Self:
+        return super().__rtruediv__(other=other)  # type: ignore
