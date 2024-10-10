@@ -34,8 +34,10 @@ class DiffractiveLayer(Element):
         self.mask = mask
         self.mask_norm = mask_norm
 
-        self.transmission_function = torch.exp(
-            (2j * torch.pi / mask_norm) * mask
+    @property
+    def transmission_function(self):
+        return torch.exp(
+            (2j * torch.pi / self.mask_norm) * self.mask
         )
 
     def forward(self, input_field: Wavefront) -> Wavefront:
