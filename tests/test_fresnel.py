@@ -1,12 +1,27 @@
+# TODO: rename to test_analytic.py
+# TODO: docstrings
+
 from svetlanna import elements
 from svetlanna import SimulationParameters
 from svetlanna import Wavefront
+
 from examples import analytical_solutions as anso
+
 import pytest
 import torch
 import numpy as np
 
-square_parameters = "ox_size, oy_size, ox_nodes, oy_nodes," + "wavelength_test, distance_test, square_size_test," + "expected_std,error_energy"
+square_parameters = [
+    "ox_size",
+    "oy_size",
+    "ox_nodes",
+    "oy_nodes",
+    "wavelength_test",
+    "distance_test",
+    "square_size_test",
+    "expected_std",
+    "error_energy"
+]
 
 
 @pytest.mark.parametrize(
@@ -50,15 +65,27 @@ def test_rectangle_fresnel(
         width=square_size_test
     ).forward(input_field=incident_field)
 
-    # field on the screen
-    output_field = elements.FreeSpace(
+    # field on the screen by using Fresnel propagation method
+    output_field_fresnel = elements.FreeSpace(
         simulation_parameters=params,
         distance=distance_test,
         method='fresnel'
         ).forward(input_field=transmission_field)
+    # field on the screen by using Angular Spectrum method
+    output_field_as = elements.FreeSpace(
+        simulation_parameters=params,
+        distance=distance_test,
+        method='AS'
+        ).forward(input_field=transmission_field)
 
-    # intensity distribution on the screen
-    intensity_output = (torch.pow(torch.abs(output_field), 2)).detach().numpy()
+    # intensity distribution on the screen by using Fresnel propagation method
+    intensity_output_fresnel = (
+        torch.pow(torch.abs(output_field_fresnel), 2)
+    ).detach().numpy()
+    # intensity distribution on the screen by using Angular Spectrum method
+    intensity_output_as = (
+        torch.pow(torch.abs(output_field_as), 2)
+    ).detach().numpy()
 
     # analytical intensity distribution on the screen
     intensity_analytic = anso.SquareFresnel(
@@ -72,94 +99,24 @@ def test_rectangle_fresnel(
     ).intensity()
 
     energy_analytic = np.sum(intensity_analytic) * dx * dy
-    energy_numeric = np.sum(intensity_output) * dx * dy
+    energy_numeric_fresnel = np.sum(intensity_output_fresnel) * dx * dy
+    energy_numeric_as = np.sum(intensity_output_as) * dx * dy
 
-    standard_deviation = np.std(intensity_analytic - intensity_output)
-    error = np.abs((energy_analytic - energy_numeric) / energy_analytic)
-
-    assert standard_deviation <= expected_std
-    assert error <= error_energy
-
-
-parameters = "ox_size, oy_size, ox_nodes, oy_nodes," + "wavelength_test, waist_radius_test, distance_total, distance_end," + "expected_std, error_energy"
-
-
-@pytest.mark.parametrize(
-    parameters,
-    [(2, 2, 1500, 1600, 1064 * 1e-6, 1., 300, 200, 0.02, 0.01)]
-)
-def test_gaussian_beam_propagation(
-    ox_size,
-    oy_size,
-    ox_nodes,
-    oy_nodes,
-    wavelength_test,
-    waist_radius_test,
-    distance_total,
-    distance_end,
-    expected_std,
-    error_energy
-):
-
-    x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
-    y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
-    x_grid, y_grid = torch.meshgrid(x_linear, y_linear, indexing='xy')
-
-    wave_number = 2 * torch.pi / wavelength_test
-
-    amplitude = 1.
-
-    dx = ox_size / ox_nodes
-    dy = oy_size / oy_nodes
-
-    rayleigh_range = torch.pi * (waist_radius_test**2) / wavelength_test
-
-    radial_distance_squared = torch.pow(x_grid, 2) + torch.pow(y_grid, 2)
-
-    hyperbolic_relation = waist_radius_test * (1 + (
-        distance_total / rayleigh_range)**2)**(1/2)
-
-    radius_of_curvature = distance_total * (
-        1 + (rayleigh_range / distance_total)**2
+    standard_deviation_fresnel = np.std(
+        intensity_analytic - intensity_output_fresnel
+    )
+    standard_deviation_as = np.std(
+        intensity_analytic - intensity_output_as
     )
 
-    # Gouy phase
-    gouy_phase = torch.arctan(torch.tensor(distance_total / rayleigh_range))
-
-    field = amplitude * (waist_radius_test / hyperbolic_relation) * (
-        torch.exp(-radial_distance_squared / (hyperbolic_relation)**2) * (
-            torch.exp(-1j * (wave_number * distance_total + wave_number * (
-                radial_distance_squared) / (2 * radius_of_curvature) - (
-                    gouy_phase)))))
-
-    intensity_analytic = torch.pow(torch.abs(field), 2)
-
-    params = SimulationParameters(
-        x_size=ox_size,
-        y_size=oy_size,
-        x_nodes=ox_nodes,
-        y_nodes=oy_nodes,
-        wavelength=wavelength_test
+    energy_error_fresnel = np.abs(
+        (energy_analytic - energy_numeric_fresnel) / energy_analytic
+    )
+    energy_error_as = np.abs(
+        (energy_analytic - energy_numeric_as) / energy_analytic
     )
 
-    distance_start = distance_total - distance_end
-
-    field_gb_start = Wavefront.gaussian_beam(
-        simulation_parameters=params,
-        distance=distance_start,
-        waist_radius=waist_radius_test
-    )
-    field_gb_end = elements.FreeSpace(
-        simulation_parameters=params, distance=distance_end, method='fresnel'
-    ).forward(input_field=field_gb_start)
-
-    intensity_output = torch.pow(torch.abs(field_gb_end), 2)
-
-    energy_analytic = torch.sum(intensity_analytic) * dx * dy
-    energy_numeric = torch.sum(intensity_output) * dx * dy
-
-    standard_deviation = torch.std(intensity_output - intensity_analytic)
-    error = torch.abs((energy_analytic - energy_numeric) / energy_analytic)
-
-    assert standard_deviation <= expected_std
-    assert error <= error_energy
+    assert standard_deviation_fresnel <= expected_std
+    assert standard_deviation_as <= expected_std
+    assert energy_error_fresnel <= error_energy
+    assert energy_error_as <= error_energy

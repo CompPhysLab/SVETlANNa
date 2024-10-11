@@ -5,7 +5,16 @@ import pytest
 import torch
 
 
-rectangle_parameters = "ox_size, oy_size, ox_nodes, oy_nodes," + "wavelength_test, height_test, width_test, expected_std"
+rectangle_parameters = [
+    "ox_size",
+    "oy_size",
+    "ox_nodes",
+    "oy_nodes",
+    "wavelength_test",
+    "height_test",
+    "width_test",
+    "expected_std"
+]
 
 
 @pytest.mark.parametrize(
@@ -74,7 +83,15 @@ def test_rectangle_aperture(
     assert standard_deviation <= expected_std
 
 
-round_parameters = "ox_size, oy_size, ox_nodes, oy_nodes," + "wavelength_test, radius_test, expected_std"
+round_parameters = [
+    "ox_size",
+    "oy_size",
+    "ox_nodes",
+    "oy_nodes",
+    "wavelength_test",
+    "radius_test",
+    "expected_std"
+]
 
 
 @pytest.mark.parametrize(
@@ -140,7 +157,15 @@ def test_round_aperture(
     assert standard_deviation <= expected_std
 
 
-arbitrary_parameters = "ox_size, oy_size, ox_nodes, oy_nodes," + "wavelength_test, mask_test, expected_std"
+arbitrary_parameters = [
+    "ox_size",
+    "oy_size",
+    "ox_nodes",
+    "oy_nodes",
+    "wavelength_test",
+    "mask_test",
+    "expected_std"
+]
 
 
 @pytest.mark.parametrize(

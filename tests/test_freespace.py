@@ -1,12 +1,25 @@
 from svetlanna import elements
 from svetlanna import SimulationParameters
-from svetlanna import beam_generator
+from svetlanna import Wavefront
+
 import pytest
 import torch
 
-parameters = "ox_size, oy_size, ox_nodes, oy_nodes," + "wavelength_test, waist_radius_test, distance_total, distance_end," + "expected_std, error_energy"
 
-# TODO: rewrite by using wavefront
+parameters = [
+    "ox_size",
+    "oy_size",
+    "ox_nodes",
+    "oy_nodes",
+    "wavelength_test",
+    "waist_radius_test",
+    "distance_total",
+    "distance_end",
+    "expected_std",
+    "error_energy"
+]
+
+# TODO: fix docstrings
 @pytest.mark.parametrize(
     parameters,
     [(2, 2, 1500, 1600, 1064 * 1e-6, 1., 300, 200, 0.02, 0.01)]
@@ -95,22 +108,22 @@ def test_gaussian_beam_propagation(
 
     distance_start = distance_total - distance_end
 
-    field_gb_start = beam_generator.GaussianBeam(
-        simulation_parameters=params
-    ).forward(distance=distance_start, waist_radius=waist_radius_test)
+    field_gb_start = Wavefront.gaussian_beam(
+        simulation_parameters=params,
+        distance=distance_start,
+        waist_radius=waist_radius_test
+    )
 
     # field on the screen by using Fresnel propagation method
     field_end_fresnel = elements.FreeSpace(
         simulation_parameters=params, distance=distance_end, method='fresnel'
     ).forward(input_field=field_gb_start)
-
     # field on the screen by using angular spectrum method
     field_end_as = elements.FreeSpace(
         simulation_parameters=params, distance=distance_end, method='fresnel'
     ).forward(input_field=field_gb_start)
 
     intensity_output_fresnel = torch.pow(torch.abs(field_end_fresnel), 2)
-
     intensity_output_as = torch.pow(torch.abs(field_end_as), 2)
 
     energy_analytic = torch.sum(intensity_analytic) * dx * dy

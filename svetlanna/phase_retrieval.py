@@ -226,7 +226,7 @@ def gerchberg_saxton_algorithm(
             ) / (torch.sum(target_intensity) * number_of_pixels)
         )
 
-        print(error)
+        # print(error)
 
         if (torch.abs(current_error - error) <= tol) or (
             number_of_iterations >= maxiter
@@ -318,9 +318,6 @@ def hybrid_input_output(
         source_amplitude > torch.max(source_amplitude) / 5
     ).float()
 
-    # TODO: check constrain
-    # support_constrain = 1. - support_constrain
-
     while True:
 
         output_field = forward(incident_field)
@@ -359,7 +356,7 @@ def hybrid_input_output(
             )
         )
 
-        print(error)
+        # print(error)
 
         if (torch.abs(current_error - error) <= tol) or (
             number_of_iterations >= maxiter

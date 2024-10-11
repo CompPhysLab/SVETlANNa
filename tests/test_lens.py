@@ -4,8 +4,16 @@ from svetlanna import SimulationParameters
 import pytest
 import torch
 
-# TODO: rewrite by using list
-lens_parameters = "ox_size, oy_size, ox_nodes, oy_nodes," + "wavelength_test, focal_length_test, radius_test, expected_std"
+lens_parameters = [
+    "ox_size",
+    "oy_size",
+    "ox_nodes",
+    "oy_nodes",
+    "wavelength_test",
+    "focal_length_test",
+    "radius_test",
+    "expected_std"
+]
 
 
 @pytest.mark.parametrize(

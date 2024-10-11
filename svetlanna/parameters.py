@@ -8,7 +8,7 @@ class Parameter(torch.Tensor):
     """
     @staticmethod
     def __new__(cls, *args, **kwargs):
-        # see https://github.com/albanD/subclass_zoo/blob/ec47458346c2a1cfcd5e676926a4bbc6709ff62e/base_tensor.py
+        # see https://github.com/albanD/subclass_zoo/blob/ec47458346c2a1cfcd5e676926a4bbc6709ff62e/base_tensor.py   # noqa: E501
         return super(cls, Parameter).__new__(cls)
 
     def __init__(
@@ -37,7 +37,7 @@ class Parameter(torch.Tensor):
 
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
-        # see https://pytorch.org/docs/stable/notes/extending.html#extending-torch-python-api
+        # see https://pytorch.org/docs/stable/notes/extending.html#extending-torch-python-api   # noqa: E501
 
         # real parameter should be used for any calculations,
         # therefore the `instance` should be replaced to
@@ -45,7 +45,7 @@ class Parameter(torch.Tensor):
         if kwargs is None:
             kwargs = {}
         kwargs = {
-            k: v.inner_parameter if isinstance(v, cls) else v for k, v in kwargs.items()
+            k: v.inner_parameter if isinstance(v, cls) else v for k, v in kwargs.items()    # noqa: E501
         }
         args = (a.inner_parameter if isinstance(a, cls) else a for a in args)
         return func(*args, **kwargs)
@@ -87,7 +87,7 @@ class BoundedParameter(Parameter):
         inv_bound_func: Callable[[torch.Tensor], torch.Tensor] = sigmoid_inv,
         requires_grad: bool = True
     ):
-        """
+        r"""
         Parameters
         ----------
         data : Any

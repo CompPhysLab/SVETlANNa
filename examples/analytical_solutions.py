@@ -6,26 +6,36 @@ class SquareFresnel:
     """A class describing the analytical solution for the problem of free
       propagation after planar wave passes a square aperture
     """
-    def __init__(self, distance: float, x_size: float, y_size: float,
-                 x_nodes: int, y_nodes: int, square_size: float,
-                 wavelength: float):
+    def __init__(
+        self,
+        distance: float,
+        x_size: float,
+        y_size: float,
+        x_nodes: int,
+        y_nodes: int,
+        square_size: float,
+        wavelength: float
+    ):
         """Constructor method
 
-        :param distance: Distance between the square aperture and the screen
-        :type distance: float
-        :param x_size: System size along the axis ox
-        :type x_size: float
-        :param y_size: System size along the axis oy
-        :type y_size: float
-        :param x_nodes: Number of computational nodes along the axis ox
-        :type x_nodes: int
-        :param y_nodes: Number of computational nodes along the axis oy
-        :type y_nodes: int
-        :param square_size: square aperture side size
-        :type square_size: float
-        :param wavelength: wavelength of the incident planar wave
-        :type wavelength: float
+        Parameters
+        ----------
+        distance : float
+            Distance between the square aperture and the screen
+        x_size : float
+            System size along the axis ox
+        y_size : float
+            System size along the axis oy
+        x_nodes : int
+            Number of computational nodes along the axis ox
+        y_nodes : int
+            Number of computational nodes along the axis oy
+        square_size : float
+            Square aperture side size
+        wavelength : float
+            Wavelength of the incident planar wave
         """
+
         self.distance: float = distance
         self.x_size: float = x_size
         self.y_size: float = y_size
@@ -37,9 +47,12 @@ class SquareFresnel:
     def intensity(self) -> np.ndarray:
         """Method that describes the intensity profile on the screen
 
-        :return: 2d Intensity profile
-        :rtype: np.ndarray
+        Returns
+        -------
+        np.ndarray
+            2d Intensity profile
         """
+
         wave_number = 2*np.pi/self.wavelength
         x_linear = np.linspace(-self.x_size / 2, self.x_size / 2, self.x_nodes)
         y_linear = np.linspace(-self.y_size / 2, self.y_size / 2, self.y_nodes)
@@ -71,25 +84,34 @@ class CircleFresnel:
     """A class describing the analytical solution for the problem of free
       propagation after planar wave passes a circular aperture aperture
     """
-    def __init__(self, distance: float, x_size: float, y_size: float,
-                 x_nodes: int, y_nodes: int,
-                 radius_aperture: float, wavelength: float):
+    def __init__(
+        self,
+        distance: float,
+        x_size: float,
+        y_size: float,
+        x_nodes: int,
+        y_nodes: int,
+        radius_aperture: float,
+        wavelength: float
+    ):
         """Constructor method
 
-        :param distance: Distance between the circular aperture and the screen
-        :type distance: float
-        :param x_size: System size along the axis ox
-        :type x_size: float
-        :param y_size: System size along the axis oy
-        :type y_size: float
-        :param x_nodes: Number of computational nodes along the axis ox
-        :type x_nodes: int
-        :param y_nodes: Number of computational nodes along the axis oy
-        :type y_nodes: int
-        :param radius_aperture: radius of the circular aperture
-        :type radius_aperture: float
-        :param wavelength: wavelength of the incident field
-        :type wavelength: float
+        Parameters
+        ----------
+        distance : float
+            Distance between the circular aperture and the screen
+        x_size : float
+            System size along the axis ox
+        y_size : float
+            System size along the axis oy
+        x_nodes : int
+            Number of computational nodes along the axis ox
+        y_nodes : int
+            Number of computational nodes along the axis oy
+        radius_aperture : float
+            Radius of the circular aperture
+        wavelength : float
+            wavelength of the incident plane wave
         """
         self.distance: float = distance
         self.x_size: float = x_size
@@ -151,13 +173,20 @@ class CircleFresnel:
 
     def intensity_1d(self, amplitude_initial: np.ndarray) -> np.ndarray:
         """Method describing 1d-intensity distribution on the screen as a
-        function of distance
+#         function of distance
 
-        :param amplitude_initial: 1d-amplitude of the incident wave
-        :type amplitude_initial: np.ndarray
-        :return: 1d intensity profile on the screen
-        :rtype: np.ndarray
+        Parameters
+        ----------
+        amplitude_initial : np.ndarray
+            Method describing 1d-intensity distribution on the screen as a
+#         function of distance
+
+        Returns
+        -------
+        np.ndarray
+            1d intensity profile on the screen
         """
+
         wave_number = 2*np.pi/self.wavelength
         x_linear = np.linspace(-self.x_size / 2, self.x_size / 2, self.x_nodes)
         y_linear = np.linspace(-self.y_size / 2, self.y_size / 2, self.y_nodes)

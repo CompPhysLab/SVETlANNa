@@ -25,7 +25,7 @@ class Wavefront(torch.Tensor):
     """Class that represents wavefront"""
     @staticmethod
     def __new__(cls, data, *args, **kwargs):
-        # see https://github.com/albanD/subclass_zoo/blob/ec47458346c2a1cfcd5e676926a4bbc6709ff62e/base_tensor.py
+        # see https://github.com/albanD/subclass_zoo/blob/ec47458346c2a1cfcd5e676926a4bbc6709ff62e/base_tensor.py   # noqa: E501
         data = torch.as_tensor(data)
         return super(cls, Wavefront).__new__(cls, data)
 
@@ -91,7 +91,7 @@ class Wavefront(torch.Tensor):
 
         wave_direction = torch.tensor(wave_direction, dtype=torch.float32)
         if wave_direction.shape != torch.Size([3]):
-            raise ValueError("wave_direction should contain exactly three components")
+            raise ValueError("wave_direction should contain exactly three components")  # noqa: E501
         wave_direction = wave_direction / torch.norm(wave_direction)
 
         wave_number = 2 * torch.pi / simulation_parameters.wavelength
@@ -135,18 +135,18 @@ class Wavefront(torch.Tensor):
 
         wave_number = 2 * torch.pi / simulation_parameters.wavelength
 
-        rayleigh_range = torch.pi * (waist_radius**2) / simulation_parameters.wavelength
+        rayleigh_range = torch.pi * (waist_radius**2) / simulation_parameters.wavelength    # noqa: E501
 
-        radial_distance_squared = numerical_mesh.x_grid**2 + numerical_mesh.y_grid**2
+        radial_distance_squared = numerical_mesh.x_grid**2 + numerical_mesh.y_grid**2   # noqa: E501
 
-        hyperbolic_relation = waist_radius * (1 + (distance / rayleigh_range)**2)**(1/2)
+        hyperbolic_relation = waist_radius * (1 + (distance / rayleigh_range)**2)**(1/2)    # noqa: E501
 
-        inverse_radius_of_curvature = distance / (distance**2 + rayleigh_range**2)
+        inverse_radius_of_curvature = distance / (distance**2 + rayleigh_range**2)  # noqa: E501
 
         # Gouy phase
         gouy_phase = torch.arctan(torch.tensor(distance / rayleigh_range))
 
-        field = torch.exp(-1j * wave_number * radial_distance_squared * inverse_radius_of_curvature / 2)
+        field = torch.exp(-1j * wave_number * radial_distance_squared * inverse_radius_of_curvature / 2)    # noqa: E501
         field *= torch.exp(torch.tensor(-1j * wave_number * distance))
         field *= torch.exp(1j * gouy_phase)
         field *= torch.exp(-radial_distance_squared / (hyperbolic_relation)**2)
