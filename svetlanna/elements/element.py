@@ -72,7 +72,7 @@ class Element(nn.Module, metaclass=ABCMeta):
                 parameter = self.__getattribute__(name)
 
             yield ParameterSpecs(
-                name=name,
+                parameter_name=name,
                 representations=(ReprRepr(value=parameter),)
             )
 

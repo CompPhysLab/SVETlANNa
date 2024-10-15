@@ -1,13 +1,14 @@
-from svetlanna.specs import SaveContexts
+from svetlanna.specs import ParameterSaveContext
 from pathlib import Path
-import os
+import sys
 import random
 
 
 def test_save_context_get_new_filepath(tmpdir):
-    contexts = SaveContexts(
+    contexts = ParameterSaveContext(
         parameter_name='test',
-        directory=tmpdir
+        directory=tmpdir,
+        stream=sys.stdout
     )
 
     # test filename
@@ -20,15 +21,16 @@ def test_save_context_get_new_filepath(tmpdir):
 
 
 def test_save_context_file(tmpdir):
-    contexts = SaveContexts(
+    contexts = ParameterSaveContext(
         parameter_name='test',
-        directory=tmpdir
+        directory=tmpdir,
+        stream=sys.stdout
     )
 
     # create a new file and write test text
     text = str(random.random())
     path = contexts.get_new_filepath("testext")
-    with contexts.file("testext") as file:
+    with contexts.file(path) as file:
         file.write(text.encode())
 
     # check if the test text is written into the file
