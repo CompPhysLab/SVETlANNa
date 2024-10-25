@@ -1,7 +1,7 @@
 from torch import Tensor
 from typing import Any
 import torch
-from svetlanna.parameters import BoundedParameter, Parameter
+from svetlanna.parameters import ConstrainedParameter, Parameter
 from svetlanna import LinearOpticalSetup
 from svetlanna import SimulationParameters
 from svetlanna.elements import Element
@@ -68,7 +68,7 @@ def test_to_cuda_device():
         simulation_parameters=sim_params
     )
     el2 = SimpleElement(
-        a=BoundedParameter(
+        a=ConstrainedParameter(
             data=0.5,
             min_value=0,
             max_value=1

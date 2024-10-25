@@ -1,4 +1,4 @@
-from svetlanna.parameters import Parameter, BoundedParameter
+from svetlanna.parameters import Parameter, ConstrainedParameter
 import torch
 import pytest
 
@@ -6,10 +6,10 @@ import pytest
 @pytest.mark.parametrize(
     "parameter", [
         Parameter(data=123.),
-        BoundedParameter(data=123., min_value=0, max_value=300)
+        ConstrainedParameter(data=123., min_value=0, max_value=300)
     ]
 )
-def test_new(parameter: Parameter | BoundedParameter):
+def test_new(parameter: Parameter | ConstrainedParameter):
     # check if parameter is a tensor and not a torch parameter
     assert isinstance(parameter, torch.Tensor)
     assert not isinstance(parameter, torch.nn.Parameter)
@@ -24,7 +24,7 @@ def test_new(parameter: Parameter | BoundedParameter):
 @pytest.mark.parametrize(
     "parameter", [
         Parameter(data=123.),
-        BoundedParameter(data=123., min_value=0, max_value=300)
+        ConstrainedParameter(data=123., min_value=0, max_value=300)
     ]
 )
 def test_behavior_as_a_tensor(parameter):
@@ -47,7 +47,7 @@ def test_bounded_parameter_inner_value():
     max_value = 5.
 
     # === default bound_func ===
-    parameter = BoundedParameter(
+    parameter = ConstrainedParameter(
         data=data,
         min_value=min_value,
         max_value=max_value
@@ -70,7 +70,7 @@ def test_bounded_parameter_inner_value():
     def inv_bound_func(x: torch.Tensor) -> torch.Tensor:
         return x
 
-    parameter = BoundedParameter(
+    parameter = ConstrainedParameter(
         data=data,
         min_value=min_value,
         max_value=max_value,

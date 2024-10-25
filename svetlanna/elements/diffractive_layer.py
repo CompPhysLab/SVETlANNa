@@ -2,6 +2,7 @@ import torch
 from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..wavefront import Wavefront
+from ..parameters import OptimizableTensor
 
 
 class DiffractiveLayer(Element):
@@ -12,7 +13,7 @@ class DiffractiveLayer(Element):
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        mask: torch.Tensor,
+        mask: OptimizableTensor,
         mask_norm: float = 2 * torch.pi
     ):
         """Constructor method
@@ -21,7 +22,7 @@ class DiffractiveLayer(Element):
         ----------
         simulation_parameters : SimulationParameters
             Simulation parameters
-        mask : torch.Tensor
+        mask : OptimizableTensor
             Phase mask
         mask_norm : float, optional
             This value will be used as following:
