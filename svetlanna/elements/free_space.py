@@ -3,6 +3,8 @@ import torch
 
 from .element import Element
 from ..simulation_parameters import SimulationParameters
+from ..parameters import OptimizableFloat
+from ..wavefront import Wavefront
 
 
 # TODO: check docstrings
@@ -19,7 +21,7 @@ class FreeSpace(Element):
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        distance: float,
+        distance: OptimizableFloat,
         method: Literal['auto', 'fresnel', 'AS']
     ):
         """Constructor method
@@ -94,21 +96,21 @@ class FreeSpace(Element):
     # TODO: ask for tol parameter
     def forward(
         self,
-        input_field: torch.Tensor,
+        input_field: Wavefront,
         tol: float = 1e-3
-    ) -> torch.Tensor:
+    ) -> Wavefront:
         """Method that calculates the field after propagating in the free space
 
         Parameters
         ----------
-        input_field : torch.Tensor
+        input_field : Wavefront
             Field before propagation in free space
         tol : float, optional
             tolerance for Fresnel approximation, by default 1e-3
 
         Returns
         -------
-        torch.Tensor
+        Wavefront
             Field after propagation in free space
 
         Raises

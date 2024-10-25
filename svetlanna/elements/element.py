@@ -5,6 +5,7 @@ from ..simulation_parameters import SimulationParameters
 from ..specs import ReprRepr, ParameterSpecs
 from typing import Iterable
 from ..parameters import BoundedParameter, Parameter
+from ..wavefront import Wavefront
 import torch
 
 INNER_PARAMETER_SUFFIX = '_svtlnn_inner_parameter'
@@ -56,7 +57,7 @@ class Element(nn.Module, metaclass=ABCMeta):
 
     # TODO: check doctrings
     @abstractmethod
-    def forward(self, Ein: Tensor) -> Tensor:
+    def forward(self, input_field: Wavefront) -> Wavefront:
 
         """Forward propagation through the optical element"""
 
