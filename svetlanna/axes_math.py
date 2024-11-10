@@ -8,6 +8,20 @@ def _append_slice_generator(
     axes_number: int,
     new_axes_number: int
 ):
+    """Yields Ellipsis, then `axes_number` of full slices (`::`), then
+    `new_axes_number - axes_number` of None (new axis).
+
+    Parameters
+    ----------
+    axes_number : int
+        number of existing axes
+    new_axes_number : int
+        number of new axes
+
+    Yields
+    ------
+    EllipsisType | slice | None
+    """
     full_slice = slice(None, None, None)
     yield ...
     for _ in range(axes_number):
@@ -42,8 +56,8 @@ def _axes_indices_to_sort(
     axes = ('a', 'b')
     new_axes = ('b', 'd', 'a', 'c')
 
-    # you should think about axes as ('a', 'b', 'd', 'c'),
-    # the axes appended with all axes presented in new_axes and not in axes
+    # one should think about axes to sort as ('a', 'b', 'd', 'c'),
+    # the axes appended with all axes presented in `new_axes` and not in `axes`
 
     >>> _axes_indices_to_sort(axes, new_axes)
     >>> (2, 0, 1, 3)
@@ -99,6 +113,9 @@ def _check_new_axes(
     axes: tuple[str, ...],
     new_axes: tuple[str, ...]
 ) -> None:
+    """
+    Check whether `new_axes` contain all names presented in `axes`.
+    """
     if not set(new_axes).issuperset(axes):
         raise ValueError('new_axes should contain all names in axes')
 
@@ -108,6 +125,23 @@ def cast_tensor(
     axes: tuple[str, ...],
     new_axes: tuple[str, ...]
 ) -> torch.Tensor:
+    """Cast tensor `a` with axes `(..., a, b, c)` to `(..., *new_axes)`.
+    `new_axes` should contain all axes presented in `axes`.
+
+    Parameters
+    ----------
+    a : torch.Tensor
+        a tensor to cast
+    axes : tuple[str, ...]
+        last axes of the tensor
+    new_axes : tuple[str, ...]
+        last axes of the resulting tensor
+
+    Returns
+    -------
+    torch.Tensor
+        tensor with `new_axes` as last axes
+    """
 
     _check_new_axes(axes, new_axes)
     axes_indices = _axes_indices_to_sort(axes, new_axes)
@@ -126,6 +160,7 @@ def cast_tensor(
 def _axis_to_tuple(
     axis: str | Iterable[str]
 ) -> tuple[str, ...]:
+    """Creates tuple of `str` from `str` or `Iterable[str]`."""
     if isinstance(axis, str):
         axis = (axis, )
     return tuple(axis)
@@ -137,18 +172,18 @@ def _new_axes(
     b_axis: tuple[str, ...]
 ) -> tuple[str, ...]:
     """
-    Generates new axes
+    Generates tuple with new axes.
+    ```
+    (a, b), (a) -> (a, b)
+    (a, b), (c) -> (a, b, c)
+    (a, b), (c, b) -> (a, b, c)
+    ```
     """
     new_axes = list(a_axis)
-    _appended = False
 
     for axis in b_axis:
         if axis not in new_axes:
-            _appended = True
             new_axes.append(axis)
-
-    if not _appended:
-        return a_axis
 
     return tuple(new_axes)
 
@@ -211,7 +246,7 @@ def tensor_dot(
     b_axis : str | Iterable[str]
         axis name of the second tensor
     strict : bool, optional
-        check if the resulting tensor , by default False
+        check if the resulting tensor axes are coincide with the `a` tensor axes, by default False
 
     Returns
     -------
