@@ -150,12 +150,12 @@ class Wavefront(torch.Tensor):
         field, _ = tensor_dot(
             a=field,
             b=torch.exp(-1j * wave_number * distance),
-            a_axis=axes1, b_axis='wavelength', strict=True
+            a_axis=axes1, b_axis='wavelength', preserve_a_axis=True
         )
         field, _ = tensor_dot(
             a=field,
             b=torch.exp(1j * gouy_phase),
-            a_axis=axes1, b_axis='wavelength', strict=True
+            a_axis=axes1, b_axis='wavelength', preserve_a_axis=True
         )
         phase2, axes2 = tensor_dot(
             a=-1/(hyperbolic_relation)**2,
@@ -168,14 +168,14 @@ class Wavefront(torch.Tensor):
             b=torch.exp(phase2),
             a_axis=axes1,
             b_axis=axes2,
-            strict=True
+            preserve_a_axis=True
         )
         field, _ = tensor_dot(
             a=field,
             b=waist_radius / hyperbolic_relation,
             a_axis=axes,
             b_axis='wavelength',
-            strict=True
+            preserve_a_axis=True
         )
 
         return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
@@ -223,7 +223,7 @@ class Wavefront(torch.Tensor):
             b=1 / radius,
             a_axis=axes,
             b_axis=('H', 'W'),
-            strict=True
+            preserve_a_axis=True
         )
 
         return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
@@ -285,5 +285,5 @@ def mul(
     else:
         wf_axes = sim_params.axes.names
 
-    res, _ = tensor_dot(wf, b, wf_axes, b_axis, strict=True)
+    res, _ = tensor_dot(wf, b, wf_axes, b_axis, preserve_a_axis=True)
     return res

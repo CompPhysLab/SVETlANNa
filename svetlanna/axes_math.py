@@ -231,7 +231,7 @@ def tensor_dot(
     b: torch.Tensor | float,
     a_axis: str | Iterable[str],
     b_axis: str | Iterable[str],
-    strict: bool = False
+    preserve_a_axis: bool = False
 ) -> tuple[torch.Tensor, tuple[str, ...]]:
     """Perform tensor dot product.
 
@@ -259,7 +259,7 @@ def tensor_dot(
     b_axis = _axis_to_tuple(b_axis)
 
     if is_scalar(a):
-        if not strict:
+        if not preserve_a_axis:
             a_axis = tuple()
     if is_scalar(b):
         b_axis = tuple()
@@ -271,7 +271,7 @@ def tensor_dot(
     # generate axes of the resulting tensor
     new_axes = _new_axes(a_axis, b_axis)
 
-    if strict:
+    if preserve_a_axis:
         assert len(new_axes) == len(a_axis), "Can't preserve axes of the first tensor"
 
     if not is_scalar(a):
