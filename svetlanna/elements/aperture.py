@@ -56,7 +56,7 @@ class Aperture(Element):
             self.mask,
             ('H', 'W'),
             self.simulation_parameters
-        )
+        ) + 0.0  # HOTFIX: to avoid problems with -0.0
 
     def get_transmission_function(self) -> torch.Tensor:
         """Method which returns the transmission function of
