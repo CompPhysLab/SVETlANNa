@@ -1,5 +1,6 @@
 from typing import Any, Iterable, TYPE_CHECKING
 import torch
+import warnings
 
 
 class Axes:
@@ -105,6 +106,60 @@ class SimulationParameters:
 
     def __getitem__(self, axis: str) -> torch.Tensor:
         return self.axes[axis]
+
+    def meshgrid(self, x_axis: str, y_axis: str):
+        """
+        Returns a meshgrid for a selected pair of axes.
+        ...
+
+        Parameters
+        ----------
+        x_axis, y_axis : str
+            Axis names to compose a meshgrid.
+
+        Returns
+        -------
+        x_grid, y_grid: torch.Tensor
+            A torch.meshgrid of selected axis.
+            Comment: indexing='xy'
+                the first dimension corresponds to the cardinality of the second axis (`y_axis`) and
+                the second dimension corresponds to the cardinality of the first axis (`x_axis`).
+        """
+        return torch.meshgrid(
+            self.axes[x_axis], self.axes[y_axis],
+            indexing='xy'
+        )
+
+    def axes_size(self, axs: str | Iterable[str]) -> torch.Size:
+        """
+        Returns a size of axes in specified order.
+
+        Parameters
+        ----------
+        axs : str | Iterable[str]
+            An order of axis.
+
+        Returns
+        -------
+        torch.Size()
+            Size of axes in a specified order.
+        """
+        sizes = []
+        for axis in axs:
+
+            try:
+                axis_len = len(self.axes[axis])
+            except TypeError:  # float has no len()
+                axis_len = 1
+            except KeyError:  # axis not in self.__axes_dict.keys()
+                warnings.warn(
+                    message=f"There is no '{axis}' in axes! Zero returned as a dimension for '{axis}'-axis."
+                )
+                axis_len = 0
+
+            sizes.append(axis_len)
+
+        return torch.Size(sizes)
 
     def to(self, device: str | torch.device | int):
         for axis_name in self.__axes_dict.keys():
