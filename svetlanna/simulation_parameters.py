@@ -161,10 +161,14 @@ class SimulationParameters:
 
         return torch.Size(sizes)
 
-    def to(self, device: str | torch.device | int):
+    def to(self, device: str | torch.device | int) -> 'SimulationParameters':
+        if self.__device == torch.device(device):
+            return self
+
+        new_axes_dict = {}
         for axis_name in self.__axes_dict.keys():
-            self.__axes_dict[axis_name] = self.__axes_dict[axis_name].to(device=device)
-        self.__device = device
+            new_axes_dict[axis_name] = self.__axes_dict[axis_name].to(device=device)
+        return SimulationParameters(axes=new_axes_dict)
 
     @property
     def device(self) -> str | torch.device | int:
