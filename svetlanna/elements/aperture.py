@@ -2,6 +2,8 @@ import torch
 
 from .element import Element
 from ..simulation_parameters import SimulationParameters
+from ..parameters import OptimizableFloat, OptimizableTensor
+from ..wavefront import Wavefront, mul
 
 
 # TODO: check docstring
@@ -18,7 +20,7 @@ class Aperture(Element):
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        mask: torch.Tensor
+        mask: OptimizableTensor
     ):
         """Constructor method
 
@@ -34,22 +36,27 @@ class Aperture(Element):
 
         self.mask = mask
 
-    def forward(self, input_field: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_field: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the
         aperture
 
         Parameters
         ----------
-        input_field : torch.Tensor
+        input_field : Wavefront
             Field incident on the aperture
 
         Returns
         -------
-        torch.Tensor
+        Wavefront
             The field after propagating through the aperture
         """
 
-        return input_field * self.mask
+        return mul(
+            input_field,
+            self.mask,
+            ('H', 'W'),
+            self.simulation_parameters
+        )
 
     def get_transmission_function(self) -> torch.Tensor:
         """Method which returns the transmission function of
@@ -78,8 +85,8 @@ class RectangularAperture(Aperture):
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        height: float,
-        width: float
+        height: OptimizableFloat,
+        width: OptimizableFloat
     ):
         """Constructor method
 
@@ -117,7 +124,7 @@ class RoundAperture(Aperture):
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        radius: float
+        radius: OptimizableFloat
     ):
         """Constructor method
 

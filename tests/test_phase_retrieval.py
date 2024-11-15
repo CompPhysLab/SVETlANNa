@@ -74,11 +74,11 @@ def test_phase_retrieval(
     dy = oy_size / oy_nodes
 
     params = SimulationParameters(
-        x_size=ox_size,
-        y_size=oy_size,
-        x_nodes=ox_nodes,
-        y_nodes=oy_nodes,
-        wavelength=wavelength_test
+        {
+            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
+            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
+            'wavelength': wavelength_test
+        }
     )
 
     field_before_lens1 = Wavefront.gaussian_beam(
@@ -235,11 +235,11 @@ def test_4f_system(
     dy = oy_size / oy_nodes
 
     params = SimulationParameters(
-        x_size=ox_size,
-        y_size=oy_size,
-        x_nodes=ox_nodes,
-        y_nodes=oy_nodes,
-        wavelength=wavelength_test
+        {
+            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
+            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
+            'wavelength': wavelength_test
+        }
     )
 
     field_before_lens1 = Wavefront.gaussian_beam(

@@ -2,6 +2,8 @@ import torch
 
 from .element import Element
 from ..simulation_parameters import SimulationParameters
+from ..parameters import OptimizableTensor
+from ..wavefront import Wavefront
 
 
 # TODO: check docstrings
@@ -18,7 +20,7 @@ class SpatialLightModulator(Element):
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        mask: torch.Tensor,
+        mask: OptimizableTensor,
         number_of_levels: int = 256
     ):
         """Constructor method
@@ -42,17 +44,17 @@ class SpatialLightModulator(Element):
             1j * 2 * torch.pi / self.number_of_levels * self.mask
         )
 
-    def forward(self, input_field: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_field: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the SLM
 
         Parameters
         ----------
-        input_field : torch.Tensor
+        input_field : Wavefront
             Field incident on the SLM
 
         Returns
         -------
-        torch.Tensor
+        Wavefront
             The field after propagating through the SLM
         """
 

@@ -1,21 +1,21 @@
-from typing import Iterable, Any, Generator, TextIO
-from abc import ABC, abstractmethod
+from typing import Iterable, Any, Generator, TextIO, Generic, TypeVar
+from abc import ABCMeta, abstractmethod
 from io import BufferedWriter
 from contextlib import contextmanager
 from pathlib import Path
-from sys import stdout
 from numpy.typing import ArrayLike
 import numpy as np
 
 
-class SaveContexts:
+class ParameterSaveContext:
     """Generates different context managers that can be used
-    to write a parameter value to stdout or file.
+    to write a parameter data to output stream or file.
     """
     def __init__(
         self,
         parameter_name: str,
-        directory: str
+        directory: Path,
+        stream: TextIO
     ):
         """
         Parameters
@@ -24,10 +24,13 @@ class SaveContexts:
             the human-readable name for the parameter
         directory : str
             the directory where the generated file will be saved, if any
+        stream :  TextIO
+            stream where the generated text will be written, if any
         """
         self.parameter_name = parameter_name
         self._directory = directory
         self._generated_files: list[Path] = []  # paths of all generated files
+        self._stream = stream
 
     def get_new_filepath(self, extension: str) -> Path:
         """Create a new filepath for a specific extension.
@@ -59,32 +62,67 @@ class SaveContexts:
         return Path(self._directory,  file_name).with_suffix(suffix)
 
     @contextmanager
-    def file(self, extension: str) -> Generator[BufferedWriter, Any, None]:
-        filepath = self.get_new_filepath(extension=extension)
+    def file(self, filepath: Path) -> Generator[BufferedWriter, Any, None]:
+        """Context manager for the output file
+
+        Parameters
+        ----------
+        filepath : Path
+            filepath
+
+        Yields
+        ------
+        Generator[BufferedWriter, Any, None]
+            Buffer
+        """
         with open(filepath, mode='wb') as file:
             yield file
         self._generated_files.append(filepath)
 
     @contextmanager
-    def stdout(self, stream: TextIO = stdout) -> Generator[TextIO, Any, None]:
-        yield stream
+    def stdout(self) -> Generator[TextIO, Any, None]:
+        """Context manager for the output stream
 
-
-class ParameterRepr(ABC):
-    """Base class of the parameter representation.
-    """
-    @abstractmethod
-    def save(self, context: SaveContexts):
-        """Save the parameter, using save contexts.
-
-        Parameters
-        ----------
-        context : SaveContexts
-            save contexts that can be used to write the parameter data.
+        Yields
+        ------
+        Generator[TextIO, Any, None]
+            Buffer
         """
+        yield self._stream
 
 
-class ImageRepr(ParameterRepr):
+ParameterSaveContext_ = TypeVar(
+    'ParameterSaveContext_',
+    bound=ParameterSaveContext
+)
+
+
+class Representation(Generic[ParameterSaveContext_]):
+    """Base class for a parameter representation"""
+    ...
+
+
+class MarkdownRepresentation(
+    Representation[ParameterSaveContext_],
+    metaclass=ABCMeta
+):
+    """Representation that can be exported to markdown file"""
+    @abstractmethod
+    def to_markdown(self, context: ParameterSaveContext_):
+        ...
+
+
+class StrRepresentation(
+    Representation[ParameterSaveContext_],
+    metaclass=ABCMeta
+):
+    """Representation that can be exported in the text format"""
+    @abstractmethod
+    def to_str(self, context: ParameterSaveContext_):
+        ...
+
+
+class ImageRepr(StrRepresentation, MarkdownRepresentation):
     """Representation of the parameter as an image.
     Image generation is based on the `matplotlib` package.
     """
@@ -92,7 +130,8 @@ class ImageRepr(ParameterRepr):
         self,
         value: Any,
         mpl_kwargs: dict[str, Any] | None = None,
-        format: str = 'png'
+        format: str = 'png',
+        show_image: bool = True
     ):
         """
         Parameters
@@ -109,18 +148,40 @@ class ImageRepr(ParameterRepr):
         self.value = value
         self.format = format
         self.mpl_kwargs = mpl_kwargs if mpl_kwargs is not None else {}
+        self.show_image = show_image
 
-    def save(self, context: SaveContexts):
+    def _draw_image(self, context: ParameterSaveContext, filepath: Path):
+        """Draw an image into the file"""
         import matplotlib.pyplot as plt
 
-        with context.file(extension=self.format) as f:
-            plt.imshow(self.value, **self.mpl_kwargs)
-            plt.savefig(f)
-            plt.close()
+        with context.file(filepath=filepath) as f:
+            figure, ax = plt.subplots()
+            ax.imshow(self.value, **self.mpl_kwargs)
+            figure.savefig(f)
+            plt.close(figure)
+
+    def to_str(self, context: ParameterSaveContext):
+        filepath = context.get_new_filepath(extension=self.format)
+
+        self._draw_image(context=context, filepath=filepath)
+
+        with context.stdout() as f:
+            f.write(f'The image is saved to {filepath}\n')
+
+    def to_markdown(self, context: ParameterSaveContext):
+        filepath = context.get_new_filepath(extension=self.format)
+
+        self._draw_image(context=context, filepath=filepath)
+
+        with context.stdout() as f:
+            f.write(f'The image is saved to `{filepath}`:\n')
+            if self.show_image:
+                f.write(f'![{context.parameter_name}]({filepath})')
 
 
-class ReprRepr(ParameterRepr):
+class ReprRepr(StrRepresentation, MarkdownRepresentation):
     """Representation of the parameter as a plain text.
+    The `__repr__` method is used to generate the text. 
     """
     def __init__(self, value: Any):
         """
@@ -133,13 +194,16 @@ class ReprRepr(ParameterRepr):
         super().__init__()
         self.value = value
 
-    def save(self, context: SaveContexts):
-        with context.stdout(stdout) as f:
-            f.write(context.parameter_name + ':\n')
-            f.write(repr(self.value) + '\n')
+    def to_str(self, context: ParameterSaveContext):
+        with context.stdout() as f:
+            f.write(f'{repr(self.value)}\n')
+
+    def to_markdown(self, context: ParameterSaveContext):
+        with context.stdout() as f:
+            f.write(f'```\n{repr(self.value)}\n```\n')
 
 
-class NpyFileRepr(ParameterRepr):
+class NpyFileRepr(StrRepresentation):
     """Representation of the parameter as a `.npy` file.
     """
     def __init__(self, value: ArrayLike):
@@ -152,9 +216,25 @@ class NpyFileRepr(ParameterRepr):
         super().__init__()
         self.value = value
 
-    def save(self, context: SaveContexts):
-        with context.file(extension='npy') as f:
+    def _save_to_file(self, context: ParameterSaveContext, filepath: Path):
+        with context.file(filepath=filepath) as f:
             np.save(f, self.value)
+
+    def to_str(self, context: ParameterSaveContext):
+        filepath = context.get_new_filepath(extension='npy')
+
+        self._save_to_file(context, filepath)
+
+        with context.stdout() as f:
+            f.write(f'The numpy array is saved to {filepath}\n')
+
+    def to_markdown(self, context: ParameterSaveContext):
+        filepath = context.get_new_filepath(extension='npy')
+
+        self._save_to_file(context, filepath)
+
+        with context.stdout() as f:
+            f.write(f'The numpy array is saved to `{filepath}`\n')
 
 
 class ParameterSpecs:
@@ -162,8 +242,8 @@ class ParameterSpecs:
     """
     def __init__(
         self,
-        name: str,
-        representations: Iterable[ParameterRepr]
+        parameter_name: str,
+        representations: Iterable[Representation]
     ) -> None:
         """
         Parameters
@@ -173,26 +253,5 @@ class ParameterSpecs:
         representations : Iterable[ParameterRepr]
             all representations of the parameter.
         """
-        self.name = name
+        self.parameter_name = parameter_name
         self.representations = representations
-
-    def save(
-        self,
-        directory: str,
-        context_type: type[SaveContexts] = SaveContexts
-    ):
-        """Save all representations to a specific directory.
-
-        Parameters
-        ----------
-        directory : str
-            directory where all representations will be saved.
-        context_type : type[SaveContexts], optional
-            type of the save contexts, by default SaveContexts
-        """
-        context = context_type(
-            parameter_name=self.name,
-            directory=directory
-        )
-        for representation in self.representations:
-            representation.save(context=context)

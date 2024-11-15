@@ -3,6 +3,7 @@ from .free_space import FreeSpace
 from .aperture import Aperture, RoundAperture, RectangularAperture
 from .lens import ThinLens
 from .slm import SpatialLightModulator
+from .diffractive_layer import DiffractiveLayer
 
 
 __all__ = [
@@ -12,5 +13,6 @@ __all__ = [
     'RoundAperture',
     'RectangularAperture',
     'ThinLens',
-    'SpatialLightModulator'
+    'SpatialLightModulator',
+    'DiffractiveLayer'
 ]

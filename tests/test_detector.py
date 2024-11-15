@@ -11,7 +11,13 @@ def test_detector_types():
     Test on types for a detector.
     """
     detector = Detector(
-        SimulationParameters(1e-2, 1e-2, 5, 5, 1e-6)
+        SimulationParameters(
+            {
+                'W': torch.linspace(-1e-2/2, 1e-2/2, 5),
+                'H': torch.linspace(-1e-2/2, 1e-2/2, 5),
+                'wavelength': 1e-6
+            }
+        )
     )
     assert isinstance(detector, torch.nn.Module)
     assert isinstance(detector, Element)
@@ -34,7 +40,13 @@ def test_detector_intensity(x_size, y_size, x_nodes, y_nodes, wavelength):
         Simulation parameters for detector.
     """
     detector = Detector(
-        SimulationParameters(x_size, y_size, x_nodes, y_nodes, wavelength),
+        SimulationParameters(
+            {
+                'W': torch.linspace(-x_size/2, x_size/2, x_nodes),
+                'H': torch.linspace(-y_size/2, y_size/2, y_nodes),
+                'wavelength': wavelength
+            }
+        ),
         func='intensity'
     )
     input_field = torch.rand(size=[y_nodes, x_nodes])

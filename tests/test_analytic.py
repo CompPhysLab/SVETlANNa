@@ -63,11 +63,11 @@ def test_rectangle_fresnel(
     """
 
     params = SimulationParameters(
-        x_size=ox_size,
-        y_size=oy_size,
-        x_nodes=ox_nodes,
-        y_nodes=oy_nodes,
-        wavelength=wavelength_test
+        {
+            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
+            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
+            'wavelength': wavelength_test
+        }
     )
 
     dx = ox_size / ox_nodes

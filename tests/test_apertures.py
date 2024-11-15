@@ -54,11 +54,11 @@ def test_rectangle_aperture(
         Criterion for accepting the test(standard deviation)
     """
     params = SimulationParameters(
-        x_size=ox_size,
-        y_size=oy_size,
-        x_nodes=ox_nodes,
-        y_nodes=oy_nodes,
-        wavelength=wavelength_test
+        {
+            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
+            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
+            'wavelength': wavelength_test
+        }
     )
 
     # transmission function of the rectangular aperture as a class method
@@ -129,11 +129,11 @@ def test_round_aperture(
     """
 
     params = SimulationParameters(
-        x_size=ox_size,
-        y_size=oy_size,
-        x_nodes=ox_nodes,
-        y_nodes=oy_nodes,
-        wavelength=wavelength_test
+        {
+            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
+            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
+            'wavelength': wavelength_test
+        }
     )
 
     # transmission function of the round aperture as a class method
@@ -179,7 +179,7 @@ def test_aperture(
     ox_nodes: int,
     oy_nodes: int,
     wavelength_test: float,
-    mask_test: float,
+    mask_test: torch.Tensor,
     expected_std: float,
 ):
     """Test for the transmission function for the aperture with arbitrary shape
@@ -196,18 +196,18 @@ def test_aperture(
         Number of computational nodes along the axis oy
     wavelength_test : float
         Wavelength for the incident field
-    mask_test : float
+    mask_test : torch.Tensor
         Transmission mask for the aperture with arbitrary shape
     expected_std : float
         Criterion for accepting the test(standard deviation)
     """
 
     params = SimulationParameters(
-        x_size=ox_size,
-        y_size=oy_size,
-        x_nodes=ox_nodes,
-        y_nodes=oy_nodes,
-        wavelength=wavelength_test
+        {
+            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
+            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
+            'wavelength': wavelength_test
+        }
     )
     # transmission function for the aperture with arbitrary shape as a
     # class method

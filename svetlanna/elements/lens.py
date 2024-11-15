@@ -2,6 +2,8 @@ import torch
 
 from .element import Element
 from ..simulation_parameters import SimulationParameters
+from ..parameters import OptimizableFloat
+from ..wavefront import Wavefront
 
 
 # TODO: check docstrings
@@ -18,8 +20,8 @@ class ThinLens(Element):
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        focal_length: float,
-        radius: float
+        focal_length: OptimizableFloat,
+        radius: OptimizableFloat
     ):
         """Constructor method
 
@@ -46,18 +48,18 @@ class ThinLens(Element):
             2 * self.focal_length) * self._radius_squared * (
                 (self._radius_squared <= self.radius**2))))
 
-    def forward(self, input_field: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_field: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the
         thin lens
 
         Parameters
         ----------
-        input_field : torch.Tensor
+        input_field : Wavefront
             Field incident on the thin lens
 
         Returns
         -------
-        torch.Tensor
+        Wavefront
             The field after propagating through the thin lens
         """
 

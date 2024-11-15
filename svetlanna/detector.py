@@ -1,44 +1,62 @@
 import torch
 from torch import nn
 from svetlanna import SimulationParameters
-from .elements import Element
+from svetlanna.elements import Element
+from svetlanna.wavefront import Wavefront
 
 
 class Detector(Element):
-    # TODO: Must an Element be a parent class?
     """
     Object that plays a role of a physical detector in an optical system:
-    transforms incident field to intensities for further image analysis
+        (1) func='intensity'
+            transforms incident field to intensities for further image analysis
+        (2) ...
     """
     def __init__(
             self,
             simulation_parameters: SimulationParameters,
             func='intensity'
     ):
+        """
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Simulation parameters for a further optical network.
+        func : str
+            A parameter that defines a function that will be applied to an incident field
+            to obtain a detector image.
+            (1) func='intensity' – detector returns intensities
+            (2) ...
+        """
         super().__init__(simulation_parameters)
         # TODO: add some normalization for the output tensor of intensities? or not?
         self.func = func
 
-    def forward(self, input_field: torch.Tensor) -> torch.Tensor:
+    def forward(self, input_field: Wavefront) -> torch.Tensor:
         """
         Method that returns the image obtained from the incident field by a detector
-        (in the simplest case the image on a detector is an intensities image)
+        using self.func.
+        in the simplest case the image on a detector is an intensities image)
         ...
 
         Parameters
         ----------
-        input_field : torch.tensor()
-            A tensor of an incident field on a detector.
+        input_field : Wavefront
+            A tensor (Wavefront) of an incident field on a detector.
 
         Returns
         -------
-        torch.tensor()
-            The field after propagating through the aperture
+        detector_output : torch.Tensor
+            The image on a detector (according to self.func).
         """
         detector_output = None
-        # TODO: add some normalization for intensities? what is with units?
+
         if self.func == 'intensity':
-            detector_output = input_field.abs().pow(2)  # field absolute values squared
+            # TODO: add some normalization for intensities? what is with units?
+            detector_output = torch.Tensor(
+                input_field.abs().pow(2)
+            )  # field absolute values squared
+
         return detector_output
 
 
@@ -59,7 +77,7 @@ class DetectorProcessorClf(nn.Module):
         segmentation_type : str
             If `segmented_detector` is not defined, that parameter defines one of the methods to markup detector:
             1) 'strips' – vertical stripes zones symmetrically arranged relative to the detector center
-            2)
+            2) ...
         """
         super().__init__()
         self.num_classes = num_classes
@@ -168,6 +186,7 @@ class DetectorProcessorClf(nn.Module):
             A tensor of weights for further calculation of integrals.
             shape=(1, self.num_classes)
         """
+        # TODO: solve the problem with dimensions...
         classes_areas = torch.zeros(size=(1, self.num_classes))
         for ind_class in range(self.num_classes):
             classes_areas[0, ind_class] = torch.where(ind_class == self.segmented_detector, 1, 0).sum().item()
@@ -192,7 +211,8 @@ class DetectorProcessorClf(nn.Module):
         """
         if self.segmented_detector is None:  # there is no predefined segments of a detector for classes
             # TODO: must we make it in __init__? But we need a detector (detector_data) shape for it!
-            self.segmented_detector = self.detector_segmentation(detector_data.shape)
+            detector_shape = detector_data.size()[-2:]  # [H, W]
+            self.segmented_detector = self.detector_segmentation(detector_shape)
             self.segments_weights = self.weight_segments()
 
         integrals_by_classes = torch.zeros(size=(1, self.num_classes))
@@ -206,4 +226,25 @@ class DetectorProcessorClf(nn.Module):
         integrals_by_classes = integrals_by_classes * self.segments_weights
         # TODO: maybe some function like SoftMax? but integrals can be large!
         return integrals_by_classes / integrals_by_classes.sum().item()
+
+    def batch_forward(self, batch_detector_data: torch.Tensor) -> torch.Tensor:
+        """
+        Calculates probabilities of belonging to classes for a batch of detector images.
+        """
+        # TODO: make `.forward()` universal for a batch and for a single wavefront!
+        if self.segmented_detector is None:  # there is no predefined segments of a detector for classes
+            detector_shape = batch_detector_data.size()[-2:]  # [H, W]
+            self.segmented_detector = self.detector_segmentation(detector_shape)
+            self.segments_weights = self.weight_segments()
+
+        batch_size = batch_detector_data.size()[0]
+
+        integrals_by_classes = torch.zeros(size=(batch_size, self.num_classes))
+        for ind_class in range(self.num_classes):
+            mask_class = torch.where(ind_class == self.segmented_detector, 1, 0)
+            integrals_by_classes[:, ind_class] = (
+                    batch_detector_data * mask_class
+            ).sum(dim=(-2, -1))[:, 0] * self.segments_weights[0, ind_class]
+
+        return integrals_by_classes / torch.unsqueeze(integrals_by_classes.sum(dim=1), 1)
 
