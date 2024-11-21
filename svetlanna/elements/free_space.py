@@ -58,10 +58,17 @@ class FreeSpace(Element):
         self._y_linear = self.simulation_parameters.__getitem__(axis='H')
 
         # spatial frequencies
-        self._kx_linear = torch.fft.fftfreq(self._x_nodes, torch.diff(
-            self._x_linear)[0], device=self._device) * (2 * torch.pi)
-        self._ky_linear = torch.fft.fftfreq(self._y_nodes, torch.diff(
-            self._y_linear)[0], device=self._device) * (2 * torch.pi)
+        self._kx_linear = 2 * torch.pi * torch.fft.fftfreq(
+            self._x_nodes,
+            torch.diff(self._x_linear)[0],
+            device=self._device
+        )
+
+        self._ky_linear = 2 * torch.pi * torch.fft.fftfreq(
+            self._y_nodes,
+            torch.diff(self._y_linear)[0],
+            device=self._device
+        )
 
         # creating spatial frequencies
         self._kx_grid = self._kx_linear[None, :]
@@ -72,8 +79,8 @@ class FreeSpace(Element):
 
         # creating low pass filter
         self.low_pass_filter = (
-            self._kx_grid**2 + self._ky_grid**2
-        ) <= self._wave_number**2
+            (self._kx_grid**2 + self._ky_grid**2) <= self._wave_number**2
+        ).to(dtype=torch.get_default_dtype())
 
     def impulse_response_angular_spectrum(self) -> torch.Tensor:
         """Create the impulse response function for angular spectrum method
@@ -89,7 +96,7 @@ class FreeSpace(Element):
             )
 
         # Fourier image of impulse response function
-        impulse_response_fft = torch.exp(
+        impulse_response_fft = self.low_pass_filter * torch.exp(
             1j * self.distance * wave_number_z
         )
 
@@ -116,7 +123,7 @@ class FreeSpace(Element):
         )
 
         # Fourier image of impulse response function
-        impulse_response_fft = -torch.exp(
+        impulse_response_fft = -self.low_pass_filter * torch.exp(
             1j * self.distance * (self._wave_number - k_eff)
         )
 
