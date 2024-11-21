@@ -8,14 +8,12 @@ def test_save_context_get_new_filepath(tmpdir):
     contexts = ParameterSaveContext(
         parameter_name='test',
         directory=tmpdir,
-        stream=sys.stdout
     )
 
     # test filename
     path = contexts.get_new_filepath("testext")
     assert Path(tmpdir, 'test_0.testext') == path
 
-    contexts._generated_files.append(path)
     path = contexts.get_new_filepath("testext")
     assert Path(tmpdir, 'test_1.testext') == path
 
@@ -24,7 +22,6 @@ def test_save_context_file(tmpdir):
     contexts = ParameterSaveContext(
         parameter_name='test',
         directory=tmpdir,
-        stream=sys.stdout
     )
 
     # create a new file and write test text

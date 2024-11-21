@@ -5,6 +5,9 @@ from contextlib import contextmanager
 from pathlib import Path
 from numpy.typing import ArrayLike
 import numpy as np
+import torch
+import numbers
+from ..parameters import BoundedParameter
 
 
 class ParameterSaveContext:
@@ -14,8 +17,7 @@ class ParameterSaveContext:
     def __init__(
         self,
         parameter_name: str,
-        directory: Path,
-        stream: TextIO
+        directory: Path
     ):
         """
         Parameters
@@ -30,7 +32,7 @@ class ParameterSaveContext:
         self.parameter_name = parameter_name
         self._directory = directory
         self._generated_files: list[Path] = []  # paths of all generated files
-        self._stream = stream
+        self.__stream = None
 
     def get_new_filepath(self, extension: str) -> Path:
         """Create a new filepath for a specific extension.
@@ -59,7 +61,9 @@ class ParameterSaveContext:
             )
         file_name = self.parameter_name + f'_{total_files}'
 
-        return Path(self._directory,  file_name).with_suffix(suffix)
+        filepath = Path(self._directory,  file_name).with_suffix(suffix)
+        self._generated_files.append(filepath)
+        return filepath
 
     @contextmanager
     def file(self, filepath: Path) -> Generator[BufferedWriter, Any, None]:
@@ -77,18 +81,6 @@ class ParameterSaveContext:
         """
         with open(filepath, mode='wb') as file:
             yield file
-        self._generated_files.append(filepath)
-
-    @contextmanager
-    def stdout(self) -> Generator[TextIO, Any, None]:
-        """Context manager for the output stream
-
-        Yields
-        ------
-        Generator[TextIO, Any, None]
-            Buffer
-        """
-        yield self._stream
 
 
 ParameterSaveContext_ = TypeVar(
@@ -108,7 +100,7 @@ class MarkdownRepresentation(
 ):
     """Representation that can be exported to markdown file"""
     @abstractmethod
-    def to_markdown(self, context: ParameterSaveContext_):
+    def to_markdown(self, out: TextIO, context: ParameterSaveContext_):
         ...
 
 
@@ -118,7 +110,7 @@ class StrRepresentation(
 ):
     """Representation that can be exported in the text format"""
     @abstractmethod
-    def to_str(self, context: ParameterSaveContext_):
+    def to_str(self, out: TextIO, context: ParameterSaveContext_):
         ...
 
 
@@ -160,28 +152,26 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation):
             figure.savefig(f)
             plt.close(figure)
 
-    def to_str(self, context: ParameterSaveContext):
+    def to_str(self, out: TextIO, context: ParameterSaveContext):
         filepath = context.get_new_filepath(extension=self.format)
 
         self._draw_image(context=context, filepath=filepath)
 
-        with context.stdout() as f:
-            f.write(f'The image is saved to {filepath}\n')
+        out.write(f'The image is saved to {filepath}\n')
 
-    def to_markdown(self, context: ParameterSaveContext):
+    def to_markdown(self, out: TextIO, context: ParameterSaveContext):
         filepath = context.get_new_filepath(extension=self.format)
 
         self._draw_image(context=context, filepath=filepath)
 
-        with context.stdout() as f:
-            f.write(f'The image is saved to `{filepath}`:\n')
-            if self.show_image:
-                f.write(f'![{context.parameter_name}]({filepath})')
+        out.write(f'The image is saved to `{filepath}`:\n')
+        if self.show_image:
+            out.write(f'![{context.parameter_name}]({filepath})')
 
 
 class ReprRepr(StrRepresentation, MarkdownRepresentation):
     """Representation of the parameter as a plain text.
-    The `__repr__` method is used to generate the text. 
+    The `__repr__` method is used to generate the text.
     """
     def __init__(self, value: Any):
         """
@@ -194,13 +184,11 @@ class ReprRepr(StrRepresentation, MarkdownRepresentation):
         super().__init__()
         self.value = value
 
-    def to_str(self, context: ParameterSaveContext):
-        with context.stdout() as f:
-            f.write(f'{repr(self.value)}\n')
+    def to_str(self, out: TextIO, context: ParameterSaveContext):
+        out.write(f'{repr(self.value)}\n')
 
-    def to_markdown(self, context: ParameterSaveContext):
-        with context.stdout() as f:
-            f.write(f'```\n{repr(self.value)}\n```\n')
+    def to_markdown(self, out: TextIO, context: ParameterSaveContext):
+        out.write(f'```\n{repr(self.value)}\n```\n')
 
 
 class NpyFileRepr(StrRepresentation):
@@ -220,21 +208,71 @@ class NpyFileRepr(StrRepresentation):
         with context.file(filepath=filepath) as f:
             np.save(f, self.value)
 
-    def to_str(self, context: ParameterSaveContext):
+    def to_str(self, out: TextIO, context: ParameterSaveContext):
         filepath = context.get_new_filepath(extension='npy')
 
         self._save_to_file(context, filepath)
 
-        with context.stdout() as f:
-            f.write(f'The numpy array is saved to {filepath}\n')
+        out.write(f'The numpy array is saved to {filepath}\n')
 
-    def to_markdown(self, context: ParameterSaveContext):
+    def to_markdown(self, out: TextIO, context: ParameterSaveContext):
         filepath = context.get_new_filepath(extension='npy')
 
         self._save_to_file(context, filepath)
 
-        with context.stdout() as f:
-            f.write(f'The numpy array is saved to `{filepath}`\n')
+        out.write(f'The numpy array is saved to `{filepath}`\n')
+
+
+class PrettyReprRepr(ReprRepr):
+    """Same as ReprRepr but with better handling of
+    Parameters and BoundedParameter"""
+    def __init__(
+        self,
+        value: Any,
+        units: str | None = None
+    ):
+        """Representation of the parameter as a plain text.
+        The `__repr__` method is used to generate the
+        text if the `value` is not `torch.Tensor` or `Parameter`.
+
+        Parameters
+        ----------
+        value : Any
+            object to generate plain text of.
+        units : str | None, optional
+            units of the value, by default None
+        """
+        super().__init__(value)
+        self.units = units
+
+    def _repr(self) -> str:
+        units_suffix = '' if self.units is None else f' [{self.units}]'
+        class_name: str = self.value.__class__.__name__
+
+        if isinstance(self.value, torch.Tensor):
+            shape = self.value.shape
+            # scalars
+            if len(shape) == 0:
+                if isinstance(self.value, BoundedParameter):
+                    s = f'{class_name}\n'
+                    s += f'  ┏ min value {self.value.min_value.item()}{units_suffix}\n'
+                    s += f'  ┗ max value {self.value.max_value.item()}{units_suffix}\n'
+                    return s + f'{self.value.item()}{units_suffix}'  
+                return f'{class_name}\n{self.value.item()}{units_suffix}'
+
+            shape_str = "x".join(map(str, shape))
+            return f'{class_name} of size ({shape_str}){units_suffix}'
+
+        if isinstance(self.value, numbers.Number):
+            return f'{self.value}{units_suffix}'
+
+        return repr(self.value)
+
+    def to_str(self, out: TextIO, context: ParameterSaveContext):
+        out.write(f'{self._repr()}\n')
+
+    def to_markdown(self, out: TextIO, context: ParameterSaveContext):
+        out.write(f'```\n{self._repr()}\n```\n')
 
 
 class ParameterSpecs:
