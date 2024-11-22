@@ -1,5 +1,6 @@
 import numpy as np
 import scipy as sp
+import torch
 
 
 class SquareFresnel:
@@ -14,7 +15,7 @@ class SquareFresnel:
         x_nodes: int,
         y_nodes: int,
         square_size: float,
-        wavelength: float
+        wavelength: torch.Tensor
     ):
         """Constructor method
 
@@ -32,7 +33,7 @@ class SquareFresnel:
             Number of computational nodes along the axis oy
         square_size : float
             Square aperture side size
-        wavelength : float
+        wavelength : torch.Tensor
             Wavelength of the incident planar wave
         """
 
@@ -53,10 +54,13 @@ class SquareFresnel:
             2d Intensity profile
         """
 
-        wave_number = 2*np.pi/self.wavelength
+        wave_number = 2*np.pi/self.wavelength[..., None, None]
         x_linear = np.linspace(-self.x_size / 2, self.x_size / 2, self.x_nodes)
         y_linear = np.linspace(-self.y_size / 2, self.y_size / 2, self.y_nodes)
         x_grid, y_grid = np.meshgrid(x_linear, y_linear)
+
+        x_grid = x_grid[None, :]
+        y_grid = y_grid[None, :]
 
         psi1 = -np.sqrt(wave_number/(np.pi*self.distance))*(self.square_size/2
                                                             + x_grid)

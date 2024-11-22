@@ -36,6 +36,18 @@ class Aperture(Element):
 
         self.mask = mask
 
+    def get_transmission_function(self) -> torch.Tensor:
+        """Method which returns the transmission function of
+        the aperture
+
+        Returns
+        -------
+        torch.Tensor
+            transmission function of the aperture
+        """
+
+        return self.mask
+
     def forward(self, input_field: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the
         aperture
@@ -57,18 +69,6 @@ class Aperture(Element):
             ('H', 'W'),
             self.simulation_parameters
         )
-
-    def get_transmission_function(self) -> torch.Tensor:
-        """Method which returns the transmission function of
-        the aperture
-
-        Returns
-        -------
-        torch.Tensor
-            transmission function of the aperture
-        """
-
-        return self.mask
 
 
 # TODO" check docstring
@@ -108,7 +108,9 @@ class RectangularAperture(Aperture):
         self.width = width
         self.mask = ((torch.abs(
             self._x_grid) <= self.width/2) * (torch.abs(
-                self._y_grid) <= self.height/2)).float()
+                self._y_grid) <= self.height/2)).to(
+                    dtype=torch.get_default_dtype()
+                )
 
 
 # TODO: check docstrings
@@ -142,4 +144,6 @@ class RoundAperture(Aperture):
 
         self.radius = radius
         self.mask = ((torch.pow(self._x_grid, 2) + torch.pow(
-            self._y_grid, 2)) <= self.radius**2).float()
+            self._y_grid, 2)) <= self.radius**2).to(
+                dtype=torch.get_default_dtype()
+            )

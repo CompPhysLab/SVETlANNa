@@ -18,15 +18,35 @@ lens_parameters = [
 
 @pytest.mark.parametrize(
     lens_parameters,
-    [(8, 12, 1200, 1400, 1064 * 1e-6, 100, 10, 1e-5),
-     (8, 4, 1100, 1000, 1064 * 1e-6, 200, 15, 1e-5)]
+    [
+        (
+            8,      # ox_size, mm
+            12,     # oy_size, mm
+            1200,   # ox_nodes
+            1400,   # oy_nodes
+            torch.linspace(330 * 1e-6, 1064 * 1e-6, 20),    # wavelength_test, tensor   # noqa: E501
+            100,    # focal_length_test, mm
+            10,     # radius_test, mm
+            1e-5    # expected_std
+        ),
+        (
+            8,  # ox_size, mm
+            4,  # oy_size, mm
+            1100,   # ox_nodes
+            1000,   # oy_nodes
+            torch.linspace(660 * 1e-6, 1600 * 1e-6, 20),    # wavelength_test, tensor   # noqa: E501
+            200,    # focal_length_test, mm
+            15,     # radius_test, mm
+            1e-5    # expected_std
+        )
+    ]
 )
 def test_lens(
     ox_size: float,
     oy_size: float,
     ox_nodes: int,
     oy_nodes: int,
-    wavelength_test: float,
+    wavelength_test: torch.Tensor,
     focal_length_test: float,
     radius_test: float,
     expected_std: float,
@@ -70,9 +90,15 @@ def test_lens(
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
-    x_grid, y_grid = torch.meshgrid(x_linear, y_linear, indexing='xy')
 
-    wave_number = 2 * torch.pi / wavelength_test
+    # creating meshgrid
+    x_grid = x_linear[None, :]
+    y_grid = y_linear[:, None]
+
+    x_grid = x_grid[None, ...]
+    y_grid = y_grid[None, ...]
+
+    wave_number = 2 * torch.pi / wavelength_test[..., None, None]
     radius_squared = torch.pow(x_grid, 2) + torch.pow(y_grid, 2)
 
     transmission_function_analytic = torch.exp(

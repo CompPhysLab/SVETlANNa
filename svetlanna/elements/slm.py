@@ -3,7 +3,7 @@ import torch
 from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableTensor
-from ..wavefront import Wavefront
+from ..wavefront import Wavefront, mul
 
 
 # TODO: check docstrings
@@ -44,6 +44,18 @@ class SpatialLightModulator(Element):
             1j * 2 * torch.pi / self.number_of_levels * self.mask
         )
 
+    def get_transmission_function(self) -> torch.Tensor:
+        """Method which returns the transmission function of
+        the SLM
+
+        Returns
+        -------
+        torch.Tensor
+            transmission function of the SLM
+        """
+
+        return self.transmission_function
+
     def forward(self, input_field: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the SLM
 
@@ -58,9 +70,14 @@ class SpatialLightModulator(Element):
             The field after propagating through the SLM
         """
 
-        return input_field * self.transmission_function
+        return mul(
+            input_field,
+            self.mask,
+            ('H', 'W'),
+            self.simulation_parameters
+        )
 
-    def reverse(self, transmission_field: torch.Tensor) -> torch.Tensor:
+    def reverse(self, transmission_field: torch.Tensor) -> Wavefront:
         """Method that calculates the field after passing the SLM in back
         propagation
 
@@ -77,16 +94,9 @@ class SpatialLightModulator(Element):
             (incident field in forward propagation)
         """
 
-        return transmission_field * torch.conj(self.transmission_function)
-
-    def get_transmission_function(self):
-        """Method which returns the transmission function of
-        the SLM
-
-        Returns
-        -------
-        torch.Tensor
-            transmission function of the SLM
-        """
-
-        return self.transmission_function
+        return mul(
+            transmission_field,
+            torch.conj(self.mask),
+            ('H', 'W'),
+            self.simulation_parameters
+        )

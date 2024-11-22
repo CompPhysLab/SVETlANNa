@@ -8,7 +8,7 @@ from io import StringIO
 from typing import Iterable
 from ..parameters import BoundedParameter, Parameter
 from ..wavefront import Wavefront
-import torch
+
 
 INNER_PARAMETER_SUFFIX = '_svtlnn_inner_parameter'
 
@@ -47,9 +47,8 @@ class Element(nn.Module, metaclass=ABCMeta):
 
         self._x_linspace = self.simulation_parameters.axes.W
         self._y_linspace = self.simulation_parameters.axes.H
-        self._x_grid, self._y_grid = torch.meshgrid(
-            self._x_linspace, self._y_linspace, indexing='xy'
-        )
+
+        self._x_grid, self._y_grid = self.simulation_parameters.meshgrid(x_axis='W', y_axis='H')    # noqa: E501
 
     # TODO: check doctrings
     @abstractmethod

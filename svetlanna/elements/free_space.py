@@ -5,9 +5,9 @@ from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableFloat
 from ..wavefront import Wavefront
+from ..axes_math import tensor_dot, cast_tensor
 
 
-# TODO: check docstrings
 class FreeSpace(Element):
     """A class that describes the propagating of the field in free space
     before two optical elements
@@ -42,20 +42,45 @@ class FreeSpace(Element):
         self.distance = distance
         self.method = method
 
-        self._wave_number = 2 * torch.pi / self._wavelength
+        self._device = self.simulation_parameters.device
 
-        # TODO: check shift
+        self._w_index = -self.simulation_parameters.axes.names[::-1].index('W') - 1  # noqa: E501
+        self._h_index = -self.simulation_parameters.axes.names[::-1].index('H') - 1  # noqa: E501
+
+        self._wave_number = 2 * torch.pi / self.simulation_parameters.__getitem__(  # noqa: E501
+            axis='wavelength'
+        )[..., None, None]
+
+        self._x_nodes = self.simulation_parameters.axes_size(axs='W')[0]
+        self._y_nodes = self.simulation_parameters.axes_size(axs='H')[0]
+
+        self._x_linear = self.simulation_parameters.__getitem__(axis='W')
+        self._y_linear = self.simulation_parameters.__getitem__(axis='H')
+
         # spatial frequencies
-        self._kx_linear = torch.fft.fftfreq(self._x_nodes, torch.diff(
-            self._x_linspace)[0]) * (2 * torch.pi)
-        self._ky_linear = torch.fft.fftfreq(self._y_nodes, torch.diff(
-            self._y_linspace)[0]) * (2 * torch.pi)
-        self._kx_grid, self._ky_grid = torch.meshgrid(
-            self._kx_linear, self._ky_linear, indexing='xy')
+        self._kx_linear = 2 * torch.pi * torch.fft.fftfreq(
+            self._x_nodes,
+            torch.diff(self._x_linear)[0],
+            device=self._device
+        )
 
-        # low-pass filter
-        self.low_pass_filter = 1. * (torch.pow(self._kx_grid, 2) + torch.pow(
-            self._ky_grid, 2) <= self._wave_number**2)
+        self._ky_linear = 2 * torch.pi * torch.fft.fftfreq(
+            self._y_nodes,
+            torch.diff(self._y_linear)[0],
+            device=self._device
+        )
+
+        # creating spatial frequencies
+        self._kx_grid = self._kx_linear[None, :]
+        self._ky_grid = self._ky_linear[:, None]
+
+        self._kx_grid = self._kx_grid[None, ...]
+        self._ky_grid = self._ky_grid[None, ...]
+
+        # creating low pass filter
+        self.low_pass_filter = (
+            (self._kx_grid**2 + self._ky_grid**2) <= self._wave_number**2
+        ).to(dtype=torch.get_default_dtype())
 
     def impulse_response_angular_spectrum(self) -> torch.Tensor:
         """Create the impulse response function for angular spectrum method
@@ -67,13 +92,14 @@ class FreeSpace(Element):
         """
 
         wave_number_z = torch.sqrt(
-                self._wave_number**2 - torch.pow(self._kx_grid, 2) - torch.pow(self._ky_grid, 2)  # noqa: E501
+                self._wave_number**2 - self.low_pass_filter * (torch.pow(self._kx_grid, 2) + torch.pow(self._ky_grid, 2))  # noqa: E501
             )
 
         # Fourier image of impulse response function
         impulse_response_fft = self.low_pass_filter * torch.exp(
             1j * self.distance * wave_number_z
         )
+
         return impulse_response_fft
 
     def impulse_response_fresnel(self) -> torch.Tensor:
@@ -85,13 +111,25 @@ class FreeSpace(Element):
             2d impulse response function for fresnel approximation
         """
 
-        wave_number_in_plane = torch.pow(self._kx_grid, 2) + torch.pow(self._ky_grid, 2)  # noqa: E501
+        wave_number_in_plane = (
+            torch.pow(self._kx_grid, 2) + torch.pow(self._ky_grid, 2)
+        ) * self.low_pass_filter
+
+        k_eff, axis = tensor_dot(
+            self._wavelength / (4 * torch.pi),
+            wave_number_in_plane,
+            'wavelength',
+            ('wavelength', 'H', 'W')
+        )
 
         # Fourier image of impulse response function
-        impulse_response_fft = - self.low_pass_filter * torch.exp(
-            1j * self.distance * (self._wave_number - self._wavelength / (4 * torch.pi) * wave_number_in_plane)  # noqa: E501
+        impulse_response_fft = -self.low_pass_filter * torch.exp(
+            1j * self.distance * (self._wave_number - k_eff)
         )
-        return impulse_response_fft
+
+        return cast_tensor(
+            impulse_response_fft, axis, self.simulation_parameters.axes.names
+        )
 
     # TODO: ask for tol parameter
     def forward(
@@ -119,7 +157,9 @@ class FreeSpace(Element):
             Occurs when a non-existent direct distribution method is chosen
         """
 
-        input_field_fft = torch.fft.fft2(input_field)
+        input_field_fft = torch.fft.fft2(
+            input_field, dim=(self._h_index, self._w_index)
+        )
 
         if self.method == 'AS':
 
@@ -129,6 +169,7 @@ class FreeSpace(Element):
 
             impulse_response_fft = self.impulse_response_fresnel()
 
+        # TODO: fix auto mod
         elif self.method == 'auto':
 
             radius_squared = torch.pow(self._x_grid, 2) + torch.pow(
@@ -152,11 +193,13 @@ class FreeSpace(Element):
         # Fourier image of output field
         output_field_fft = input_field_fft * impulse_response_fft
 
-        output_field = torch.fft.ifft2(output_field_fft)
+        output_field = torch.fft.ifft2(
+            output_field_fft, dim=(self._h_index, self._w_index)
+        )
 
         return output_field
 
-    def reverse(self, transmission_field: torch.Tensor) -> torch.Tensor:
+    def reverse(self, transmission_field: torch.Tensor) -> Wavefront:
         """Method that calculates the field after propagating in the free space
         in back propagation
 
@@ -171,7 +214,9 @@ class FreeSpace(Element):
             Field after propagation in free space in back propagation
         """
 
-        transmission_field_fft = torch.fft.fft2(transmission_field)
+        transmission_field_fft = torch.fft.fft2(
+            transmission_field, dim=(self._h_index, self._w_index)
+        )
 
         # square of the modulus of the wave vector in the plane oXY
         wave_number_in_plane = torch.pow(self._kx_grid, 2) + torch.pow(self._ky_grid, 2)  # noqa: E501
@@ -183,6 +228,8 @@ class FreeSpace(Element):
         )
 
         incident_field_fft = impulse_response * transmission_field_fft
-        incident_field = torch.fft.ifft2(incident_field_fft)
+        incident_field = torch.fft.ifft2(
+            incident_field_fft, dim=(self._h_index, self._w_index)
+        )
 
         return incident_field

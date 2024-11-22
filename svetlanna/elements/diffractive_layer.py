@@ -36,7 +36,7 @@ class DiffractiveLayer(Element):
         self.mask_norm = mask_norm
 
     @property
-    def transmission_function(self):
+    def transmission_function(self) -> torch.Tensor:
         return torch.exp(
             (2j * torch.pi / self.mask_norm) * self.mask
         )

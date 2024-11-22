@@ -100,7 +100,7 @@ def test_phase_retrieval(
     free_space1 = elements.FreeSpace(
         simulation_parameters=params,
         distance=torch.tensor(3 * distance_test),
-        method='auto'
+        method='AS'
     )
     output_field = free_space1.forward(input_field=field_after_lens1)
 

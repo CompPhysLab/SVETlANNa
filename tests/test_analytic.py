@@ -1,12 +1,13 @@
 import pytest
 import torch
-import numpy as np
 
 from svetlanna import elements
 from svetlanna import SimulationParameters
 from svetlanna import Wavefront
 
 from examples import analytical_solutions as anso
+
+torch.set_default_dtype(torch.float64)
 
 square_parameters = [
     "ox_size",
@@ -23,15 +24,37 @@ square_parameters = [
 
 @pytest.mark.parametrize(
     square_parameters,
-    [(3, 3, 1000, 1000, 1064 * 1e-6, 150, 1.5, 0.065, 0.05),
-     (4, 4, 1000, 1000, 660 * 1e-6, 600, 1, 0.05, 0.05)]
+    [
+        (
+            3,  # ox_size, mm
+            3,  # oy_size, mm
+            1000,   # ox_nodes
+            1000,   # oy_nodes
+            torch.linspace(330 * 1e-6, 660 * 1e-6, 5),  # wavelength_test tensor, mm    # noqa: E501
+            150,    # distance_test, mm
+            1.5,    # waist radius, mm
+            0.065,  # expected std
+            0.05    # error_energy
+        ),
+        (
+            4,  # ox_size, mm
+            4,  # oy_size, mm
+            1200,   # ox_nodes
+            1300,   # oy_nodes
+            torch.linspace(330 * 1e-6, 660 * 1e-6, 5),  # wavelength_test tensor, mm    # noqa: E501
+            600,    # distance_test, mm
+            1,  # waist radius, mm
+            0.075,  # expected std
+            0.05    # error_energy
+        )
+    ]
 )
 def test_rectangle_fresnel(
     ox_size: float,
     oy_size: float,
     ox_nodes: int,
     oy_nodes: int,
-    wavelength_test: float,
+    wavelength_test: torch.Tensor,
     distance_test: float,
     square_size_test: float,
     expected_std: float,
@@ -50,7 +73,7 @@ def test_rectangle_fresnel(
         Number of computational nodes along the axis ox
     oy_nodes : int
         Number of computational nodes along the axis oy
-    wavelength_test : float
+    wavelength_test : torch.Tensor
         Wavelength for the incident field
     distance_test : float
         The distance between square aperture and the screen
@@ -100,13 +123,9 @@ def test_rectangle_fresnel(
         ).forward(input_field=transmission_field)
 
     # intensity distribution on the screen by using Fresnel propagation method
-    intensity_output_fresnel = (
-        torch.pow(torch.abs(output_field_fresnel), 2)
-    ).detach().numpy()
+    intensity_output_fresnel = output_field_fresnel.intensity
     # intensity distribution on the screen by using Angular Spectrum method
-    intensity_output_as = (
-        torch.pow(torch.abs(output_field_as), 2)
-    ).detach().numpy()
+    intensity_output_as = output_field_as.intensity
 
     # analytical intensity distribution on the screen
     intensity_analytic = anso.SquareFresnel(
@@ -119,25 +138,29 @@ def test_rectangle_fresnel(
         wavelength=wavelength_test
     ).intensity()
 
-    energy_analytic = np.sum(intensity_analytic) * dx * dy
-    energy_numeric_fresnel = np.sum(intensity_output_fresnel) * dx * dy
-    energy_numeric_as = np.sum(intensity_output_as) * dx * dy
+    intensity_analytic = intensity_analytic.clone().detach()
 
-    standard_deviation_fresnel = np.std(
-        intensity_analytic - intensity_output_fresnel
+    energy_analytic = torch.sum(intensity_analytic, dim=(-2, -1)) * dx * dy
+    energy_numeric_fresnel = torch.sum(
+        intensity_output_fresnel, dim=(-2, -1)
+    ) * dx * dy
+    energy_numeric_as = torch.sum(intensity_output_as, dim=(-2, -1)) * dx * dy
+
+    standard_deviation_fresnel = torch.std(
+        intensity_analytic - intensity_output_fresnel, dim=(-2, -1)
     )
-    standard_deviation_as = np.std(
-        intensity_analytic - intensity_output_as
+    standard_deviation_as = torch.std(
+        intensity_analytic - intensity_output_as, dim=(-2, -1)
     )
 
-    energy_error_fresnel = np.abs(
+    energy_error_fresnel = torch.abs(
         (energy_analytic - energy_numeric_fresnel) / energy_analytic
     )
-    energy_error_as = np.abs(
+    energy_error_as = torch.abs(
         (energy_analytic - energy_numeric_as) / energy_analytic
     )
 
-    assert standard_deviation_fresnel <= expected_std
-    assert standard_deviation_as <= expected_std
-    assert energy_error_fresnel <= error_energy
-    assert energy_error_as <= error_energy
+    assert (standard_deviation_fresnel <= expected_std).all()
+    assert (standard_deviation_as <= expected_std).all()
+    assert (energy_error_fresnel <= error_energy).all()
+    assert (energy_error_as <= error_energy).all()

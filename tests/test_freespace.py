@@ -4,7 +4,7 @@ import torch
 from svetlanna import elements
 from svetlanna import SimulationParameters
 from svetlanna import Wavefront
-
+torch.set_default_dtype(torch.float64)
 
 parameters = [
     "ox_size",
@@ -23,22 +23,38 @@ parameters = [
 # TODO: fix docstrings
 @pytest.mark.parametrize(
     parameters,
-    [(2, 2, 1500, 1600, 1064 * 1e-6, 1., 300, 200, 0.02, 0.01)]
+    [
+        (
+            6,  # ox_size
+            6,  # oy_size
+            1500,   # ox_nodes
+            1600,   # oy_nodes
+            torch.linspace(330*1e-6, 660*1e-6, 5),  # wavelength_test tensor, mm    # noqa: E501
+            2.,     # waist_radius_test, mm
+            300,    # distance_total, mm
+            200,    # distance_end, mm
+            0.02,   # expected_std
+            0.01    # error_energy
+        )
+    ]
 )
 def test_gaussian_beam_propagation(
-    ox_size,
-    oy_size,
-    ox_nodes,
-    oy_nodes,
-    wavelength_test,
-    waist_radius_test,
-    distance_total,
-    distance_end,
-    expected_std,
-    error_energy
+    ox_size: float,
+    oy_size: float,
+    ox_nodes: int,
+    oy_nodes: int,
+    wavelength_test: torch.Tensor,
+    waist_radius_test: float,
+    distance_total: float,
+    distance_end: float,
+    expected_std: float,
+    error_energy: float
 ):
     """Test for the free field propagation problem: free propagation of the
-    Gaussian beam at the arbitrary distance
+    Gaussian beam at the arbitrary distance(distance_total). We calculate the
+    field at the distance_total by using analytical expression and calculate
+    the field at the distance_total by splitting on two FreeSpace exemplars(
+    distance_total - distance_end + distance_end)
 
     Parameters
     ----------
@@ -50,18 +66,18 @@ def test_gaussian_beam_propagation(
         Number of computational nodes along the axis ox
     oy_nodes : int
         Number of computational nodes along the axis oy
-    wavelength_test : float
+    wavelength_test : torch.Tensor
         Wavelength for the incident field
-    waist_radius_test : _type_
+    waist_radius_test : float
         Waist radius of the Gaussian beam
-    distance_total : _type_
+    distance_total : float
         Total propagation distance of the Gaussian beam
-    distance_end : _type_
+    distance_end : float
         Propagation distance of the Gaussian beam which calculates by using
         Fresnel propagation method or angular spectrum method
-    expected_std : _type_
+    expected_std : float
         Criterion for accepting the test(standard deviation)
-    error_energy : _type_
+    error_energy : float
         Criterion for accepting the test(energy loss by propagation)
     """
 
@@ -69,14 +85,18 @@ def test_gaussian_beam_propagation(
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
     x_grid, y_grid = torch.meshgrid(x_linear, y_linear, indexing='xy')
 
-    wave_number = 2 * torch.pi / wavelength_test
+    # creating meshgrid
+    x_grid = x_grid[None, :]
+    y_grid = y_grid[None, :]
+
+    wave_number = 2 * torch.pi / wavelength_test[..., None, None]
 
     amplitude = 1.
 
     dx = ox_size / ox_nodes
     dy = oy_size / oy_nodes
 
-    rayleigh_range = torch.pi * (waist_radius_test**2) / wavelength_test
+    rayleigh_range = torch.pi * (waist_radius_test**2) / wavelength_test[..., None, None]   # noqa: E501
 
     radial_distance_squared = torch.pow(x_grid, 2) + torch.pow(y_grid, 2)
 
@@ -88,7 +108,7 @@ def test_gaussian_beam_propagation(
     )
 
     # Gouy phase
-    gouy_phase = torch.arctan(torch.tensor(distance_total / rayleigh_range))
+    gouy_phase = torch.arctan(torch.tensor(distance_total) / rayleigh_range)
 
     # analytical equation for the propagation of the Gaussian beam
     field = amplitude * (waist_radius_test / hyperbolic_relation) * (
@@ -121,20 +141,28 @@ def test_gaussian_beam_propagation(
     ).forward(input_field=field_gb_start)
     # field on the screen by using angular spectrum method
     field_end_as = elements.FreeSpace(
-        simulation_parameters=params, distance=distance_end, method='fresnel'
+        simulation_parameters=params, distance=distance_end, method='AS'
     ).forward(input_field=field_gb_start)
 
-    intensity_output_fresnel = torch.pow(torch.abs(field_end_fresnel), 2)
-    intensity_output_as = torch.pow(torch.abs(field_end_as), 2)
+    intensity_output_fresnel = field_end_fresnel.intensity
+    intensity_output_as = field_end_as.intensity
 
-    energy_analytic = torch.sum(intensity_analytic) * dx * dy
-    energy_numeric_fresnel = torch.sum(intensity_output_fresnel) * dx * dy
-    energy_numeric_as = torch.sum(intensity_output_as) * dx * dy
+    energy_analytic = torch.sum(
+        intensity_analytic, dim=(-2, -1)
+    ) * dx * dy
+    energy_numeric_fresnel = torch.sum(
+        intensity_output_fresnel, dim=(-2, -1)
+    ) * dx * dy
+    energy_numeric_as = torch.sum(
+        intensity_output_as, dim=(-2, -1)
+    ) * dx * dy
 
     standard_deviation_fresnel = torch.std(
-        intensity_output_fresnel - intensity_analytic
+        intensity_output_fresnel - intensity_analytic, dim=(-2, -1)
     )
-    standard_deviation_as = torch.std(intensity_output_as - intensity_analytic)
+    standard_deviation_as = torch.std(
+        intensity_output_as - intensity_analytic, dim=(-2, -1)
+    )
 
     energy_error_fresnel = torch.abs(
         (energy_analytic - energy_numeric_fresnel) / energy_analytic
@@ -143,7 +171,7 @@ def test_gaussian_beam_propagation(
         (energy_analytic - energy_numeric_as) / energy_analytic
     )
 
-    assert standard_deviation_fresnel <= expected_std
-    assert standard_deviation_as <= expected_std
-    assert energy_error_fresnel <= error_energy
-    assert energy_error_as <= error_energy
+    assert (standard_deviation_fresnel <= expected_std).all()
+    assert (standard_deviation_as <= expected_std).all()
+    assert (energy_error_fresnel <= error_energy).all()
+    assert (energy_error_as <= error_energy).all()

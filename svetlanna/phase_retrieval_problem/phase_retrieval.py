@@ -59,8 +59,8 @@ def retrieve_phase(
     initial_phase: torch.Tensor = None,
     method: Literal['GS', 'HIO'] = 'GS',
     options: dict = {
-        'tol': 1e-16,
-        'maxiter': 20,
+        'tol': 1e-25,
+        'maxiter': 100,
         'constant_factor': float == 0.9,
         'disp': False
     }

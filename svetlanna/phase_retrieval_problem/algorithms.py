@@ -124,7 +124,8 @@ def gerchberg_saxton_algorithm(
         solution=phase_function,
         cost_func=error,
         cost_func_evolution=cost_func_evolution,
-        number_of_iterations=number_of_iterations
+        number_of_iterations=number_of_iterations,
+
     )
     return phase_retrieval_result
 
