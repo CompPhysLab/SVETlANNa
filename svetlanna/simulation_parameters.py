@@ -7,6 +7,11 @@ class AxisNotFound(Exception):
     pass
 
 
+_AXES_INNER_ATTRS = tuple(
+    f'_Axes{i}' for i in ('__axes_dict', '__names', '__names_inversed')
+)
+
+
 class Axes:
     """Axes storage"""
     def __init__(self, axes: dict[str, torch.Tensor]) -> None:
@@ -70,7 +75,7 @@ class Axes:
 
     def __getattribute__(self, name: str) -> Any:
 
-        if name in (f'_Axes{i}' for i in ('__axes_dict', '__names')):
+        if name in _AXES_INNER_ATTRS:
             return super().__getattribute__(name)
 
         axes = self.__axes_dict
