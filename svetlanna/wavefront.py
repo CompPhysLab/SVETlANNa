@@ -67,8 +67,8 @@ class Wavefront(torch.Tensor):
 
         indices = torch.nonzero(self.intensity >= half_max_intensity)
 
-        min_x, min_y = torch.min(indices, dim=0)[0]
-        max_x, max_y = torch.max(indices, dim=0)[0]
+        min_y, min_x = torch.min(indices, dim=0)[0]
+        max_y, max_x = torch.max(indices, dim=0)[0]
 
         fwhm_x = (max_x - min_x) * x_step
         fwhm_y = (max_y - min_y) * y_step
