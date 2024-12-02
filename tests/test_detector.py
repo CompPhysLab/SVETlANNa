@@ -83,15 +83,24 @@ def test_detector_segmentation_strips(num_classes, detector_x, expected_mask):
     expected_mask
         Expected segmentation by strips.
     """
-    processor = DetectorProcessorClf(num_classes)
+    processor = DetectorProcessorClf(
+        num_classes=num_classes,
+        simulation_parameters=SimulationParameters(
+            {
+                'W': torch.linspace(-1e-2/2, 1e-2/2, detector_x),
+                'H': torch.linspace(0, 0, 1),
+                'wavelength': 500e-6
+            }
+        )
+    )
     assert isinstance(processor, torch.nn.Module)
 
-    segmentation = processor.detector_segmentation(torch.Size([1, detector_x]))
+    # segmentation = processor.detector_segmentation(torch.Size([1, detector_x]))
 
     for ind_class in range(num_classes):  # check if all classes zones are marked
-        assert ind_class in segmentation
+        assert ind_class in processor.segmented_detector
 
-    assert torch.allclose(segmentation, torch.tensor(expected_mask, dtype=torch.int32))
+    assert torch.allclose(processor.segmented_detector, torch.tensor(expected_mask, dtype=torch.int32))
 
 
 @pytest.mark.parametrize(
@@ -120,8 +129,17 @@ def test_detector_weight_segments(num_classes, segmented_detector, expected_weig
         Expected weights for segments.
     """
     segmented_detector_tensor = torch.tensor(segmented_detector, dtype=torch.int32)
+    all_detector_size = segmented_detector_tensor.size()
+
     processor = DetectorProcessorClf(
-        num_classes,
+        num_classes=num_classes,
+        simulation_parameters=SimulationParameters(
+            {
+                'W': torch.linspace(-1e-2 / 2, 1e-2 / 2, all_detector_size[1]),
+                'H': torch.linspace(-1e-2 / 2, 1e-2 / 2, all_detector_size[0]),
+                'wavelength': 500e-6
+            }
+        ),
         segmented_detector=segmented_detector_tensor,
     )
     assert torch.allclose(processor.segments_weights, torch.tensor(expected_weights))
