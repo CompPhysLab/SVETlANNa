@@ -78,30 +78,53 @@ class FreeSpace(Element):
         )
 
         # low pass filter, (kx^2 + ky^2) <= k^2
+        self._low_pass_filter: torch.Tensor | int
         use_filter = False
         if use_filter:
-            self._low_pass_filter = (relation <= 1).to(kx_grid)
+            self.register_buffer(
+                '_low_pass_filter',
+                (relation <= 1).to(kx_grid),
+                persistent=False
+            )
         else:
             self._low_pass_filter = 1
 
-        _wave_number_x2y2 = self._low_pass_filter * kx2ky2
-        self._wave_number = k[..., None, None]
+        self._wave_number: torch.Tensor
+        self.register_buffer(
+            '_wave_number',
+            k[..., None, None],
+            persistent=False
+        )
+
         self._calc_axes = relation_axes  # axes tuple used during calculations
+        _wave_number_x2y2 = self._low_pass_filter * kx2ky2
 
         # kz
         if use_filter:
             # kz =
             #      sqrt(k^2-(kx^2 + ky^2)) if (kx^2 + ky^2) <= k^2,
             #      kz=|k| otherwise
-            self._wave_number_z = torch.sqrt(
+            wave_number_z = torch.sqrt(
                 self._wave_number**2 - _wave_number_x2y2 * self._low_pass_filter  # noqa: E501
             )
         else:
-            self._wave_number_z = torch.sqrt(
+            wave_number_z = torch.sqrt(
                 self._wave_number**2 - _wave_number_x2y2 + 0j
             )
+        self._wave_number_z: torch.Tensor
+        self.register_buffer(
+            '_wave_number_z',
+            wave_number_z,
+            persistent=False
+        )
+
         # kz taylored, used by Fresnel approximation
-        self._wave_number_z_eff_fresnel = - 0.5 * _wave_number_x2y2 / self._wave_number  # noqa: E501
+        self._wave_number_z_eff_fresnel: torch.Tensor
+        self.register_buffer(
+            '_wave_number_z_eff_fresnel',
+            - 0.5 * _wave_number_x2y2 / self._wave_number,
+            persistent=False
+        )
 
     def impulse_response_angular_spectrum(self) -> torch.Tensor:
         """Create the impulse response function for angular spectrum method
