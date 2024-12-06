@@ -1,12 +1,16 @@
 from abc import ABCMeta, abstractmethod
 from torch import nn
 from torch import Tensor
+from torch.nn.modules.module import register_module_forward_hook
 from ..simulation_parameters import SimulationParameters
 from ..specs import ReprRepr, ParameterSpecs
 from typing import Iterable
 from ..parameters import BoundedParameter, Parameter
 from ..wavefront import Wavefront
 
+import logging
+
+logger = logging.getLogger(__name__)
 
 INNER_PARAMETER_SUFFIX = '_svtlnn_inner_parameter'
 
@@ -81,3 +85,32 @@ class Element(nn.Module, metaclass=ABCMeta):
             )
 
         return super().__setattr__(name, value)
+
+
+def _arg_string(arg) -> str:
+    if isinstance(arg, Tensor):
+        return f'{type(arg)} shape={arg.shape}, dtype={arg.dtype}, device={arg.device}'
+    else:
+        return f'{type(arg)}'
+
+
+def forward_logging_hook(module, input, output) -> None:
+    """Global debug forward hook for all elements"""
+    if isinstance(module, Element):
+        args_info = ''
+
+        input = (input,) if not isinstance(input, tuple) else input
+        input = (output,) if not isinstance(input, tuple) else output
+
+        for i, _input in enumerate(input):
+            args_info += f'\n   input {i}: {_arg_string(_input)}'
+
+        for i, _output in enumerate(output):
+            args_info += f'\n   output {i}: {_arg_string(_output)}'
+
+        logger.debug(
+            f'{module} forward was called{args_info}'
+        )
+
+
+register_module_forward_hook(forward_logging_hook)
