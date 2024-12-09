@@ -95,6 +95,14 @@ def set_debug_logging(
         type of logging messages output
     """
     global __handles
+    global __logging_type
+
+    if type not in ('logging', 'print'):
+        raise ValueError(
+            f"Logging type should be 'logging' or 'print, not {type}"
+        )
+    __logging_type = type
+
     if mode:
         if __handles is None:
             __handles = (
@@ -115,3 +123,4 @@ def set_debug_logging(
         if __handles is not None:
             for handle in __handles:
                 handle.remove()
+            __handles = None
