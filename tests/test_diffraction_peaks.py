@@ -7,6 +7,7 @@ from svetlanna import SimulationParameters
 from svetlanna import Wavefront
 
 from scipy.optimize import curve_fit
+from scipy.optimize import minimize_scalar
 torch.set_default_dtype(torch.float64)
 
 parameters = [
@@ -34,7 +35,7 @@ parameters = [
             1500,    # distance, mm
             0.1,    # width, mm
             5,  # max diffraction order to check
-            0.05  # expected_error
+            0.02  # expected_error
         ),
         (
             500,  # ox_size
@@ -45,7 +46,7 @@ parameters = [
             1500,    # distance, mm
             0.1,    # width, mm
             6,  # max diffraction order to check
-            0.05   # expected_error
+            0.02   # expected_error
         ),
         (
             500,  # ox_size
@@ -56,7 +57,7 @@ parameters = [
             1500,    # distance, mm
             0.1,    # width, mm
             4,  # max diffraction order to check
-            0.05   # expected_error
+            0.02   # expected_error
         ),
         (
             500,  # ox_size
@@ -67,7 +68,7 @@ parameters = [
             1500,    # distance, mm
             0.1,    # width, mm
             8,  # max diffraction order to check
-            0.05   # expected_error
+            0.02   # expected_error
         ),
     ]
 )
@@ -119,10 +120,10 @@ def test_diffraction_peaks(
             'wavelength': wavelength_test
             })
 
-    plane_wave = Wavefront.plane_wave(
+    beam = Wavefront.gaussian_beam(
         simulation_parameters=params,
-        distance=distance,
-        wave_direction=[0.0, 0.0, 1.0]
+        waist_radius=2.,
+        distance=distance
     )
 
     # create rectangular aperture
@@ -132,7 +133,7 @@ def test_diffraction_peaks(
         width=width
     )
 
-    field_after_aperture = rectangular_aperture.forward(input_field=plane_wave)
+    field_after_aperture = rectangular_aperture.forward(input_field=beam)
 
     fs = elements.FreeSpace(
         simulation_parameters=params, distance=distance, method='AS'
@@ -141,16 +142,29 @@ def test_diffraction_peaks(
     output_field = fs.forward(field_after_aperture)
     intensity_output = output_field.intensity
 
-    # array of min
-    orders = torch.arange(1, diffraction_order, 1)
-
-    sin = (orders + 0.5) * wavelength_test / width
-
-    theta = torch.arcsin(sin)
-
-    x_min = distance * torch.tan(theta)
-
     amplitude_1d = np.sqrt(intensity_output.detach().numpy())[int(oy_nodes/2)]
+
+    def intensity_analytic(coordinates: torch.tensor) -> np.array:
+        phi = np.arctan(coordinates / distance)
+        u = np.pi / wavelength_test * width * np.sin(phi)
+        return (np.sin(u) / u)**2 * intensity_output[int(oy_nodes/2), int(ox_nodes/2)]   # noqa: E501
+
+    def find_maximum(start, end):
+        result = minimize_scalar(
+            lambda x: -intensity_analytic(x),
+            bounds=(start, end),
+            method='bounded'
+        )
+        return result.x
+
+    x_max = []
+    for m in range(1, diffraction_order):  # Находим первые 5 максимумов
+        start = distance * np.tan(np.arcsin(m * wavelength_test / width))
+        end = distance * np.tan(np.arcsin((m + 1) * wavelength_test / width))
+        max_x = find_maximum(start, end)
+        x_max.append(max_x)
+
+    x_max = torch.tensor(x_max)
 
     # define Gaussian function
     def gaussian(x, amp, cen, wid):
@@ -158,7 +172,7 @@ def test_diffraction_peaks(
 
     x_max_averaged = np.array([])
 
-    peaks = torch.cat((x_min, -x_min), dim=0)
+    peaks = torch.cat((x_max, -x_max), dim=0)
     gaussian_params = []
 
     for peak in peaks:
