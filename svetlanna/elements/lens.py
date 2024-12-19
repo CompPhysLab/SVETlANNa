@@ -51,9 +51,6 @@ class ThinLens(Element):
         self._x_grid = self._x_linear[None, :]
         self._y_grid = self._y_linear[:, None]
 
-        self._x_grid = self._x_grid[None, ...]
-        self._y_grid = self._y_grid[None, ...]
-
         self._radius_squared = torch.pow(self._x_grid, 2) + torch.pow(
             self._y_grid, 2)
 
@@ -101,7 +98,12 @@ class ThinLens(Element):
         #     self.simulation_parameters
         # )
 
-        return input_field * self.transmission_function
+        return mul(
+            input_field,
+            self.transmission_function,
+            ('H', 'W'),
+            self.simulation_parameters
+        )
 
     def reverse(self, transmission_field: torch.Tensor) -> Wavefront:
         """Method that calculates the field after passing the lens in back

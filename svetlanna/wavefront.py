@@ -24,6 +24,17 @@ class Wavefront(torch.Tensor):
         return torch.abs(torch.Tensor(self)) ** 2
 
     @property
+    def max_intensity(self) -> float:
+        """Calculates maximum intensity of the wavefront
+
+        Returns
+        -------
+        float
+            maximum intensity
+        """
+        return self.intensity.max().item()
+
+    @property
     def phase(self) -> torch.Tensor:
         """Calculates phase of the wavefront
 
@@ -32,9 +43,38 @@ class Wavefront(torch.Tensor):
         torch.Tensor
             phase from $0$ to $2\\pi$
         """
-        res = torch.angle(torch.Tensor(self) + 0.0)  # HOTFIX: problem with phase of -0. in visualization
-        res[res < 0] += 2 * torch.pi
+        # HOTFIX: problem with phase of -0. in visualization
+        res = torch.angle(torch.Tensor(self) + 0.0)
+        # res[res < 0] += 2 * torch.pi
         return res
+
+    def fwhm(
+        self,
+        simulation_parameters: SimulationParameters
+    ) -> tuple[float, float]:
+        """Calculates full width at half maximum of the wavefront
+
+        Returns
+        -------
+        tuple[float, float]
+            full width at half maximum along x and y axes
+        """
+
+        x_step = torch.diff(simulation_parameters.axes.W)[0].item()
+        y_step = torch.diff(simulation_parameters.axes.H)[0].item()
+
+        max_intensity = self.max_intensity
+        half_max_intensity = max_intensity / 2
+
+        indices = torch.nonzero(self.intensity >= half_max_intensity)
+
+        min_y, min_x = torch.min(indices, dim=0)[0]
+        max_y, max_x = torch.max(indices, dim=0)[0]
+
+        fwhm_x = (max_x - min_x) * x_step
+        fwhm_y = (max_y - min_y) * y_step
+
+        return fwhm_x.item(), fwhm_y.item()
 
     @classmethod
     def plane_wave(
@@ -178,7 +218,9 @@ class Wavefront(torch.Tensor):
             preserve_a_axis=True
         )
 
-        return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
+        return cls(
+            cast_tensor(field, axes, simulation_parameters.axes.names)
+        ).conj()
 
     @classmethod
     def spherical_wave(
