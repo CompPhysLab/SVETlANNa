@@ -54,7 +54,9 @@ class ThinLens(Element):
         self._radius_squared = torch.pow(self._x_grid, 2) + torch.pow(
             self._y_grid, 2)
 
-        self.transmission_function = torch.exp(
+    @property
+    def transmission_function(self) -> torch.Tensor:
+        return torch.exp(
             1j * (
                 -self._wave_number / (2 * self.focal_length) * self._radius_squared * (     # noqaL E501
                     (self._radius_squared <= self.radius**2).to(
