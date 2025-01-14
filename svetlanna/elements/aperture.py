@@ -34,7 +34,7 @@ class Aperture(Element):
 
         super().__init__(simulation_parameters)
 
-        self.mask = mask
+        self.mask = self.process_parameter('mask', mask)
 
     def get_transmission_function(self) -> torch.Tensor:
         """Method which returns the transmission function of

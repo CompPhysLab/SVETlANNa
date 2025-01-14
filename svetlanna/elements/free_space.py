@@ -35,8 +35,12 @@ class FreeSpace(Element):
         """
         super().__init__(simulation_parameters)
 
-        self.distance = distance
-        self.method = method
+        self.distance = self.process_parameter(
+            'distance', distance
+        )
+        self.method = self.process_parameter(
+            'method', method
+        )
 
         # params extracted from SimulationParameters
         device = self.simulation_parameters.device
@@ -82,22 +86,24 @@ class FreeSpace(Element):
 
         # Legacy low pass filter, (kx^2+ky^2) / k^2 <= 1
         # The filter removes contribution of evanescent waves
-        self._low_pass_filter: torch.Tensor | int  # <- Registering Buffer for _low_pass_filter
         if use_legacy_filter:
             # TODO: Shouldn't the 88'th string be here?
             condition = (relation <= 1)  # calculate the low pass filter condition
             condition = condition.to(kx_grid)  # cast bool to float
-            self.register_buffer(
-                '_low_pass_filter', condition, persistent=False
+
+            # Registering Buffer for _low_pass_filter
+            self._low_pass_filter = self.make_buffer(
+                '_low_pass_filter', condition
             )
         else:
             self._low_pass_filter = 1
 
         # Reshape wave vector for further calculations
         wave_number = k[..., None, None]  # shape: ('wavelength', 1, 1) or (1, 1)
-        self._wave_number: torch.Tensor  # <- Registering Buffer for _wave_number
-        self.register_buffer(
-            '_wave_number', wave_number, persistent=False
+
+        # Registering Buffer for _wave_number
+        self._wave_number = self.make_buffer(
+            '_wave_number', wave_number
         )
 
         self._calc_axes = relation_axes  # axes tuple used during calculations
@@ -116,21 +122,18 @@ class FreeSpace(Element):
                 self._wave_number ** 2 - kx2ky2 + 0j
             )  # 0j is required to convert argument to complex
 
-        self._wave_number_z: torch.Tensor  # <- Registering Buffer for _wave_number_z
-        self.register_buffer(
-            '_wave_number_z', wave_number_z, persistent=False
+        # Registering Buffer for _wave_number_z
+        self._wave_number_z = self.make_buffer(
+            '_wave_number_z', wave_number_z
         )
 
         # Calculate kz taylored, used by Fresnel approximation
         wave_number_z_eff_fresnel = - 0.5 * kx2ky2 / self._wave_number
 
-        self._wave_number_z_eff_fresnel: torch.Tensor
-        #  ^- Registering Buffer for _wave_number_z_eff_fresnel
-        self.register_buffer(
-            '_wave_number_z_eff_fresnel', wave_number_z_eff_fresnel, persistent=False
+        # Registering Buffer for _wave_number_z_eff_fresnel
+        self._wave_number_z_eff_fresnel = self.make_buffer(
+            '_wave_number_z_eff_fresnel', wave_number_z_eff_fresnel
         )
-
-        # TODO: Maybe add a separate method to define all necessary Buffers?
 
     def impulse_response_angular_spectrum(self) -> torch.Tensor:
         """Create the impulse response function for angular spectrum method
