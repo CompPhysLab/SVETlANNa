@@ -80,7 +80,7 @@ class Element(nn.Module, metaclass=ABCMeta):
         # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
         if isinstance(value, (BoundedParameter, Parameter)):
             super().__setattr__(
-                name + INNER_PARAMETER_SUFFIX, value.inner_parameter
+                name + INNER_PARAMETER_SUFFIX, value.inner_storage
             )
 
         return super().__setattr__(name, value)
@@ -146,7 +146,7 @@ class Element(nn.Module, metaclass=ABCMeta):
         _V
             the value passed to the method
         """
-        if isinstance(value, (nn.parameter.Parameter, Parameter)):
+        if isinstance(value, (nn.Parameter, Parameter)):
             return value
         if isinstance(value, Tensor):
             return self.make_buffer(name, value, persistent=True)

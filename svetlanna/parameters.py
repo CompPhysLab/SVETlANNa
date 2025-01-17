@@ -2,6 +2,24 @@ import torch
 from typing import Callable, Any, TypeAlias
 
 
+class InnerParameterStorageModule(torch.nn.Module):
+    def __init__(
+        self,
+        params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]
+    ):
+        super().__init__()
+        for name, value in params_to_store.items():
+            if isinstance(value, torch.nn.Parameter):
+                self.register_parameter(name, value)
+            elif isinstance(value, torch.Tensor):
+                self.register_buffer(name, value)
+            else:
+                raise TypeError(
+                    f"Parameters should be instances of either torch.Tensor or torch.nn.Parameter. The type {type(value)} of {name} is not compatible."
+                )
+        self.params_to_store = params_to_store
+
+
 class Parameter(torch.Tensor):
     """`torch.Parameter` replacement.
     Added for further feature enrichment.
@@ -33,6 +51,11 @@ class Parameter(torch.Tensor):
         self.inner_parameter = torch.nn.Parameter(
             data=data,
             requires_grad=requires_grad
+        )
+        self.inner_storage = InnerParameterStorageModule(
+            {
+                'inner_parameter': self.inner_parameter
+            }
         )
 
     @classmethod
@@ -126,10 +149,15 @@ class ConstrainedParameter(Parameter):
         self.min_value = min_value
         self.max_value = max_value
 
-        self.__a = a
-        self.__b = b
-
         self.bound_func = bound_func
+
+        self.inner_storage = InnerParameterStorageModule(
+            {
+                'a': a,
+                'b': b,
+                **self.inner_storage.params_to_store
+            }
+        )
 
     @property
     def value(self) -> torch.Tensor:
@@ -142,7 +170,7 @@ class ConstrainedParameter(Parameter):
         """
         # for inner parameter value y:
         # x = (M-m) * bound_function( y ) + m = a * bound_function( y ) + b
-        return self.__a * self.bound_func(self.inner_parameter) + self.__b
+        return self.inner_storage.a * self.bound_func(self.inner_parameter) + self.inner_storage.b
 
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
