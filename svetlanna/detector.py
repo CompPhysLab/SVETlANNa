@@ -345,7 +345,7 @@ class DetectorProcessorClf(nn.Module):
 
         batch_size = batch_detector_data.size()[0]  # batch size is a 0'th dimension!
 
-        integrals_by_classes = torch.zeros(size=(batch_size, self.num_classes))
+        integrals_by_classes = torch.zeros(size=(batch_size, self.num_classes)).to(self.__device)
         for ind_class in range(self.num_classes):
             integrals_by_classes[:, ind_class] = (
                     self.batch_zone_integral(batch_detector_data, ind_class) *

@@ -12,7 +12,14 @@ parameters = "default_type"
     torch.float64,
     torch.float32
 ])
-def test_types(default_type):
+def test_types(default_type: torch.dtype):
+    """A test that checks that all elements belong to the same data type
+
+    Parameters
+    ----------
+    default_type : torch.dtype
+        dtype for objects
+    """
 
     torch.set_default_dtype(default_type)
 
