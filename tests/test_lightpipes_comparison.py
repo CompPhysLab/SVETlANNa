@@ -1,24 +1,20 @@
 import pytest
 import torch
-import numpy as np
 
-from LightPipes import *
+import LightPipes as lp
+import svetlanna as sv
+
 from svetlanna import elements
-from svetlanna import SimulationParameters
-from svetlanna import wavefront as w
+
 torch.set_default_dtype(torch.float64)
 
 parameters = [
     "ox_size",
-    "oy_size",
     "ox_nodes",
-    "oy_nodes",
     "wavelength",
     "radius",
     "distance",
-    "focal_length",
-    "expected_std",
-    "error_energy"
+    "focal_length"
 ]
 
 
@@ -27,110 +23,92 @@ parameters = [
     parameters,
     [
         (
-            25,  # ox_size
-            25,  # oy_size
+            25 * lp.mm,  # ox_size
             3000,   # ox_nodes
-            3000,   # oy_nodes
-            1064 * 1e-6,  # wavelength, mm
-            4.,     # radius, mm
-            800,    # distance, mm
-            1000,    # focal_length, mm
-            0.02,   # expected_std
-            0.01    # error_energy
+            1064 * lp.nm,  # wavelength, mm
+            2 * lp.mm,     # radius, mm
+            2000 * lp.mm,    # distance, mm
+            2000 * lp.mm,    # focal_length, mm
         )
     ]
 )
 def test_circular_aperture(
     ox_size: float,
-    oy_size: float,
     ox_nodes: int,
-    oy_nodes: int,
-    wavelength: torch.Tensor,
+    wavelength: float,
     radius: float,
     distance: float,
-    focal_length: float,
-    expected_std: float,
-    error_energy: float
+    focal_length: float
 ):
-    F = Begin(ox_size*mm, wavelength*mm, ox_nodes)
-    F = CircAperture(radius*mm, 0, 0, F)
-    F = Fresnel(F,distance*mm)
-    intensity_before_lens_lightpipes = torch.tensor(Intensity(F))
-    F = Lens(F, focal_length*mm)
-    F = Forvard(focal_length*mm, F)
-    output_intensity_lightpipes = torch.tensor(Intensity(0, F))
+    # ----------------------------------
+    #   LightPipes fields calculations
+    # ----------------------------------
+    F = lp.Begin(ox_size, wavelength, ox_nodes)
+    F = lp.CircAperture(F, radius)
+    F = lp.Forvard(F, distance)
+    field_before_lens_lp = torch.tensor(F.field)
+    F = lp.Lens(F, focal_length)
+    F = lp.Forvard(F, focal_length)
+    field_output_lp = torch.tensor(F.field)
 
+    # ----------------------------------
+    #   SVETlANNa fields calculations
+    # ----------------------------------
+    torch.set_default_dtype(torch.float64)
+    oy_size = ox_size
+    oy_nodes = ox_nodes
     x_length = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_length = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
 
-    dx = ox_size / ox_nodes
-    dy = oy_size / oy_nodes
-
-    params = SimulationParameters(
+    simulation_parameters = sv.SimulationParameters(
         axes={
             'W': x_length,
             'H': y_length,
             'wavelength': wavelength
-            }
+        }
     )
-
-    # create plane  before the aperture
-    incident_field = w.Wavefront.plane_wave(
-        simulation_parameters=params,
-        distance=0.,
-        wave_direction=[0., 0., 1.]
-    )
-
+    # elements' definitions
     aperture = elements.RoundAperture(
-        simulation_parameters=params,
-        radius=radius
+        simulation_parameters,
+        radius
     )
-
-    field_after_aperture = aperture.forward(input_field=incident_field)
-
     fs1 = elements.FreeSpace(
-        simulation_parameters=params,
-        distance=distance,
-        method='AS'
+        simulation_parameters,
+        distance,
+        method='fresnel'
     )
-    field_before_lens = fs1.forward(input_field=field_after_aperture)
-
-    intensity_before_lens = field_before_lens.intensity
-    intensity_before_lens = intensity_before_lens[0, :, :]
-
     lens = elements.ThinLens(
-        simulation_parameters=params,
-        focal_length=focal_length,
-        radius=radius
+        simulation_parameters,
+        focal_length
     )
-
-    field_after_lens = lens.forward(input_field=field_before_lens)
-
     fs2 = elements.FreeSpace(
-        simulation_parameters=params,
-        distance=focal_length,
-        method='AS'
+        simulation_parameters,
+        focal_length,
+        method='fresnel'
     )
 
-    output_field = fs2.forward(input_field=field_after_lens)
+    # field calculations
+    G = sv.Wavefront.plane_wave(simulation_parameters)
+    G = aperture(G)
+    G = fs1(input_field=G)
+    field_before_lens_sv = G
+    G = lens(G)
+    G = fs2(G)
+    field_output_sv = G
 
-    output_intensity = output_field.intensity[0, :, :]
+    # it is better to compare normalized fields
+    before_lens_norm = torch.max(torch.abs(field_before_lens_lp))
+    output_norm = torch.max(torch.abs(field_output_lp))
 
-    energy_before_lens = torch.sum(intensity_before_lens) * dx * dy
-    energy_before_lens_lightpipes = torch.sum(
-        intensity_before_lens_lightpipes
-    ) * dx * dy
+    # ----------------------------------
+    #          results testing
+    # ----------------------------------
+    assert torch.mean(
+        torch.abs(field_before_lens_lp - field_before_lens_sv)
+    ) / before_lens_norm < 0.01
 
-    error = torch.abs(
-        energy_before_lens - energy_before_lens_lightpipes
-    ) / energy_before_lens
-
-    assert error <= error_energy
-    assert torch.std(
-        output_intensity - output_intensity_lightpipes
-    ) <= expected_std
-    assert torch.std(
-        intensity_before_lens - intensity_before_lens_lightpipes
-    ) <= expected_std
+    assert torch.mean(
+        torch.abs(field_output_lp - field_output_sv)
+    ) / output_norm < 0.01
 
 # TODO: сравнить пиковую мощность и положение максимумов
