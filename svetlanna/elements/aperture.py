@@ -35,6 +35,7 @@ class Aperture(Element):
         super().__init__(simulation_parameters)
 
         self.mask = mask
+        self._device = self.simulation_parameters.device
 
     def get_transmission_function(self) -> torch.Tensor:
         """Method which returns the transmission function of
@@ -109,7 +110,8 @@ class RectangularAperture(Aperture):
         self.mask = ((torch.abs(
             self._x_grid) <= self.width/2) * (torch.abs(
                 self._y_grid) <= self.height/2)).to(
-                    dtype=torch.get_default_dtype()
+                    dtype=torch.get_default_dtype(),
+                    device=self._device
                 )
 
 
@@ -145,5 +147,6 @@ class RoundAperture(Aperture):
         self.radius = radius
         self.mask = ((torch.pow(self._x_grid, 2) + torch.pow(
             self._y_grid, 2)) <= self.radius**2).to(
-                dtype=torch.get_default_dtype()
+                dtype=torch.get_default_dtype(),
+                device=self._device
             )

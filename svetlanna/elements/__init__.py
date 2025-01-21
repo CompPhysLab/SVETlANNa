@@ -4,7 +4,7 @@ from .aperture import Aperture, RoundAperture, RectangularAperture
 from .lens import ThinLens
 from .slm import SpatialLightModulator
 from .diffractive_layer import DiffractiveLayer
-
+from .nonlinear_element import NonlinearElement, FunctionModule
 
 __all__ = [
     'Element',
@@ -14,5 +14,7 @@ __all__ = [
     'RectangularAperture',
     'ThinLens',
     'SpatialLightModulator',
-    'DiffractiveLayer'
+    'DiffractiveLayer',
+    'NonlinearElement'
+    'FunctionModule'
 ]

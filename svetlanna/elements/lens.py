@@ -40,6 +40,8 @@ class ThinLens(Element):
         self.focal_length = focal_length
         self.radius = radius
 
+        self._device = self.simulation_parameters.device
+
         self._wave_number = 2 * torch.pi / self.simulation_parameters.__getitem__(  # noqa: E501
             axis='wavelength'
         )[..., None, None]
@@ -58,7 +60,8 @@ class ThinLens(Element):
             1j * (
                 -self._wave_number / (2 * self.focal_length) * self._radius_squared * (     # noqaL E501
                     (self._radius_squared <= self.radius**2).to(
-                        dtype=torch.get_default_dtype()
+                        dtype=torch.get_default_dtype(),
+                        device=self._device
                     )
                 )
             )
