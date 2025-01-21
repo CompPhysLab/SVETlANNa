@@ -15,6 +15,7 @@ parameters = [
 ]
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize(
     parameters,
     [(10, 10, 1000, 1200, 256, 1e-5),

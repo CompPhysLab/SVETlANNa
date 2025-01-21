@@ -85,7 +85,7 @@ class RectangleFresnel:
         s_eta1, c_eta1 = sp.special.fresnel(eta1)
         s_eta2, c_eta2 = sp.special.fresnel(eta2)
 
-        self.field = np.exp(1j * wave_number * self.distance) * (1 / 2j) * (
+        field = np.exp(1j * wave_number * self.distance) * (1 / 2j) * (
             (c_psi2 - c_psi1) + 1j * (s_psi2 - s_psi1)
         ) * (
             (c_eta2 - c_eta1) + 1j * (s_eta2 - s_eta1)
@@ -96,10 +96,10 @@ class RectangleFresnel:
         #                        np.power((c_eta2 - c_eta1), 2) + np.power(
         #                            (s_eta2 - s_eta1), 2))
 
-        return self.field
+        return field
 
     def intensity(self) -> np.ndarray:
-        return np.abs(self.field) ** 2
+        return np.abs(self.field()) ** 2
 
 
 class CircleFresnel:
