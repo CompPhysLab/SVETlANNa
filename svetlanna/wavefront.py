@@ -1,6 +1,6 @@
 import torch
 from .simulation_parameters import SimulationParameters
-from typing import Any, Self, Iterable
+from typing import Any, Self, Iterable, cast
 from .axes_math import tensor_dot, cast_tensor
 
 
@@ -180,7 +180,7 @@ class Wavefront(torch.Tensor):
         gouy_phase = torch.arctan(distance / rayleigh_range)
 
         phase1, axes1 = tensor_dot(
-            a=-1j * wave_number * inverse_radius_of_curvature / 2,
+            a=1j * wave_number * inverse_radius_of_curvature / 2,
             b=radial_distance_squared,
             a_axis='wavelength',
             b_axis=('H', 'W')
@@ -189,12 +189,12 @@ class Wavefront(torch.Tensor):
         field = torch.exp(phase1)
         field, _ = tensor_dot(
             a=field,
-            b=torch.exp(-1j * wave_number * distance),
+            b=torch.exp(1j * wave_number * distance),
             a_axis=axes1, b_axis='wavelength', preserve_a_axis=True
         )
         field, _ = tensor_dot(
             a=field,
-            b=torch.exp(1j * gouy_phase),
+            b=torch.exp(-1j * gouy_phase),
             a_axis=axes1, b_axis='wavelength', preserve_a_axis=True
         )
         phase2, axes2 = tensor_dot(
@@ -220,7 +220,7 @@ class Wavefront(torch.Tensor):
 
         return cls(
             cast_tensor(field, axes, simulation_parameters.axes.names)
-        ).conj()
+        )
 
     @classmethod
     def spherical_wave(
@@ -328,4 +328,4 @@ def mul(
         wf_axes = sim_params.axes.names
 
     res, _ = tensor_dot(wf, b, wf_axes, b_axis, preserve_a_axis=True)
-    return res
+    return cast(Wavefront, res)
