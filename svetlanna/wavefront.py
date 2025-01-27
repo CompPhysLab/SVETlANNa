@@ -1,6 +1,6 @@
 import torch
 from .simulation_parameters import SimulationParameters
-from typing import Any, Self, Iterable, cast
+from typing import Any, Self, Iterable, cast, TYPE_CHECKING
 from .axes_math import tensor_dot, cast_tensor
 
 
@@ -272,17 +272,18 @@ class Wavefront(torch.Tensor):
 
     # === methods below are added for typing only ===
 
-    def __mul__(self, other: Any) -> Self:
-        return super().__mul__(other=other)  # type: ignore
+    if TYPE_CHECKING:
+        def __mul__(self, other: Any) -> Self:
+            ...
 
-    def __rmul__(self, other: Any) -> Self:
-        return super().__rmul__(other=other)  # type: ignore
+        def __rmul__(self, other: Any) -> Self:
+            ...
 
-    def __truediv__(self, other: Any) -> Self:
-        return super().__truediv__(other=other)  # type: ignore
+        def __truediv__(self, other: Any) -> Self:
+            ...
 
-    def __rtruediv__(self, other: Any) -> Self:
-        return super().__rtruediv__(other=other)  # type: ignore
+        def __rtruediv__(self, other: Any) -> Self:
+            ...
 
 
 DEFAULT_LAST_AXES_NAMES = (
