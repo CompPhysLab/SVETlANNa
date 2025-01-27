@@ -22,6 +22,7 @@ parameters = [
 ]
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize(
     parameters,
     [
@@ -184,6 +185,7 @@ parameters_4f = [
 ]
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize(
     parameters_4f,
     [

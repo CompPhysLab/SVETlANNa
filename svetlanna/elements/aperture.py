@@ -2,7 +2,7 @@ import torch
 
 from .element import Element
 from ..simulation_parameters import SimulationParameters
-from ..parameters import OptimizableFloat, OptimizableTensor
+from ..parameters import OptimizableTensor
 from ..wavefront import Wavefront, mul
 
 
@@ -10,11 +10,6 @@ from ..wavefront import Wavefront, mul
 class Aperture(Element):
     """Aperture of the optical element with transmission function, which takes
     the value 0 or 1
-
-    Parameters
-    ----------
-    Element : _type_
-        _description_
     """
 
     def __init__(
@@ -22,19 +17,20 @@ class Aperture(Element):
         simulation_parameters: SimulationParameters,
         mask: OptimizableTensor
     ):
-        """Constructor method
+        """Aperture of the optical element defined by mask tensor.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
             Class exemplar that describes the optical system
         mask : torch.Tensor
-            Tensor that describes 2d transmission function
+            Two-dimensional tensor representing the aperture mask.
+            Each element must be either 0 (blocks light) or 1 (allows light).
         """
 
         super().__init__(simulation_parameters)
 
-        self.mask = mask
+        self.mask = self.process_parameter('mask', mask)
 
     def get_transmission_function(self) -> torch.Tensor:
         """Method which returns the transmission function of
@@ -75,18 +71,13 @@ class Aperture(Element):
 class RectangularAperture(Aperture):
     """A rectangle-shaped aperture with a transmission function taking either
       a value of 0 or 1
-
-    Parameters
-    ----------
-    Element : _type_
-        _description_
     """
 
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        height: OptimizableFloat,
-        width: OptimizableFloat
+        height: float,
+        width: float
     ):
         """Constructor method
 
@@ -104,8 +95,8 @@ class RectangularAperture(Aperture):
             mask=torch.tensor(0)
         )
 
-        self.height = height
-        self.width = width
+        self.height = self.process_parameter('height', height)
+        self.width = self.process_parameter('width', width)
         self.mask = ((torch.abs(
             self._x_grid) <= self.width/2) * (torch.abs(
                 self._y_grid) <= self.height/2)).to(
@@ -117,16 +108,11 @@ class RectangularAperture(Aperture):
 class RoundAperture(Aperture):
     """A round-shaped aperture with a transmission function taking either
       a value of 0 or 1
-
-    Parameters
-    ----------
-    Element : _type_
-        _description_
     """
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        radius: OptimizableFloat
+        radius: float
     ):
         """Constructor method
 
@@ -142,7 +128,7 @@ class RoundAperture(Aperture):
             mask=torch.tensor(0)
         )
 
-        self.radius = radius
+        self.radius = self.process_parameter('radius', radius)
         self.mask = ((torch.pow(self._x_grid, 2) + torch.pow(
             self._y_grid, 2)) <= self.radius**2).to(
                 dtype=torch.get_default_dtype()

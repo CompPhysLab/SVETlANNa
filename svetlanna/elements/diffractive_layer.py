@@ -32,8 +32,8 @@ class DiffractiveLayer(Element):
 
         super().__init__(simulation_parameters)
 
-        self.mask = mask
-        self.mask_norm = mask_norm
+        self.mask = self.process_parameter('mask', mask)
+        self.mask_norm = self.process_parameter('mask_norm', mask_norm)
 
     @property
     def transmission_function(self) -> torch.Tensor:

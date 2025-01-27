@@ -4,124 +4,142 @@ from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableFloat
 from ..wavefront import Wavefront, mul
+from ..axes_math import tensor_dot
 
 
-# TODO: check docstrings
 class ThinLens(Element):
     """A class that described the field after propagating through the
-    thin lens
-
-    Parameters
-    ----------
-    Element : _type_
-        _description_
+    thin lens.
     """
 
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
         focal_length: OptimizableFloat,
-        radius: OptimizableFloat
+        radius: float = torch.inf
     ):
-        """Constructor method
+        """Thin lens element.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            Class exemplar, that describes optical system
-        focal_length : float
-            focal length of the lens, greater than 0 for the collecting lens
+            An instance describing the optical system's simulation parameters.
+        focal_length : OptimizableFloat
+            The focal length of the lens.
+            Must be greater than 0 for a converging lens.
         radius : float
-            radius of the thin lens
+            The radius of the thin lens.
         """
 
         super().__init__(simulation_parameters)
 
-        self.focal_length = focal_length
-        self.radius = radius
+        self.focal_length = self.process_parameter(
+            'focal_length', focal_length
+        )
+        self.radius = self.process_parameter(
+            'radius', radius
+        )
 
-        self._wave_number = 2 * torch.pi / self.simulation_parameters.__getitem__(  # noqa: E501
-            axis='wavelength'
-        )[..., None, None]
+        # Compute wave_number as a tensor
+        wave_number, axes = tensor_dot(
+            2 * torch.pi / self.simulation_parameters.axes.wavelength,
+            torch.tensor([[1]]),
+            'wavelength',
+            ('H', 'W')
+        )  # shape: ('wavelength', 1, 1) or (1, 1)
 
-        self._x_linear = self.simulation_parameters.__getitem__(axis='W')
-        self._y_linear = self.simulation_parameters.__getitem__(axis='H')
+        # Registering Buffer for _wave_number
+        self._wave_number = self.make_buffer(
+            '_wave_number',
+            wave_number
+        )
 
-        # creating meshgrid
-        self._x_grid = self._x_linear[None, :]
-        self._y_grid = self._y_linear[:, None]
+        self._calc_axes = axes  # axes tuple used during calculations
 
-        self._x_grid = self._x_grid[None, ...]
-        self._y_grid = self._y_grid[None, ...]
+        x_linear = self.simulation_parameters.axes.W
+        y_linear = self.simulation_parameters.axes.H
 
-        self._radius_squared = torch.pow(self._x_grid, 2) + torch.pow(
-            self._y_grid, 2)
+        x_grid = x_linear[None, :]  # shape: (1, 'W')
+        y_grid = y_linear[:, None]  # shape: ('H', 1)
 
-        self.transmission_function = torch.exp(
-            1j * (
-                -self._wave_number / (2 * self.focal_length) * self._radius_squared * (     # noqaL E501
-                    (self._radius_squared <= self.radius**2).to(
-                        dtype=torch.get_default_dtype()
-                    )
+        # Registering Buffer for _radius_squared
+        self._radius_squared = self.make_buffer(
+            '_radius_squared',
+            x_grid**2 + y_grid**2
+        )
+
+        # Create a mask that acts as an aperture:
+        # Regions of the field where x^2 + y^2 > radius^2
+        # will propagate with no change in phase.
+        if self.radius == torch.inf:
+            self._radius_mask = 1.0
+        else:
+            self._radius_mask = self.make_buffer(
+                '_radius_mask',
+                (self._radius_squared <= self.radius**2).to(
+                    dtype=torch.get_default_dtype()  # cast bool to float
                 )
+            )
+
+    @property
+    def transmission_function(self) -> torch.Tensor:
+        return torch.exp(
+            - 1j * self._radius_mask * self._radius_squared * (
+                self._wave_number / (2 * self.focal_length)
             )
         )
 
     def get_transmission_function(self) -> torch.Tensor:
-        """Method which returns the transmission function of
-        the thin lens
+        """Returns the transmission function of the thin lens.
 
         Returns
         -------
         torch.Tensor
-            transmission function of the thin lens
+            The transmission function of the thin lens.
         """
 
         return self.transmission_function
 
     def forward(self, input_field: Wavefront) -> Wavefront:
-        """Method that calculates the field after propagating through the
-        thin lens
+        """Calculates the field after propagation through the thin lens.
 
         Parameters
         ----------
         input_field : Wavefront
-            Field incident on the thin lens
+            The field incident on the thin lens.
 
         Returns
         -------
         Wavefront
-            The field after propagating through the thin lens
+            The field after propagation through the thin lens.
         """
 
-        # mul(
-        #     input_field,
-        #     self.transmission_function,
-        #     ('wavelength', 'H', 'W'),
-        #     self.simulation_parameters
-        # )
+        return mul(
+            input_field,
+            self.transmission_function,
+            self._calc_axes,
+            self.simulation_parameters
+        )
 
-        return input_field * self.transmission_function
-
-    def reverse(self, transmission_field: torch.Tensor) -> Wavefront:
-        """Method that calculates the field after passing the lens in back
-        propagation
+    def reverse(self, transmission_field: Wavefront) -> Wavefront:
+        """Calculates the field after passing through the lens during
+        back propagation.
 
         Parameters
         ----------
-        transmission_field : torch.Tensor
-            Field incident on the lens in back propagation
-            (transmitted field in forward propagation)
+        transmission_field : Wavefront
+            The field incident on the lens during back propagation.
+            This corresponds to the transmitted field in forward propagation.
 
         Returns
         -------
-        torch.tensor
-            Field transmitted on the lens in back propagation
-            (incident field in forward propagation)
+        Wavefront
+            The field transmitted through the lens during back propagation.
+            This corresponds to the incident field in forward propagation.
         """
         return mul(
             transmission_field,
             torch.conj(self.transmission_function),
-            ('H', 'W'),
+            self._calc_axes,
             self.simulation_parameters
         )

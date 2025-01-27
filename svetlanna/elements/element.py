@@ -5,12 +5,15 @@ from ..simulation_parameters import SimulationParameters
 from ..specs import PrettyReprRepr, ParameterSpecs
 from ..specs.specs_writer import write_specs_to_html
 from io import StringIO
-from typing import Iterable
+from typing import Iterable, TypeVar
 from ..parameters import BoundedParameter, Parameter
 from ..wavefront import Wavefront
 
 
 INNER_PARAMETER_SUFFIX = '_svtlnn_inner_parameter'
+
+_T = TypeVar('_T', bound=Tensor)
+_V = TypeVar('_V')
 
 
 # TODO: check docstring
@@ -79,7 +82,7 @@ class Element(nn.Module, metaclass=ABCMeta):
         # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
         if isinstance(value, (BoundedParameter, Parameter)):
             super().__setattr__(
-                name + INNER_PARAMETER_SUFFIX, value.inner_parameter
+                name + INNER_PARAMETER_SUFFIX, value.inner_storage
             )
 
         return super().__setattr__(name, value)
@@ -88,3 +91,71 @@ class Element(nn.Module, metaclass=ABCMeta):
         stream = StringIO('')
         write_specs_to_html(self, 0, '', stream)
         return stream.getvalue()
+
+    def make_buffer(
+        self,
+        name: str,
+        value: _T,
+        persistent: bool = False
+    ) -> _T:
+        """Make buffer for internal use.
+
+        Use case:
+        ```
+        self.mask = make_buffer('mask', some_tensor)
+        ```
+        This allow torch to properly process `.to` method on Element
+        by marking that `mask` should be transferred to required device.
+
+        Parameters
+        ----------
+        name : str
+            name of the new buffer
+            (it is more convenient to use name of new attribute)
+        value : _T
+            tensor to be buffered
+        persistent : bool, optional
+            see torch docs on buffers, by default False
+
+        Returns
+        -------
+        _T
+            the value passed to the method
+        """
+        self.register_buffer(
+            name, value, persistent=persistent
+        )
+        return self.__getattr__(name)
+
+    def process_parameter(
+        self,
+        name: str,
+        value: _V
+    ) -> _V:
+        """Process element parameter passed by user.
+        Automatically registers buffer for non-parametric tensors.
+
+        Use case:
+        ```
+        self.mask = process_parameter('mask', some_tensor)
+        ```
+
+        Parameters
+        ----------
+        name : str
+            name of the new buffer
+            (it is more convenient to use name of new attribute)
+        value : _V
+            the value of the element parameter
+
+        Returns
+        -------
+        _V
+            the value passed to the method
+        """
+        if isinstance(value, (nn.Parameter, Parameter)):
+            return value
+        if isinstance(value, Tensor):
+            return self.make_buffer(name, value, persistent=True)
+        return value
+
