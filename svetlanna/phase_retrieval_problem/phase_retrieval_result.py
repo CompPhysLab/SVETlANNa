@@ -10,7 +10,7 @@ class PhaseRetrievalResult:
 
     solution: torch.Tensor
     cost_func: float
-    cost_func_evolution: list
+    cost_func_evolution: list[float]
     number_of_iterations: int
 
     # TODO: create metrics

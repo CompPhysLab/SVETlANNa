@@ -62,13 +62,23 @@ def gerchberg_saxton_algorithm(
     number_of_iterations = 0
 
     while True:
-
+        # calculate the output field
         output_field = forward(input_field)
-
         output_field_phase = torch.angle(output_field)
-        output_field_phase = output_field_phase + (
-            2 * torch.pi
-        ) * (output_field_phase < 0).float()
+        output_intensity = output_field.abs()**2
+
+        # calculate an error
+        error = (
+            torch.mean(
+                torch.abs(output_intensity - target_intensity)
+            ) / torch.max(target_intensity)
+        ).item()
+        cost_func_evolution.append(error)
+
+        if (abs(error) <= tol) or (number_of_iterations >= maxiter):
+            break
+
+        # update the input field
 
         if (target_phase is not None) and (target_region is not None):
 
@@ -81,51 +91,24 @@ def gerchberg_saxton_algorithm(
             )
 
         else:
-
             updated_output_field = target_amplitude * torch.exp(
                 1j * output_field_phase
             )
 
-        output_intensity_profile = torch.pow(
-            torch.abs(updated_output_field), 2
-        )
-
         updated_input_field = reverse(updated_output_field)
+        updated_input_field_phase = torch.angle(updated_input_field)
 
-        error = torch.sqrt(
-            torch.sum(
-                torch.pow(
-                    torch.sqrt(output_intensity_profile) - target_amplitude, 2
-                )
-            ) / torch.sum(target_intensity)
+        input_field = source_amplitude * torch.exp(
+            1j * updated_input_field_phase
         )
-
-        phase_function = torch.angle(updated_input_field)
-        phase_function = phase_function + (
-            2 * torch.pi
-        ) * (phase_function < 0.).float()
 
         number_of_iterations += 1
-        cost_func_evolution.append(error)
-
-        if (torch.abs(error) <= tol) or (
-            number_of_iterations >= maxiter
-        ):
-
-            break
-
-        else:
-
-            input_field = source_amplitude * torch.exp(
-                1j * phase_function
-            )
 
     phase_retrieval_result = prr.PhaseRetrievalResult(
-        solution=phase_function,
+        solution=torch.angle(input_field),
         cost_func=error,
         cost_func_evolution=cost_func_evolution,
         number_of_iterations=number_of_iterations,
-
     )
     return phase_retrieval_result
 
@@ -195,12 +178,23 @@ def hybrid_input_output(
 
     while True:
 
+        # calculate the output field
         output_field = forward(input_field)
-
         output_field_phase = torch.angle(output_field)
-        output_field_phase = output_field_phase + (
-            2 * torch.pi
-        ) * (output_field_phase < 0).float()
+        output_intensity = output_field.abs()**2
+
+        # calculate an error
+        error = (
+            torch.mean(
+                torch.abs(output_intensity - target_intensity)
+            ) / torch.max(target_intensity)
+        ).item()
+        cost_func_evolution.append(error)
+
+        if (abs(error) <= tol) or (number_of_iterations >= maxiter):
+            break
+
+        # update the input field
 
         if (target_phase is not None) and (target_region is not None):
 
@@ -219,41 +213,18 @@ def hybrid_input_output(
             ) - (1. - support_constrain) * constant_factor * output_field
 
         updated_input_field = reverse(updated_output_field)
+        updated_input_field_phase = torch.angle(updated_input_field)
 
-        output_intensity_profile = torch.pow(
-            torch.abs(updated_output_field), 2
+        input_field = source_amplitude * torch.exp(
+            1j * updated_input_field_phase
         )
-
-        error = torch.sqrt(
-            torch.sum(
-                torch.pow(
-                    torch.sqrt(output_intensity_profile) - target_amplitude, 2
-                )
-            ) / torch.sum(target_intensity)
-        )
-
-        phase_function = torch.angle(updated_input_field)
-        phase_function = phase_function + (
-            2 * torch.pi
-        ) * (phase_function < 0.).float()
 
         number_of_iterations += 1
-        cost_func_evolution.append(error)
-
-        if (torch.abs(error) <= tol) or (
-            number_of_iterations >= maxiter
-        ):
-            break
-
-        else:
-
-            input_field = source_amplitude * torch.exp(1j * phase_function)
 
     phase_retrieval_result = prr.PhaseRetrievalResult(
-        solution=phase_function,
+        solution=torch.angle(input_field),
         cost_func=error,
         cost_func_evolution=cost_func_evolution,
-        number_of_iterations=number_of_iterations
+        number_of_iterations=number_of_iterations,
     )
-
     return phase_retrieval_result
