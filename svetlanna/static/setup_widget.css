@@ -49,10 +49,16 @@
     cursor: default;
 }
 .svetlanna-element-index:hover {
-    overflow: visible;
-    background-color: white;
-    height: auto;
+    animation: svetlanna-hoverOverIndexEffect 0s 0.5s forwards;
 }
+@keyframes svetlanna-hoverOverIndexEffect {
+    to {
+        overflow: visible;
+        background-color: rgb(245, 245, 245);
+        height: auto;
+    }
+}
+
 .svetlanna-specs-container {
     display: block;
 }
