@@ -52,6 +52,7 @@ class ParameterSaveContext:
         """
         suffix = '.' + extension
 
+        # calculate total number of created files with the same extension
         total_files = len(
             list(
                 filter(
@@ -60,11 +61,15 @@ class ParameterSaveContext:
                     )
                 )
             )
+
+        # name of the new file ending with `_<n>.<extension>`
         file_name = self.parameter_name + f'_{total_files}'
 
+        # save filepath of the file
         filepath = Path(self._directory,  file_name).with_suffix(suffix)
         self._generated_files.append(filepath)
 
+        # create a new folder for the file if there is none
         Path.mkdir(self._directory, parents=True, exist_ok=True)
 
         return filepath
@@ -198,8 +203,12 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
         self.mode = mode
         self.show_image = show_image
 
-    def draw_image(self, context: ParameterSaveContext, filepath: Path) -> Image.Image:
-        """Draw image into the file, using `matplotlib` package.
+    def draw_image(
+        self,
+        context: ParameterSaveContext,
+        filepath: Path
+    ) -> Image.Image:
+        """Draw image into the file, using `pillow` package.
 
         Parameters
         ----------
@@ -224,12 +233,13 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
 
     def to_markdown(self, out: TextIO, context: ParameterSaveContext):
         filepath = context.get_new_filepath(extension=self.format)
+        rel_filepath = context.rel_filepath(filepath)
 
         self.draw_image(context=context, filepath=filepath)
 
-        out.write(f'The image is saved to `{context.rel_filepath(filepath)}`\n')
+        out.write(f'The image is saved to `{rel_filepath}`\n')
         if self.show_image:
-            out.write(f'\n![{context.parameter_name}]({context.rel_filepath(filepath)})\n\n')
+            out.write(f'\n![{context.parameter_name}]({rel_filepath})\n\n')
 
     def to_html(self, out: TextIO, context: ParameterSaveContext):
 
@@ -238,8 +248,15 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
         if self.show_image:
             buffer = BytesIO()
             image.save(buffer, format=self.format)
+            # encode image using base64
             encoded_image = base64.b64encode(buffer.getvalue()).decode()
-            out.write(f'\n<img class="spec-img" src="data:image/{self.format};base64, {encoded_image}"/>\n')
+
+            # src for <img/> HTML element
+            img_src = f"data:image/{self.format};base64, {encoded_image}"
+
+            out.write(
+                f'\n<img class="spec-img" src="{img_src}"/>\n'
+            )
 
 
 class ReprRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
@@ -295,17 +312,19 @@ class NpyFileRepr(StrRepresentation, MarkdownRepresentation):
 
     def to_str(self, out: TextIO, context: ParameterSaveContext):
         filepath = context.get_new_filepath(extension='npy')
+        rel_filepath = context.rel_filepath(filepath)
 
         self.save_to_file(context, filepath)
 
-        out.write(f'The numpy array is saved to {context.rel_filepath(filepath)}\n')
+        out.write(f'The numpy array is saved to {rel_filepath}\n')
 
     def to_markdown(self, out: TextIO, context: ParameterSaveContext):
         filepath = context.get_new_filepath(extension='npy')
+        rel_filepath = context.rel_filepath(filepath)
 
         self.save_to_file(context, filepath)
 
-        out.write(f'The numpy array is saved to `{context.rel_filepath(filepath)}`\n')
+        out.write(f'The numpy array is saved to `{rel_filepath}`\n')
 
 
 class PrettyReprRepr(ReprRepr, HTMLRepresentation):
@@ -336,18 +355,28 @@ class PrettyReprRepr(ReprRepr, HTMLRepresentation):
 
         if isinstance(self.value, torch.Tensor):
             shape = self.value.shape
-            # scalars
+
+            # If the value is scalar, it can be directly printed out
             if len(shape) == 0:
+
+                # Print minimum and maximum values for ConstrainedParameter
                 if isinstance(self.value, ConstrainedParameter):
+
+                    min_val = self.value.min_value.item()
+                    max_val = self.value.max_value.item()
+
                     s = f'{class_name}\n'
-                    s += f'  ┏ min value {self.value.min_value.item()}{units_suffix}\n'
-                    s += f'  ┗ max value {self.value.max_value.item()}{units_suffix}\n'
+                    s += f'  ┏ min value {min_val}{units_suffix}\n'
+                    s += f'  ┗ max value {max_val}{units_suffix}\n'
                     return s + f'{self.value.item()}{units_suffix}'
+
                 return f'{class_name}\n{self.value.item()}{units_suffix}'
 
+            # Print shape of the tensor
             shape_str = "x".join(map(str, shape))
             return f'{class_name} of size ({shape_str}){units_suffix}'
 
+        # If the value is number, it can be directly printed out
         if isinstance(self.value, numbers.Number):
             return f'{self.value}{units_suffix}'
 
