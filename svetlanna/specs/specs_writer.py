@@ -1,4 +1,4 @@
-from typing import Iterable, TextIO, Protocol, TypeVar, Generic
+from typing import Iterable, TextIO, Protocol, TypeVar, Generic, Generator, Any
 from .specs import ParameterSpecs
 from .specs import ParameterSaveContext, Representation
 from .specs import StrRepresentation, MarkdownRepresentation
@@ -25,6 +25,7 @@ class _IndexedObject(Generic[_T]):
 
 @dataclass
 class _WriterContext:
+    """Storage for additional info within ParameterSaveContext"""
     parameter_name: _IndexedObject[str]
     representation: _IndexedObject[Representation]
     context: ParameterSaveContext
@@ -34,30 +35,54 @@ def _context_generator(
     element: Specsable,
     element_index: int,
     directory: str | Path
-):
+) -> Generator[_WriterContext, Any, None]:
+    """Generate _WriterContext for the element
+
+    Parameters
+    ----------
+    element : Specsable
+        Element
+    element_index : int
+        Index of the element. It is used to create
+        unique directory for element specs.
+    directory : str | Path
+        Directory where element directory is created
+
+    Yields
+    ------
+    _WriterContext
+        context
+    """
     specs_directory = Path(
         directory, f'{element_index}_{element.__class__.__name__}'
     )
 
-    parameter_representations = {}
+    # sort all iterators based on parameter name
+    repr_iterators: dict[str, list[Iterable[Representation]]] = {}
 
     for spec in element.to_specs():
         parameter_name = spec.parameter_name
         representations = spec.representations
 
-        if parameter_name in parameter_representations:
-            parameter_representations[parameter_name].append(representations)
+        if parameter_name in repr_iterators:
+            repr_iterators[parameter_name].append(representations)
         else:
-            parameter_representations[parameter_name] = [representations]
+            repr_iterators[parameter_name] = [representations]
+
+    # create representations iterator for each parameter
+    parameter_representations = {
+        name: itertools.chain(*iters) for name, iters in repr_iterators.items()
+    }
 
     for parameter_index, (parameter_name, representations) in enumerate(parameter_representations.items()):
 
+        # create context for parameter
         context = ParameterSaveContext(
             parameter_name=parameter_name,
             directory=specs_directory
         )
 
-        for representation_index, representation in enumerate(itertools.chain(*representations)):
+        for representation_index, representation in enumerate(representations):
             yield _WriterContext(
                 parameter_name=_IndexedObject(
                     parameter_name, parameter_index
