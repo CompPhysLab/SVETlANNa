@@ -8,7 +8,7 @@ from numpy.typing import ArrayLike
 import numpy as np
 import torch
 import numbers
-from ..parameters import BoundedParameter
+from ..parameters import ConstrainedParameter
 import base64
 
 
@@ -338,7 +338,7 @@ class PrettyReprRepr(ReprRepr, HTMLRepresentation):
             shape = self.value.shape
             # scalars
             if len(shape) == 0:
-                if isinstance(self.value, BoundedParameter):
+                if isinstance(self.value, ConstrainedParameter):
                     s = f'{class_name}\n'
                     s += f'  ┏ min value {self.value.min_value.item()}{units_suffix}\n'
                     s += f'  ┗ max value {self.value.max_value.item()}{units_suffix}\n'
