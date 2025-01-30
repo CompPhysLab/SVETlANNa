@@ -4,29 +4,10 @@ from .simulation_parameters import SimulationParameters
 from torch import nn
 from torch import Tensor
 import torch
-import anywidget
-import traitlets
-import pathlib
 import base64
 import io
-
-
-class LinearOpticalSetupWidget(anywidget.AnyWidget):
-    _esm = pathlib.Path(__file__).parent / 'static' / 'setup_widget.js'
-    _css = pathlib.Path(__file__).parent / 'static' / 'setup_widget.css'
-
-    elements = traitlets.List([]).tag(sync=True)
-    settings = traitlets.Dict({
-        'open': True,
-        'show_all': False,
-    }).tag(sync=True)
-
-
-class LinearOpticalSetupStepwiseForwardWidget(LinearOpticalSetupWidget):
-    _esm = pathlib.Path(__file__).parent / 'static' / 'setup_stepwise_forward_widget.js'
-    _css = pathlib.Path(__file__).parent / 'static' / 'setup_widget.css'
-
-    wavefront_images = traitlets.List([]).tag(sync=True)
+from .visualization.widgets import LinearOpticalSetupWidget
+from .visualization.widgets import LinearOpticalSetupStepwiseForwardWidget
 
 
 StepwisePlotTypes = Literal['A'] | Literal['I'] | Literal['phase'] | Literal['Re'] | Literal['Im'] 
