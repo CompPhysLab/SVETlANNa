@@ -65,8 +65,7 @@ class SpatialLightModulator(Element):
         self.aperture = ((torch.abs(
             self._x_grid - self.x) <= self.width/2) * (torch.abs(
                 self._y_grid - self.y) <= self.height/2)).to(
-                    dtype=torch.get_default_dtype(),
-                    device=self._device
+                    dtype=torch.get_default_dtype()
                 )
         return self.aperture
 
@@ -113,7 +112,6 @@ class SpatialLightModulator(Element):
         self.resized_mask = _resized_mask.squeeze(0).squeeze(0)
         return self.resized_mask
 
-    @property
     def get_transmission_function(self) -> torch.Tensor:
 
         _aperture = self.get_aperture
@@ -146,7 +144,7 @@ class SpatialLightModulator(Element):
 
         return mul(
                     input_field,
-                    self.get_transmission_function,
+                    self.get_transmission_function(),
                     ('H', 'W'),
                     self.simulation_parameters
                 )
@@ -155,7 +153,7 @@ class SpatialLightModulator(Element):
 
         return mul(
                     transmission_field,
-                    torch.conj(self.get_transmission_function),
+                    torch.conj(self.get_transmission_function()),
                     ('H', 'W'),
                     self.simulation_parameters
                 )

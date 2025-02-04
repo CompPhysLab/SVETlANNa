@@ -94,7 +94,9 @@ def test_types(default_type: torch.dtype):
 
     slm = elements.SpatialLightModulator(
         simulation_parameters=params,
-        mask=torch.ones_like(x_grid)
+        mask=torch.ones_like(x_grid),
+        height=8,
+        width=9
     ).get_transmission_function()
 
     layer = elements.DiffractiveLayer(

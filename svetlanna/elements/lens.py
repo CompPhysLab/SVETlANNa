@@ -43,7 +43,7 @@ class ThinLens(Element):
         # Compute wave_number as a tensor
         wave_number, axes = tensor_dot(
             2 * torch.pi / self.simulation_parameters.axes.wavelength,
-            torch.tensor([[1]]),
+            torch.tensor([[1]], device=self.simulation_parameters.device),
             'wavelength',
             ('H', 'W')
         )  # shape: ('wavelength', 1, 1) or (1, 1)
