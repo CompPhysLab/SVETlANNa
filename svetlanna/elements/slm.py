@@ -1,5 +1,5 @@
 import torch
-
+import warnings
 from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableFloat
@@ -38,13 +38,19 @@ class SpatialLightModulator(Element):
 
         super().__init__(simulation_parameters)
 
-        self.mask = mask
-        self.height = height
-        self.width = width
+        self.mask = self.process_parameter("mask", mask)
+        self.height = self.process_parameter("height", height)
+        self.width = self.process_parameter("width", width)
         self.step_function = step_function
-        self.x, self.y = location
-        self.mode = mode
-        self.number_of_levels = number_of_levels
+        _x, _y = location
+        self.x = self.process_parameter("x", _x)
+        self.y = self.process_parameter("y", _y)
+
+        self.mode = self.process_parameter("mode", mode)
+        self.number_of_levels = self.process_parameter(
+            "number_of_levels",
+            number_of_levels
+        )
 
         self.height_resolution, self.width_resolution = self.mask.shape
 
@@ -53,8 +59,14 @@ class SpatialLightModulator(Element):
         self._w_index = self.simulation_parameters.axes.index('W')
         self._h_index = self.simulation_parameters.axes.index('H')
 
-        self._x_linear = self.simulation_parameters.axes.W
-        self._y_linear = self.simulation_parameters.axes.H
+        self._x_linear = self.make_buffer(
+            "_x_linear",
+            self.simulation_parameters.axes.W
+        )
+        self._y_linear = self.make_buffer(
+            "_y_linear",
+            self.simulation_parameters.axes.H
+        )
 
         self._x_grid = self._x_linear[None, :]
         self._y_grid = self._y_linear[:, None]
@@ -70,7 +82,7 @@ class SpatialLightModulator(Element):
         return self.aperture
 
     @property
-    def resize_mask(self) -> torch.Tensor:
+    def resized_mask(self) -> torch.Tensor:
 
         _y_indices, _x_indices = torch.where(self.aperture == 1)
         _y_indices, _x_indices = torch.unique(_y_indices), torch.unique(_x_indices)  # noqa: E501
@@ -109,13 +121,17 @@ class SpatialLightModulator(Element):
         )
 
         # delete added dimensions
-        self.resized_mask = _resized_mask.squeeze(0).squeeze(0)
-        return self.resized_mask
+        resized_mask = _resized_mask.squeeze(0).squeeze(0)
+
+        if resized_mask.size() < self.mask.size():
+            warnings.warn(f"New mask size {resized_mask.size()} is smaller than the original one {self.mask.size()}! ")
+
+        return resized_mask
 
     def get_transmission_function(self) -> torch.Tensor:
 
         _aperture = self.get_aperture
-        _resized_mask = self.resize_mask
+        _resized_mask = self.resized_mask
 
         indices = (
             slice(self.bottom_boundary, self.top_boundary + 1),
