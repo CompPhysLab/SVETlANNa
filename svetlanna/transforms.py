@@ -26,7 +26,7 @@ class ToWavefront(nn.Module):
         """
         super().__init__()
         # since images are usually in the range [0, 255]
-        self.eps = 2 * torch.pi / 255  # necessary for phase modulation
+        self.eps = 1e-6  # necessary for phase modulation
         self.modulation_type = modulation_type
 
     def forward(self, img_tensor: torch.Tensor) -> Wavefront:
@@ -45,17 +45,28 @@ class ToWavefront(nn.Module):
             A resulted Wavefront obtained via one of modulation types (self.modulation_type).
         """
         # creation of a wavefront based on an image
-        normalized_tensor = img_tensor  # values from 0 to 1, shape=[C, H, W]
+        if img_tensor.size()[0] == 1:  # only one channel
+            # squeeze 0th channel dimension of image tensor
+            normalized_tensor = torch.squeeze(img_tensor, 0)  # values from 0 to 1, shape=[H, W]
+        else:  # more than 1 color channels
+            normalized_tensor = img_tensor  # values from 0 to 1, shape=[C, H, W]
+            # TODO: check that in simulation parameters we have the same number of wavelengths?
 
         if self.modulation_type == 'amp':  # amplitude modulation
             amplitudes = normalized_tensor
-            phases = torch.zeros(size=img_tensor.size())
+            phases = torch.zeros(size=normalized_tensor.size())
         else:
-            # image -> phases from 0 to 2pi - eps
-            phases = normalized_tensor * (2 * torch.pi - self.eps)
+            # image -> phases from -pi + eps to pi - eps
+            normalized_tensor_fix = normalized_tensor
+            normalized_tensor_fix[normalized_tensor_fix == 1.] -= self.eps  # maximal values - eps
+            normalized_tensor_fix[normalized_tensor_fix == 0.] += self.eps  # 0 + eps
+
+            # [0, 1] --> [-pi + eps, pi - eps]
+            phases = normalized_tensor_fix * 2 * torch.pi - torch.pi
+
             if self.modulation_type == 'phase':  # phase modulation
                 # TODO: What is with an amplitude?
-                amplitudes = torch.ones(size=img_tensor.size())  # constant amplitude
+                amplitudes = torch.ones(size=normalized_tensor.size())  # constant amplitude
             else:  # phase AND amplitude modulation 'amp&phase'
                 amplitudes = normalized_tensor
 
