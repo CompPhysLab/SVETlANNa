@@ -1,6 +1,8 @@
 import torch
 from typing import Callable, Any, TypeAlias
 
+# TODO: fix impropriate .to() method handling in parameters
+
 
 class InnerParameterStorageModule(torch.nn.Module):
     def __init__(
@@ -8,6 +10,20 @@ class InnerParameterStorageModule(torch.nn.Module):
         params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]
     ):
         super().__init__()
+        self.params_to_store = {}
+        self.expand(params_to_store)
+
+    def expand(
+        self,
+        params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]
+    ):
+        """Add more parameters to the storage
+
+        Parameters
+        ----------
+        params_to_store : dict[str, torch.Tensor  |  torch.nn.Parameter]
+            parameters to store
+        """
         for name, value in params_to_store.items():
             if isinstance(value, torch.nn.Parameter):
                 self.register_parameter(name, value)
@@ -19,7 +35,7 @@ class InnerParameterStorageModule(torch.nn.Module):
                     'or torch.nn.Parameter. '
                     'The type {type(value)} of {name} is not compatible.'
                 )
-        self.params_to_store = params_to_store
+            self.params_to_store[name] = value
 
 
 class Parameter(torch.Tensor):
@@ -153,11 +169,10 @@ class ConstrainedParameter(Parameter):
 
         self.bound_func = bound_func
 
-        self.inner_storage = InnerParameterStorageModule(
+        self.inner_storage.expand(
             {
                 'a': a,
                 'b': b,
-                **self.inner_storage.params_to_store
             }
         )
 
