@@ -114,7 +114,7 @@ class SpatialLightModulator(Element):
         return self.resized_mask
 
     @property
-    def get_transmission_function(self) -> torch.Tensor:
+    def transmission_function(self) -> torch.Tensor:
 
         _aperture = self.get_aperture
         _resized_mask = self.resize_mask
@@ -142,20 +142,20 @@ class SpatialLightModulator(Element):
 
         return self.transmission_function
 
-    def forward(self, input_field: Wavefront) -> Wavefront:
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
 
         return mul(
-                    input_field,
-                    self.get_transmission_function,
+                    incident_wavefront,
+                    self.transmission_function,
                     ('H', 'W'),
                     self.simulation_parameters
                 )
 
-    def reverse(self, transmission_field: Wavefront) -> Wavefront:
+    def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
 
         return mul(
-                    transmission_field,
-                    torch.conj(self.get_transmission_function),
+                    transmission_wavefront,
+                    torch.conj(self.transmission_function),
                     ('H', 'W'),
                     self.simulation_parameters
                 )

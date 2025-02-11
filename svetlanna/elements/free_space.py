@@ -226,7 +226,7 @@ class FreeSpace(Element):
     # TODO: ask for tol parameter, maybe move it to init?
     def forward(
         self,
-        input_field: Wavefront
+        incident_wavefront: Wavefront
     ) -> Wavefront:
         """Calculates the field after propagating in the free space
 
@@ -247,7 +247,7 @@ class FreeSpace(Element):
         """
 
         input_field_fft = torch.fft.fft2(
-            input_field,
+            incident_wavefront,
             dim=(self._h_index, self._w_index)
         )
 
@@ -269,7 +269,7 @@ class FreeSpace(Element):
 
         return output_field
 
-    def reverse(self, transmission_field: Wavefront) -> Wavefront:
+    def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
         # TODO: Check the description...
         """Calculate the field after it propagates in the free space
         in the backward direction.
@@ -286,7 +286,7 @@ class FreeSpace(Element):
         """
 
         transmission_field_fft = torch.fft.fft2(
-            transmission_field,
+            transmission_wavefront,
             dim=(self._h_index, self._w_index)
         )
 

@@ -43,7 +43,7 @@ class DiffractiveLayer(Element):
             (2j * torch.pi / self.mask_norm) * self.mask
         )
 
-    def forward(self, input_field: Wavefront) -> Wavefront:
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the SLM
 
         Parameters
@@ -57,13 +57,13 @@ class DiffractiveLayer(Element):
             The field after propagating through the SLM
         """
         return mul(
-            input_field,
+            incident_wavefront,
             self.transmission_function,
             ('H', 'W'),
             self.simulation_parameters
         )
 
-    def reverse(self, transmitted_field: Wavefront) -> Wavefront:
+    def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
         """Method that calculates the field after passing the SLM in back
         propagation
 
@@ -80,7 +80,7 @@ class DiffractiveLayer(Element):
             (incident field in forward propagation)
         """
         return mul(
-            transmitted_field,
+            transmission_wavefront,
             torch.conj(self.transmission_function),
             ('H', 'W'),
             self.simulation_parameters

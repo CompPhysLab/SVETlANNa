@@ -38,7 +38,7 @@ class MulElement(Element, ABC):
         """
         ...
 
-    def forward(self, input_field: Wavefront) -> Wavefront:
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Calculate the field after propagating through the
         element
 
@@ -53,7 +53,7 @@ class MulElement(Element, ABC):
             The field after propagating through the element
         """
         return mul(
-            input_field,
+            incident_wavefront,
             self.get_transmission_function(),
             self.transmission_function_axes,
             self.simulation_parameters

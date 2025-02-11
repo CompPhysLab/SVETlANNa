@@ -97,7 +97,7 @@ class NonlinearElement(Element):
             response_parameters
         )
 
-    def forward(self, input_field: Wavefront) -> Wavefront:
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Method calculating the wavefront after passing a nonlinear optical
         element
 
@@ -112,10 +112,10 @@ class NonlinearElement(Element):
             Wavefront passing through a nonlinear optical element
         """
         transformed_intensity = self.response_function.forward(
-            input_field.intensity
+            incident_wavefront.intensity
         )
         # preserve the phase of the incident wavefront
-        phase = input_field.phase
+        phase = incident_wavefront.phase
 
         return Wavefront(
             torch.sqrt(transformed_intensity) * torch.exp(1j * phase)

@@ -102,7 +102,7 @@ class ThinLens(Element):
 
         return self.transmission_function
 
-    def forward(self, input_field: Wavefront) -> Wavefront:
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Calculates the field after propagation through the thin lens.
 
         Parameters
@@ -117,13 +117,13 @@ class ThinLens(Element):
         """
 
         return mul(
-            input_field,
+            incident_wavefront,
             self.transmission_function,
             self._calc_axes,
             self.simulation_parameters
         )
 
-    def reverse(self, transmission_field: Wavefront) -> Wavefront:
+    def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
         """Calculates the field after passing through the lens during
         back propagation.
 
@@ -140,7 +140,7 @@ class ThinLens(Element):
             This corresponds to the incident field in forward propagation.
         """
         return mul(
-            transmission_field,
+            transmission_wavefront,
             torch.conj(self.transmission_function),
             self._calc_axes,
             self.simulation_parameters

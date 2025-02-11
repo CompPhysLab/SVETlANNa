@@ -46,7 +46,7 @@ class Element(nn.Module, metaclass=ABCMeta):
 
     # TODO: check doctrings
     @abstractmethod
-    def forward(self, input_field: Wavefront) -> Wavefront:
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
 
         """Forward propagation through the optical element"""
 
