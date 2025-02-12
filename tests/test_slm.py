@@ -301,6 +301,6 @@ def test_slm_propagation(
         waist_radius=2.,
         distance=100
     )
-    transmitted_field = slm.forward(input_field=incident_field)
+    transmitted_field = slm(incident_field)
 
     assert transmitted_field.size() == (4, oy_nodes, ox_nodes)

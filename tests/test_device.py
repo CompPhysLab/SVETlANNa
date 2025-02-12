@@ -119,7 +119,7 @@ def test_devices(device_type: torch.device):
         mask=torch.ones_like(x_grid)
     )
 
-    tensors.append(slm.get_transmission_function())
+    tensors.append(slm.transmission_function)
     tensors.append(slm.forward(gaussian_beam))
     tensors.append(slm.reverse(gaussian_beam))
 

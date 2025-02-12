@@ -97,7 +97,7 @@ def test_types(default_type: torch.dtype):
         mask=torch.ones_like(x_grid),
         height=8,
         width=9
-    ).get_transmission_function()
+    ).transmission_function
 
     layer = elements.DiffractiveLayer(
         simulation_parameters=params,
@@ -107,17 +107,17 @@ def test_types(default_type: torch.dtype):
     free_space_as = elements.FreeSpace(
         simulation_parameters=params,
         distance=distance, method='AS'
-    ).forward(input_field=gaussian_beam)
+    )(gaussian_beam)
 
     free_space_fresnel = elements.FreeSpace(
         simulation_parameters=params,
         distance=distance, method='fresnel'
-    ).forward(input_field=gaussian_beam)
+    )(gaussian_beam)
 
     free_space_reverse = elements.FreeSpace(
         simulation_parameters=params,
         distance=distance, method='fresnel'
-    ).reverse(transmission_field=gaussian_beam)
+    ).reverse(transmission_wavefront=gaussian_beam)
 
     default_type = torch.get_default_dtype()
 
