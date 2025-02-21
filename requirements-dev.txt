@@ -1,0 +1,3 @@
+torch==2.4.0+cu126
+torchvision==0.19.1+cu126
+-f https://download.pytorch.org/whl/cu126

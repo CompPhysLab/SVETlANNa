@@ -1,6 +1,6 @@
 import pytest
 import torch
-
+import svetlanna
 from svetlanna import elements
 from svetlanna import SimulationParameters
 
@@ -62,11 +62,12 @@ def test_rectangle_aperture(
     )
 
     # transmission function of the rectangular aperture as a class method
-    transmission_function = elements.RectangularAperture(
+    aperture = elements.RectangularAperture(
         simulation_parameters=params,
         height=height_test,
         width=width_test
-    ).get_transmission_function()
+    )
+    transmission_function = aperture.get_transmission_function()
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
@@ -81,6 +82,12 @@ def test_rectangle_aperture(
     )
 
     assert standard_deviation <= expected_std
+
+    # test forward calculations
+    wavefront = svetlanna.Wavefront.plane_wave(params)
+    torch.testing.assert_close(
+        aperture(wavefront), transmission_function * wavefront
+    )
 
 
 round_parameters = [
@@ -137,10 +144,11 @@ def test_round_aperture(
     )
 
     # transmission function of the round aperture as a class method
-    transmission_function = elements.RoundAperture(
+    aperture = elements.RoundAperture(
         simulation_parameters=params,
         radius=radius_test
-    ).get_transmission_function()
+    )
+    transmission_function = aperture.get_transmission_function()
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
@@ -155,6 +163,12 @@ def test_round_aperture(
     )
 
     assert standard_deviation <= expected_std
+
+    # test forward calculations
+    wavefront = svetlanna.Wavefront.plane_wave(params)
+    torch.testing.assert_close(
+        aperture(wavefront), transmission_function * wavefront
+    )
 
 
 arbitrary_parameters = [
@@ -171,7 +185,7 @@ arbitrary_parameters = [
 @pytest.mark.parametrize(
     arbitrary_parameters,
     [(10, 15, 1200, 1000, 1064 * 1e-6, torch.rand(1000, 1200), 1e-5),
-     (8, 4, 1100, 1000, 1064 * 1e-6, torch.rand(1100, 1000), 1e-5)]
+     (8, 4, 1100, 1000, 1064 * 1e-6, torch.rand(1000, 1100), 1e-5)]
 )
 def test_aperture(
     ox_size: float,
@@ -211,10 +225,11 @@ def test_aperture(
     )
     # transmission function for the aperture with arbitrary shape as a
     # class method
-    transmission_function = elements.Aperture(
+    aperture = elements.Aperture(
         simulation_parameters=params,
         mask=mask_test
-    ).get_transmission_function()
+    )
+    transmission_function = aperture.get_transmission_function()
 
     transmission_function_analytic = mask_test
 
@@ -223,3 +238,9 @@ def test_aperture(
     )
 
     assert standard_deviation <= expected_std
+
+    # test forward calculations
+    wavefront = svetlanna.Wavefront.plane_wave(params)
+    torch.testing.assert_close(
+        aperture(wavefront), transmission_function * wavefront
+    )

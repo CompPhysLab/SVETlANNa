@@ -1,6 +1,42 @@
 import torch
 from typing import Callable, Any, TypeAlias
 
+# TODO: fix impropriate .to() method handling in parameters
+
+
+class InnerParameterStorageModule(torch.nn.Module):
+    def __init__(
+        self,
+        params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]
+    ):
+        super().__init__()
+        self.params_to_store = {}
+        self.expand(params_to_store)
+
+    def expand(
+        self,
+        params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]
+    ):
+        """Add more parameters to the storage
+
+        Parameters
+        ----------
+        params_to_store : dict[str, torch.Tensor  |  torch.nn.Parameter]
+            parameters to store
+        """
+        for name, value in params_to_store.items():
+            if isinstance(value, torch.nn.Parameter):
+                self.register_parameter(name, value)
+            elif isinstance(value, torch.Tensor):
+                self.register_buffer(name, value)
+            else:
+                raise TypeError(
+                    'Parameters should be instances of either torch.Tensor '
+                    'or torch.nn.Parameter. '
+                    'The type {type(value)} of {name} is not compatible.'
+                )
+            self.params_to_store[name] = value
+
 
 class Parameter(torch.Tensor):
     """`torch.Parameter` replacement.
@@ -33,6 +69,11 @@ class Parameter(torch.Tensor):
         self.inner_parameter = torch.nn.Parameter(
             data=data,
             requires_grad=requires_grad
+        )
+        self.inner_storage = InnerParameterStorageModule(
+            {
+                'inner_parameter': self.inner_parameter
+            }
         )
 
     @classmethod
@@ -126,10 +167,14 @@ class ConstrainedParameter(Parameter):
         self.min_value = min_value
         self.max_value = max_value
 
-        self.__a = a
-        self.__b = b
-
         self.bound_func = bound_func
+
+        self.inner_storage.expand(
+            {
+                'a': a,
+                'b': b,
+            }
+        )
 
     @property
     def value(self) -> torch.Tensor:
@@ -142,7 +187,7 @@ class ConstrainedParameter(Parameter):
         """
         # for inner parameter value y:
         # x = (M-m) * bound_function( y ) + m = a * bound_function( y ) + b
-        return self.__a * self.bound_func(self.inner_parameter) + self.__b
+        return self.inner_storage.a * self.bound_func(self.inner_parameter) + self.inner_storage.b
 
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
@@ -161,6 +206,3 @@ class ConstrainedParameter(Parameter):
 
 OptimizableFloat: TypeAlias = float | torch.Tensor | torch.nn.Parameter | Parameter
 OptimizableTensor: TypeAlias = torch.Tensor | torch.nn.Parameter | Parameter
-
-
-BoundedParameter = ConstrainedParameter

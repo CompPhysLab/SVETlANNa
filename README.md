@@ -9,6 +9,10 @@ To init the project and install all dependencies use
 ```
 poetry install
 ```
+Then install PyTorch (the version you want)
+```
+pip install torch
+```
 
 To add package
 ```

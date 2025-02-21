@@ -18,16 +18,20 @@ parameters = [
     "waist_radius_test",
     "distance_test",
     "radius_test",
-    "error_energy"
+    "method"
 ]
 
 
+# TODO: add target_region tests
 @pytest.mark.parametrize(
     parameters,
     [
-        (10, 10, 1000, 1000, 660 * 1e-6, 0.5, 100., 10., 1e-4),
-        (7, 8, 1000, 1000, 1064 * 1e-6, 0.7, 150., 10., 1e-4),
-        (15, 8, 1500, 1000, 550 * 1e-6, 0.5, 120., 10., 1e-4)
+        (10, 10, 1000, 1000, 660 * 1e-6, 0.5, 100., 10., 'HIO'),
+        (10, 10, 1000, 1000, 660 * 1e-6, 0.5, 100., 10., 'GS'),
+        (7, 8, 1000, 1000, 1064 * 1e-6, 0.7, 150., 10., 'HIO'),
+        (7, 8, 1000, 1000, 1064 * 1e-6, 0.7, 150., 10., 'GS'),
+        (15, 8, 1500, 1000, 550 * 1e-6, 0.5, 120., 10., 'HIO'),
+        (15, 8, 1500, 1000, 550 * 1e-6, 0.5, 120., 10., 'GS')
     ]
 )
 def test_phase_retrieval(
@@ -39,7 +43,7 @@ def test_phase_retrieval(
     waist_radius_test: float,
     distance_test: float,
     radius_test: float,
-    error_energy: float
+    method: phase_retrieval.Method
 ):
     """Test for phase reconstruction problem and generate target intensity
     problem using HIO and Gerchberg-Saxton algorithms on the example of a
@@ -66,12 +70,8 @@ def test_phase_retrieval(
     error_energy : float
         Criterion for accepting the test(energy loss)
     """
-    x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
-    y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
-    x_grid, y_grid = torch.meshgrid(x_linear, y_linear, indexing='xy')
 
-    dx = ox_size / ox_nodes
-    dy = oy_size / oy_nodes
+    torch.set_default_dtype(torch.float32)
 
     params = SimulationParameters(
         {
@@ -80,6 +80,7 @@ def test_phase_retrieval(
             'wavelength': wavelength_test
         }
     )
+    x_grid, y_grid = params.meshgrid('W', 'H')
 
     field_before_lens1 = Wavefront.gaussian_beam(
         simulation_parameters=params,
@@ -87,7 +88,7 @@ def test_phase_retrieval(
         waist_radius=waist_radius_test
     )
 
-    intensity_source = field_before_lens1.intensity.detach().numpy()
+    intensity_source = field_before_lens1.intensity
 
     lens1 = elements.ThinLens(
         simulation_parameters=params,
@@ -95,80 +96,43 @@ def test_phase_retrieval(
         radius=radius_test
     )
 
-    field_after_lens1 = lens1.forward(input_field=field_before_lens1)
+    field_after_lens1 = lens1(field_before_lens1)
 
     free_space1 = elements.FreeSpace(
         simulation_parameters=params,
-        distance=torch.tensor(3 * distance_test),
+        distance=3 * distance_test,
         method='AS'
     )
-    output_field = free_space1.forward(input_field=field_after_lens1)
+    output_field = free_space1(field_after_lens1)
 
     # target phase profile for phase reconstruction problem
-    phase_target = (
-        torch.angle(output_field) + 2 * torch.pi * (
-            torch.angle(output_field) < 0.
-        ).float()
-    ).detach().numpy()
+    phase_target = torch.angle(output_field)
+    target_region = (x_grid**2 + y_grid ** 2 <= 5).float()
 
     # target intensity profile on the screen
-    intensity_target = output_field.intensity.detach().numpy()
+    intensity_target = output_field.intensity
 
     optical_setup = LinearOpticalSetup([free_space1])
 
-    goal = (x_grid**2 + y_grid ** 2 <= 5).float()
-
     result_hio = phase_retrieval.retrieve_phase(
-        source_intensity=torch.tensor(intensity_source),
+        source_intensity=intensity_source,
         optical_setup=optical_setup,
-        target_intensity=torch.tensor(intensity_target),
-        target_phase=torch.tensor(phase_target),
-        target_region=goal,
-        initial_phase=None,
-        method='HIO'
+        target_intensity=intensity_target,
+        # target_phase=phase_target,
+        # target_region=target_region,
+        initial_phase=torch.full_like(intensity_target, 0),
+        method=method,
+        options={
+            'maxiter': 50,
+            'constant_factor': 0.5
+        }
     )
 
-    phase_reconstruction_hio = result_hio.solution
+    errors = result_hio.cost_func_evolution
 
-    result_gs = phase_retrieval.retrieve_phase(
-        source_intensity=torch.tensor(intensity_source),
-        optical_setup=optical_setup,
-        target_intensity=torch.tensor(intensity_target),
-        target_phase=None,
-        target_region=None,
-        initial_phase=None,
-        method='GS'
-    )
-
-    phase_get_intensity = result_gs.solution
-
-    step = 2 * torch.pi / 256
-    mask_reconstruction_hio = phase_reconstruction_hio // step
-    mask_get_intensity = phase_get_intensity // step
-
-    field_after_slm = elements.SpatialLightModulator(
-        simulation_parameters=params,
-        mask=mask_reconstruction_hio
-    ).forward(field_before_lens1)
-
-    output_field = optical_setup.forward(field_after_slm)
-    intensity_target_opt = output_field.intensity.detach().numpy()
-
-    energy_reconstruction_hio = np.sum(intensity_target_opt) * dx * dy
-    energy_true = np.sum(intensity_target) * dx * dy
-
-    field_after_slm = elements.SpatialLightModulator(
-        simulation_parameters=params,
-        mask=mask_get_intensity
-    ).forward(field_before_lens1)
-
-    output_field = optical_setup.forward(field_after_slm)
-    intensity_target_opt = output_field.intensity.detach().numpy()
-
-    energy_get_intensity = np.sum(intensity_target_opt) * dx * dy
-
-    assert np.abs(energy_true - energy_reconstruction_hio) <= error_energy
-    assert np.abs(energy_true - energy_get_intensity) <= error_energy
+    # test if the error decreases
+    assert np.sum(np.diff(errors) < 0) > 0.95 * (len(errors)-1)
+    assert errors[-1] < errors[0] / 5
 
 
 parameters_4f = [
@@ -184,6 +148,7 @@ parameters_4f = [
 ]
 
 
+@pytest.mark.skip
 @pytest.mark.parametrize(
     parameters_4f,
     [

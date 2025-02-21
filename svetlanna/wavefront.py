@@ -1,6 +1,6 @@
 import torch
 from .simulation_parameters import SimulationParameters
-from typing import Any, Self, Iterable
+from typing import Any, Self, Iterable, cast, TYPE_CHECKING
 from .axes_math import tensor_dot, cast_tensor
 
 
@@ -24,6 +24,17 @@ class Wavefront(torch.Tensor):
         return torch.abs(torch.Tensor(self)) ** 2
 
     @property
+    def max_intensity(self) -> float:
+        """Calculates maximum intensity of the wavefront
+
+        Returns
+        -------
+        float
+            maximum intensity
+        """
+        return self.intensity.max().item()
+
+    @property
     def phase(self) -> torch.Tensor:
         """Calculates phase of the wavefront
 
@@ -32,9 +43,38 @@ class Wavefront(torch.Tensor):
         torch.Tensor
             phase from $0$ to $2\\pi$
         """
-        res = torch.angle(torch.Tensor(self) + 0.0)  # HOTFIX: problem with phase of -0. in visualization
-        res[res < 0] += 2 * torch.pi
+        # HOTFIX: problem with phase of -0. in visualization
+        res = torch.angle(torch.Tensor(self) + 0.0)
+        # res[res < 0] += 2 * torch.pi
         return res
+
+    def fwhm(
+        self,
+        simulation_parameters: SimulationParameters
+    ) -> tuple[float, float]:
+        """Calculates full width at half maximum of the wavefront
+
+        Returns
+        -------
+        tuple[float, float]
+            full width at half maximum along x and y axes
+        """
+
+        x_step = torch.diff(simulation_parameters.axes.W)[0].item()
+        y_step = torch.diff(simulation_parameters.axes.H)[0].item()
+
+        max_intensity = self.max_intensity
+        half_max_intensity = max_intensity / 2
+
+        indices = torch.nonzero(self.intensity >= half_max_intensity)
+
+        min_y, min_x = torch.min(indices, dim=0)[0]
+        max_y, max_x = torch.max(indices, dim=0)[0]
+
+        fwhm_x = (max_x - min_x) * x_step
+        fwhm_y = (max_y - min_y) * y_step
+
+        return fwhm_x.item(), fwhm_y.item()
 
     @classmethod
     def plane_wave(
@@ -140,7 +180,7 @@ class Wavefront(torch.Tensor):
         gouy_phase = torch.arctan(distance / rayleigh_range)
 
         phase1, axes1 = tensor_dot(
-            a=-1j * wave_number * inverse_radius_of_curvature / 2,
+            a=1j * wave_number * inverse_radius_of_curvature / 2,
             b=radial_distance_squared,
             a_axis='wavelength',
             b_axis=('H', 'W')
@@ -149,12 +189,12 @@ class Wavefront(torch.Tensor):
         field = torch.exp(phase1)
         field, _ = tensor_dot(
             a=field,
-            b=torch.exp(-1j * wave_number * distance),
+            b=torch.exp(1j * wave_number * distance),
             a_axis=axes1, b_axis='wavelength', preserve_a_axis=True
         )
         field, _ = tensor_dot(
             a=field,
-            b=torch.exp(1j * gouy_phase),
+            b=torch.exp(-1j * gouy_phase),
             a_axis=axes1, b_axis='wavelength', preserve_a_axis=True
         )
         phase2, axes2 = tensor_dot(
@@ -178,7 +218,9 @@ class Wavefront(torch.Tensor):
             preserve_a_axis=True
         )
 
-        return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
+        return cls(
+            cast_tensor(field, axes, simulation_parameters.axes.names)
+        )
 
     @classmethod
     def spherical_wave(
@@ -230,17 +272,18 @@ class Wavefront(torch.Tensor):
 
     # === methods below are added for typing only ===
 
-    def __mul__(self, other: Any) -> Self:
-        return super().__mul__(other=other)  # type: ignore
+    if TYPE_CHECKING:
+        def __mul__(self, other: Any) -> Self:
+            ...
 
-    def __rmul__(self, other: Any) -> Self:
-        return super().__rmul__(other=other)  # type: ignore
+        def __rmul__(self, other: Any) -> Self:
+            ...
 
-    def __truediv__(self, other: Any) -> Self:
-        return super().__truediv__(other=other)  # type: ignore
+        def __truediv__(self, other: Any) -> Self:
+            ...
 
-    def __rtruediv__(self, other: Any) -> Self:
-        return super().__rtruediv__(other=other)  # type: ignore
+        def __rtruediv__(self, other: Any) -> Self:
+            ...
 
 
 DEFAULT_LAST_AXES_NAMES = (
@@ -286,4 +329,4 @@ def mul(
         wf_axes = sim_params.axes.names
 
     res, _ = tensor_dot(wf, b, wf_axes, b_axis, preserve_a_axis=True)
-    return res
+    return cast(Wavefront, res)

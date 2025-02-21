@@ -1,6 +1,6 @@
 import pytest
 import torch
-
+import svetlanna
 from svetlanna import elements
 from svetlanna import SimulationParameters
 
@@ -117,3 +117,24 @@ def test_lens(
     )
 
     assert standard_deviation <= expected_std
+
+
+def test_reverse():
+    params = SimulationParameters(
+        {
+            'W': torch.linspace(-10/2, 10/2, 10),
+            'H': torch.linspace(-10/2, 10/2, 10),
+            'wavelength': 1
+        }
+    )
+
+    lens = elements.ThinLens(
+        simulation_parameters=params,
+        focal_length=1
+    )
+
+    # test is reverse(forward(x)) is x, where x is a wavefront
+    wavefront = svetlanna.Wavefront.plane_wave(params)
+    assert torch.allclose(
+        lens.reverse(lens.forward(wavefront)), wavefront
+    )

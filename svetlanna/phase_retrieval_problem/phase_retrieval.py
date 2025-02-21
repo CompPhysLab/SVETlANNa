@@ -1,6 +1,4 @@
-from typing import Literal
-from typing import overload
-from typing import Protocol
+from typing import Literal, overload, Protocol, TypeAlias, TypedDict
 
 import torch
 
@@ -26,14 +24,26 @@ class SetupLike(Protocol):
         ...
 
 
+class AlgorithmOptions(TypedDict, total=False):
+    tol: float
+    maxiter: int
+    constant_factor: float
+    disp: bool
+
+
+Method: TypeAlias = Literal['GS', 'HIO']
+
+
 @overload
 def retrieve_phase(
     source_intensity: torch.Tensor,
     optical_setup: LinearOpticalSetup | SetupLike,
     target_intensity: torch.Tensor,
-    initial_phase: torch.Tensor = None,
-    method: Literal['GS', 'HIO'] = 'GS'
-):
+    *,
+    initial_phase: torch.Tensor | None = None,
+    method: Method = 'GS',
+    options: AlgorithmOptions | None = None
+) -> prr.PhaseRetrievalResult:
     ...
 
 
@@ -44,9 +54,11 @@ def retrieve_phase(
     target_intensity: torch.Tensor,
     target_phase: torch.Tensor,
     target_region: torch.Tensor,
-    initial_phase: torch.Tensor = None,
-    method: Literal['GS', 'HIO'] = 'GS'
-):
+    *,
+    initial_phase: torch.Tensor | None = None,
+    method: Method = 'GS',
+    options: AlgorithmOptions | None = None
+) -> prr.PhaseRetrievalResult:
     ...
 
 
@@ -55,15 +67,11 @@ def retrieve_phase(
     optical_setup: LinearOpticalSetup | SetupLike,
     target_intensity: torch.Tensor,
     target_phase: torch.Tensor | None = None,
-    target_region: torch.Tensor = None,
-    initial_phase: torch.Tensor = None,
-    method: Literal['GS', 'HIO'] = 'GS',
-    options: dict = {
-        'tol': 1e-25,
-        'maxiter': 100,
-        'constant_factor': float == 0.9,
-        'disp': False
-    }
+    target_region: torch.Tensor | None = None,
+    *,
+    initial_phase: torch.Tensor | None = None,
+    method: Method = 'GS',
+    options: AlgorithmOptions | None = None
 ) -> prr.PhaseRetrievalResult:
     """Function for solving phase retrieval problem: generating target
     intensity profile or reconstructing the phase profile of the field
@@ -90,7 +98,7 @@ def retrieve_phase(
         Dictionary with optimization parameters, by default {
         'tol': 1e-16,   # criteria for stop optimization
         'maxiter': 100, # maximum number of iterations
-        'constant_factor': float == 0.9,    # convergence parameter for HIO
+        'constant_factor': 0.9,    # convergence parameter for HIO
         'disp': False   # show result of optimization
         }
 
@@ -112,6 +120,14 @@ def retrieve_phase(
     if initial_phase is None:
         initial_phase = 2 * torch.pi * torch.rand_like(source_intensity)
 
+    # read options
+    if options is None:
+        options = {}
+    tol = options.get('tol', 1e-16)
+    maxiter = options.get('maxiter', 100)
+    constant_factor = options.get('constant_factor', 0.9)
+    disp = options.get('disp', False)
+
     if method == 'GS':
 
         result = algorithms.gerchberg_saxton_algorithm(
@@ -120,8 +136,8 @@ def retrieve_phase(
             forward=forward_propagation,
             reverse=reverse_propagation,
             initial_approximation=initial_phase,
-            tol=options['tol'],
-            maxiter=options['maxiter'],
+            tol=tol,
+            maxiter=maxiter,
             target_phase=target_phase,
             target_region=target_region
         )
@@ -132,16 +148,16 @@ def retrieve_phase(
             forward=forward_propagation,
             reverse=reverse_propagation,
             initial_approximation=initial_phase,
-            tol=options['tol'],
-            maxiter=options['maxiter'],
+            tol=tol,
+            maxiter=maxiter,
             target_phase=target_phase,
             target_region=target_region,
-            constant_factor=options['constant_factor']
+            constant_factor=constant_factor
         )
     else:
         raise ValueError('Unknown optimization method')
 
-    if options['disp'] is True:
+    if disp:
         if (target_phase is not None) & (target_region is not None):
             print('Type of problem: phase reconstruction')
         else:

@@ -3,6 +3,8 @@ from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..wavefront import Wavefront, mul
 from ..parameters import OptimizableTensor
+from typing import Iterable
+from ..specs import ImageRepr, PrettyReprRepr, ParameterSpecs
 
 
 class DiffractiveLayer(Element):
@@ -32,8 +34,8 @@ class DiffractiveLayer(Element):
 
         super().__init__(simulation_parameters)
 
-        self.mask = mask
-        self.mask_norm = mask_norm
+        self.mask = self.process_parameter('mask', mask)
+        self.mask_norm = self.process_parameter('mask_norm', mask_norm)
 
     @property
     def transmission_function(self) -> torch.Tensor:
@@ -41,7 +43,7 @@ class DiffractiveLayer(Element):
             (2j * torch.pi / self.mask_norm) * self.mask
         )
 
-    def forward(self, input_field: Wavefront) -> Wavefront:
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the SLM
 
         Parameters
@@ -55,13 +57,13 @@ class DiffractiveLayer(Element):
             The field after propagating through the SLM
         """
         return mul(
-            input_field,
+            incident_wavefront,
             self.transmission_function,
             ('H', 'W'),
             self.simulation_parameters
         )
 
-    def reverse(self, transmitted_field: Wavefront) -> Wavefront:
+    def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
         """Method that calculates the field after passing the SLM in back
         propagation
 
@@ -78,8 +80,23 @@ class DiffractiveLayer(Element):
             (incident field in forward propagation)
         """
         return mul(
-            transmitted_field,
+            transmission_wavefront,
             torch.conj(self.transmission_function),
             ('H', 'W'),
             self.simulation_parameters
         )
+
+    def to_specs(self) -> Iterable[ParameterSpecs]:
+        return [
+            ParameterSpecs(
+                'mask', [
+                    PrettyReprRepr(self.mask),
+                    ImageRepr(self.mask.numpy(force=True)),
+                ]
+            ),
+            ParameterSpecs(
+                'mask_norm', [
+                    PrettyReprRepr(self.mask_norm)
+                ]
+            )
+        ]

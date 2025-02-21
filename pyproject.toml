@@ -1,20 +1,22 @@
-[tool.poetry]
+[project]
 name = "svetlanna"
 version = "0.1.0"
-description = ""
-authors = ["Your Name <you@example.com>"]
-license = "MPL-2.0"
+description = "Open source library for simulation and engineering of diffractive neural networks"
+authors = [
+    {name="Alexey A. Shcherbakov", email="alexey.shcherbakov@metalab.ifmo.ru"},
+    {name="Alexey Y. Kokhanovskiy", email="a.kokhanovskiy@metalab.ifmo.ru"},
+    {name="Vladimir D. Igoshin", email="vladimir.igoshin@metalab.ifmo.ru"},
+    {name="Denis I. Sakhno", email="denis.sakhno@metalab.ifmo.ru"},
+    {name="Semen S. Chugunov", email="semen.chugunov@metalab.ifmo.ru"}
+]
+license = { file = "LICENSE" }
 readme = "README.md"
-
-
-
-[tool.poetry.dependencies]
-python = "^3.11,<3.12"
-numpy = "<2.0"
-torch = "^2.4.0"
-matplotlib = "^3.9.2"
-torchvision = "^0.19.1"
-
+requires-python = "^3.11,<3.12"
+dependencies = [
+    "numpy<2.0",
+    "matplotlib<3.9.2",
+    "anywidget (>=0.9.13,<0.10.0)"
+]
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
@@ -25,7 +27,18 @@ sphinx = "^8.1.3"
 sphinx-rtd-theme = "^3.0.1"
 sphinx-autodoc-typehints = "^2.5.0"
 pytest-cov = "^6.0.0"
+lightpipes = "^2.1.5"
 
+
+[[tool.poetry.source]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+priority = "explicit"
+
+[[tool.poetry.source]]
+name = "pytorch-cuda"
+url = "https://download.pytorch.org/whl/cu126"
+priority = "explicit"
 
 [build-system]
 requires = ["poetry-core"]
