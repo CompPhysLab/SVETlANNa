@@ -5,6 +5,7 @@ from .lens import ThinLens
 from .slm import SpatialLightModulator
 from .diffractive_layer import DiffractiveLayer
 from .nonlinear_element import NonlinearElement, FunctionModule
+from .reservoir import SimpleReservoir
 
 __all__ = [
     'Element',
@@ -16,5 +17,6 @@ __all__ = [
     'SpatialLightModulator',
     'DiffractiveLayer',
     'NonlinearElement',
-    'FunctionModule'
+    'FunctionModule',
+    'SimpleReservoir'
 ]
