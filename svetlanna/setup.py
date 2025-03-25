@@ -1,7 +1,23 @@
-from typing import Iterable
+from typing import Iterable, Literal, Union
 from .elements import Element
+from .simulation_parameters import SimulationParameters
 from torch import nn
 from torch import Tensor
+from warnings import warn
+import torch
+import base64
+import io
+from .visualization import LinearOpticalSetupWidget
+from .visualization import LinearOpticalSetupStepwiseForwardWidget
+
+
+StepwisePlotTypes = Union[
+    Literal['A'],
+    Literal['I'],
+    Literal['phase'],
+    Literal['Re'],
+    Literal['Im']
+]
 
 
 class LinearOpticalSetup:
@@ -15,14 +31,28 @@ class LinearOpticalSetup:
         elements : Iterable[Element]
             A set of optical elements which make up a setup.
         """
+        elements = list(elements)
         self.elements = elements
         self.net = nn.Sequential(*elements)  # torch network
+
+        if len(elements) > 0:
+            first_sim_params = elements[0].simulation_parameters
+
+            def check_sim_params(element: Element) -> bool:
+                return element.simulation_parameters is first_sim_params
+
+            if not all(map(check_sim_params, self.elements)):
+                warn(
+                    "Some elements have different SimulationParameters "
+                    "instance. It is more convenient to use "
+                    "the same SimulationParameters instance."
+                )
 
         if all((hasattr(el, 'reverse') for el in self.elements)):
 
             class ReverseNet(nn.Module):
                 def forward(self, Ein: Tensor) -> Tensor:
-                    for el in reversed(list(elements)):
+                    for el in reversed(elements):
                         Ein = el.reverse(Ein)
                     return Ein
 
@@ -42,13 +72,15 @@ class LinearOpticalSetup:
         Returns
         -------
         torch.Tensor
-            A wavefront after the last element of the network (output of the network).
+            A wavefront after the last element of
+            the network (output of the network).
         """
         return self.net(input_wavefront)
 
     def stepwise_forward(self, input_wavefront: Tensor):
         """
-        Function that consistently applies forward method of each element to an input wavefront.
+        Function that consistently applies forward method of each element
+        to an input wavefront.
 
         Parameters
         ----------
@@ -60,7 +92,8 @@ class LinearOpticalSetup:
         str
             A string that represents a scheme of a propagation through a setup.
         list(torch.Tensor)
-            A list of an input wavefront evolution during a propagation through a setup.
+            A list of an input wavefront evolution
+            during a propagation through a setup.
         """
         this_wavefront = input_wavefront
         # list of wavefronts while propagation of an initial wavefront through the system
@@ -85,4 +118,176 @@ class LinearOpticalSetup:
     def reverse(self, Ein: Tensor) -> Tensor:
         if self._reverse_net is not None:
             return self._reverse_net(Ein)
-        raise TypeError('Reverse propagation is impossible. All elements should have reverse method.')
+        raise TypeError(
+            'Reverse propagation is impossible. '
+            'All elements should have reverse method.'
+        )
+
+    def show(self, **settings) -> LinearOpticalSetupWidget:
+        """Show the setup and its specs via widget
+
+        Returns
+        -------
+        LinearOpticalSetupWidget
+            Widget
+        """
+        widget = LinearOpticalSetupWidget()
+
+        # prepare elements for widget
+        elements = []
+        for index, element in enumerate(self.elements):
+            elements.append(
+                {
+                    'index': index,
+                    'type': element.__class__.__name__,
+                    'specs_html': element._repr_html_()
+                }
+            )
+
+        # widget settings
+        new_settings = {}
+        for name in widget.settings.keys():
+            if name in settings:
+                new_settings[name] = settings[name]
+            else:
+                new_settings[name] = widget.settings[name]
+
+        # set elements and settings
+        widget.settings = new_settings
+        widget.elements = elements
+        return widget
+
+    def show_stepwise_forward(
+        self,
+        input_wavefront: Tensor,
+        simulation_parameters: SimulationParameters,
+        types_to_plot: tuple[StepwisePlotTypes, ...] = ('I', 'phase'),
+        **settings
+    ) -> LinearOpticalSetupStepwiseForwardWidget:
+        """Show field propagation in the setup via widget
+
+        Parameters
+        ----------
+        input_wavefront : Tensor
+            input wavefront
+        simulation_parameters : SimulationParameters
+            simulation parameters
+        types_to_plot : tuple[StepwisePlotTypes, ...], optional
+            field properties to plot, by default ('I', 'phase')
+
+        Returns
+        -------
+        LinearOpticalSetupStepwiseForwardWidget
+            widget
+        """
+        widget = LinearOpticalSetupStepwiseForwardWidget()
+
+        # prepare elements for widget
+        elements = []
+        for index, element in enumerate(self.elements):
+            elements.append(
+                {
+                    'index': index,
+                    'type': element.__class__.__name__,
+                    'specs_html': element._repr_html_()
+                }
+            )
+
+        # widget settings
+        new_settings = {}
+        for name in widget.settings.keys():
+            if name in settings:
+                new_settings[name] = settings[name]
+            else:
+                new_settings[name] = widget.settings[name]
+
+        # set elements and settings
+        widget.settings = new_settings
+        widget.elements = elements
+
+        import matplotlib.pyplot as plt
+
+        with torch.no_grad():
+            _, stepwise_wavefront = self.stepwise_forward(
+                input_wavefront=input_wavefront
+            )
+
+        wavefront_images = []
+        for wavefront in stepwise_wavefront:
+            stream = io.BytesIO()
+
+            width = simulation_parameters.axes.W.cpu()
+            height = simulation_parameters.axes.H.cpu()
+
+            N_plots = len(types_to_plot)
+
+            width_to_height = (
+                width.max() - width.min()
+            ) / (
+                height.max() - height.min()
+            )
+
+            figure, ax = plt.subplots(
+                    1, N_plots,
+                    figsize=(2+3*N_plots*width_to_height, 3),
+                    dpi=120
+                )
+
+            for i, plot_type in enumerate(types_to_plot):
+                axes = ax[i] if N_plots != 1 else ax
+                if plot_type == 'A':
+                    axes.pcolorfast(
+                        width,
+                        height,
+                        wavefront.abs().cpu().numpy()
+                    )
+                    axes.set_title('Amplitude')
+
+                elif plot_type == 'I':
+                    axes.pcolorfast(
+                        width,
+                        height,
+                        (wavefront.abs()**2).cpu().numpy()
+                    )
+                    axes.set_title('Intensity')
+
+                elif plot_type == 'phase':
+                    axes.pcolorfast(
+                        width,
+                        height,
+                        wavefront.angle().cpu().numpy(),
+                        vmin=-torch.pi,
+                        vmax=torch.pi,
+                    )
+                    axes.set_title('Phase')
+
+                elif plot_type == 'Re':
+                    axes.pcolorfast(
+                        width,
+                        height,
+                        wavefront.real.cpu().numpy(),
+                    )
+                    axes.set_title('Real part')
+
+                elif plot_type == 'Re':
+                    axes.pcolorfast(
+                        width,
+                        height,
+                        wavefront.imag.cpu().numpy(),
+                    )
+                    axes.set_title('Imaginary part')
+
+                axes.set_aspect('equal')
+
+            plt.tight_layout()
+            figure.savefig(stream)
+            plt.close(figure)
+
+            wavefront_images.append(
+                base64.b64encode(stream.getvalue()).decode()
+            )
+
+        # set plots
+        widget.wavefront_images = wavefront_images
+
+        return widget

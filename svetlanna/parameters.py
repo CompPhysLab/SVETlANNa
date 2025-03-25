@@ -1,5 +1,41 @@
 import torch
-from typing import Callable, Any
+from typing import Callable, Any, TypeAlias
+
+# TODO: fix impropriate .to() method handling in parameters
+
+
+class InnerParameterStorageModule(torch.nn.Module):
+    def __init__(
+        self,
+        params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]
+    ):
+        super().__init__()
+        self.params_to_store = {}
+        self.expand(params_to_store)
+
+    def expand(
+        self,
+        params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]
+    ):
+        """Add more parameters to the storage
+
+        Parameters
+        ----------
+        params_to_store : dict[str, torch.Tensor  |  torch.nn.Parameter]
+            parameters to store
+        """
+        for name, value in params_to_store.items():
+            if isinstance(value, torch.nn.Parameter):
+                self.register_parameter(name, value)
+            elif isinstance(value, torch.Tensor):
+                self.register_buffer(name, value)
+            else:
+                raise TypeError(
+                    'Parameters should be instances of either torch.Tensor '
+                    'or torch.nn.Parameter. '
+                    'The type {type(value)} of {name} is not compatible.'
+                )
+            self.params_to_store[name] = value
 
 
 class Parameter(torch.Tensor):
@@ -33,6 +69,11 @@ class Parameter(torch.Tensor):
         self.inner_parameter = torch.nn.Parameter(
             data=data,
             requires_grad=requires_grad
+        )
+        self.inner_storage = InnerParameterStorageModule(
+            {
+                'inner_parameter': self.inner_parameter
+            }
         )
 
     @classmethod
@@ -70,13 +111,12 @@ def sigmoid_inv(x: torch.Tensor) -> torch.Tensor:
     return torch.log(x/(1-x))
 
 
-# TODO: rename to ConstrainedParameter
-class BoundedParameter(Parameter):
+class ConstrainedParameter(Parameter):
     """Constrained parameter
     """
     @staticmethod
     def __new__(cls, *args, **kwargs):
-        return super(torch.Tensor, BoundedParameter).__new__(cls)
+        return super(torch.Tensor, ConstrainedParameter).__new__(cls)
 
     def __init__(
         self,
@@ -97,7 +137,7 @@ class BoundedParameter(Parameter):
         max_value : Any
             maximum value tensor
         bound_func : Callable[[torch.Tensor], torch.Tensor], optional
-            function that map $\mathbb{R}\to[0,1]$, by default torch.sigmoid
+            function that map $\\mathbb{R}\to[0,1]$, by default torch.sigmoid
         inv_bound_func : Callable[[torch.Tensor], torch.Tensor], optional
             inverse function of `bound_func`
         requires_grad : bool, optional
@@ -127,10 +167,14 @@ class BoundedParameter(Parameter):
         self.min_value = min_value
         self.max_value = max_value
 
-        self.__a = a
-        self.__b = b
-
         self.bound_func = bound_func
+
+        self.inner_storage.expand(
+            {
+                'a': a,
+                'b': b,
+            }
+        )
 
     @property
     def value(self) -> torch.Tensor:
@@ -143,7 +187,7 @@ class BoundedParameter(Parameter):
         """
         # for inner parameter value y:
         # x = (M-m) * bound_function( y ) + m = a * bound_function( y ) + b
-        return self.__a * self.bound_func(self.inner_parameter) + self.__b
+        return self.inner_storage.a * self.bound_func(self.inner_parameter) + self.inner_storage.b
 
     @classmethod
     def __torch_function__(cls, func, types, args=(), kwargs=None):
@@ -158,3 +202,7 @@ class BoundedParameter(Parameter):
 
     def __repr__(self) -> str:
         return f'Bounded parameter containing:\n{repr(self.value)}'
+
+
+OptimizableFloat: TypeAlias = float | torch.Tensor | torch.nn.Parameter | Parameter
+OptimizableTensor: TypeAlias = torch.Tensor | torch.nn.Parameter | Parameter

@@ -65,28 +65,72 @@ class DetectorProcessorClf(nn.Module):
     The necessary layer to solve a classification task. Must be placed after a detector.
     This layer process an image from the detector and calculates probabilities of belonging to classes.
     """
-    def __init__(self, num_classes: int, segmented_detector=None, segmentation_type='strips'):
+    def __init__(
+            self,
+            num_classes: int,
+            simulation_parameters: SimulationParameters,
+            segmented_detector: torch.Tensor | None = None,
+            segments_weights: torch.Tensor | None = None,
+            segments_zone_size: torch.Size | None = None,
+            segmentation_type: str = 'strips',
+            device: str | torch.device = torch.get_default_device(),
+    ):
         """
         Parameters
         ----------
         num_classes : int
             Number of classes in a classification task.
-        segmented_detector : torch.Tensor
+        simulation_parameters : SimulationParameters
+            Simulation parameters for a further optical network.
+        segmented_detector : torch.Tensor | None
             A tensor of the same shape as detector, where
             each pixel in the mask is marked by a class number from 0 to self.num_classes
+        segments_weights : torch.Tensor | None
+            Weights for each class segment. The factor by which the detector integral over the zone is multiplied.
+        segments_zone_size : torch.Size | None
+            A size of a zone (square in a middle of a detector), where segments will be placed.
+            If None - match the simulation parameters.
         segmentation_type : str
             If `segmented_detector` is not defined, that parameter defines one of the methods to markup detector:
             1) 'strips' – vertical stripes zones symmetrically arranged relative to the detector center
             2) ...
+        device : str | torch.device
+            Device, where network training will be conducted.
         """
         super().__init__()
         self.num_classes = num_classes
-        self.segmented_detector = segmented_detector  # markup of a detector by classes zones
-        if segmented_detector is not None:  # if a detector segmentation is not defined
-            self.segmented_detector = self.segmented_detector.int()
-            # TODO: weights could be custom!
-            self.segments_weights = self.weight_segments()
+        self.simulation_parameters = simulation_parameters  # only to get sizes - devices mustn't match
+
+        self.__device = device
+
+        self.segments_zone_size = segments_zone_size
         self.segmentation_type = segmentation_type
+
+        if segmented_detector is not None:  # if a detector segmentation is not defined
+            self.segmented_detector = segmented_detector.int()  # markup of a detector by classes zones
+        else:  # detector is not segmented
+            self.segmentation_type = segmentation_type
+            if segments_zone_size is None:
+                sim_params_size = self.simulation_parameters.axes_size(axs=('H', 'W'))  # [H, W]
+                # make a detector segmentation according to self.segmentation_type
+                self.segmented_detector = self.detector_segmentation(sim_params_size)
+            else:
+                self.segmented_detector = self.detector_segmentation(
+                    torch.Size(self.segments_zone_size)
+                )
+
+        # TODO: extend self.segmented_detector size if it is not match with SimulationParameters?
+
+        # calculate weights for segments
+        if segments_weights is not None:
+            self.segments_weights = segments_weights
+        else:
+            # TODO: weights could be custom?
+            self.segments_weights = self.weight_segments()
+
+        # move tensors to device
+        self.segmented_detector = self.segmented_detector.to(self.__device)
+        self.segments_weights = self.segments_weights.to(self.__device)
 
     def detector_segmentation(self, detector_shape: torch.Size) -> torch.Tensor:
         """
@@ -172,6 +216,27 @@ class DetectorProcessorClf(nn.Module):
                 assert torch.all(-1 == detector_markup[:, ind_left_border:ind_right_border]).item()
                 detector_markup[:, ind_left_border:ind_right_border] = ind_class
 
+        # add padding to match simulation parameters Wavefront shape
+        sim_params_size = self.simulation_parameters.axes_size(axs=('H', 'W'))
+        if not sim_params_size == detector_shape:
+            y_nodes, x_nodes = sim_params_size  # goal size
+            y_mask, x_mask = detector_shape  # current size
+            # params for padding
+            pad_top = int((y_nodes - y_mask) / 2)
+            pad_bottom = y_nodes - pad_top - y_mask
+            pad_left = int((x_nodes - x_mask) / 2)
+            pad_right = x_nodes - pad_left - x_mask
+            # add padding of -1
+            detector_markup = nn.functional.pad(
+                input=detector_markup,
+                pad=(pad_left, pad_right, pad_top, pad_bottom),
+                mode='constant',
+                value=-1
+            )
+
+        # if the detector size matches with sim params
+        assert detector_markup.size() == sim_params_size
+
         return detector_markup
 
     def weight_segments(self) -> torch.Tensor:
@@ -209,15 +274,10 @@ class DetectorProcessorClf(nn.Module):
             A tensor of probabilities of element belonging to classes for further calculation of loss.
             shape=(1, self.num_classes)
         """
-        if self.segmented_detector is None:  # there is no predefined segments of a detector for classes
-            # TODO: must we make it in __init__? But we need a detector (detector_data) shape for it!
-            detector_shape = detector_data.size()[-2:]  # [H, W]
-            self.segmented_detector = self.detector_segmentation(detector_shape)
-            self.segments_weights = self.weight_segments()
-
         integrals_by_classes = torch.zeros(size=(1, self.num_classes))
         # TODO: what to do with multiple wavelengths?
         for ind_class in range(self.num_classes):
+            # `mask_class` will be on the same device as `self.segmented_detector`!
             mask_class = torch.where(ind_class == self.segmented_detector, 1, 0)
             integrals_by_classes[0, ind_class] = (
                     detector_data * mask_class
@@ -227,24 +287,84 @@ class DetectorProcessorClf(nn.Module):
         # TODO: maybe some function like SoftMax? but integrals can be large!
         return integrals_by_classes / integrals_by_classes.sum().item()
 
+    def batch_zone_integral(self, batch_detector_data: torch.Tensor, ind_class: int) -> torch.Tensor:
+        """
+        Returns an integral (sum) of a detector data over a selected zone (`ind_class`).
+        ...
+
+        Parameters
+        ----------
+        batch_detector_data : torch.Tensor
+            A batch of images from a detector.
+        ind_class : int
+            Index of a class.
+
+        Returns
+        -------
+        torch.Tensor
+            Sum of intensities over the selected zone for a batch.
+            Sze of a tensor = [batch_size]
+        """
+        mask_class = torch.where(ind_class == self.segmented_detector, 1, 0)
+        # sum by two last dimensions!
+        class_integral = (batch_detector_data * mask_class).sum(dim=(-2, -1))
+        # Comment: class_integral.size() = [batch_size, dim_0, dim_1...] (all dimensions except 'W' and 'H')
+
+        if len(class_integral.size()) > 1:
+            # TODO: how to process other dimensions? user must define by himself?
+            return class_integral.sum(
+                dim=tuple(
+                    range(1, len(class_integral.size()))  # all dimensions except batch_size dimension
+                )
+            )  # return.size() = [batch_size]
+        else:  # no other dimensions except ['W', 'H'] for each item in the batch
+            return class_integral
+
     def batch_forward(self, batch_detector_data: torch.Tensor) -> torch.Tensor:
         """
         Calculates probabilities of belonging to classes for a batch of detector images.
+        ...
+
+        Parameters
+        ----------
+        batch_detector_data : torch.Tensor
+            A batch of images from a detector.
+            shape=(batch_size, ... 'H', 'W').
+
+        Returns
+        -------
+        torch.Tensor
+            A tensor of probabilities of element belonging to classes for further calculation of loss.
+            shape=(batch_size, self.num_classes)
         """
         # TODO: make `.forward()` universal for a batch and for a single wavefront!
-        if self.segmented_detector is None:  # there is no predefined segments of a detector for classes
-            detector_shape = batch_detector_data.size()[-2:]  # [H, W]
-            self.segmented_detector = self.detector_segmentation(detector_shape)
-            self.segments_weights = self.weight_segments()
+        # TODO: use simulation parameters to understand if there is a batch dimension?
+        # if not batch_detector_data.device == self.__device:
+        #     # TODO: it does not work!
+        #     raise ValueError('A data batch and DetectorProcessorClf must be on the same device!')
 
-        batch_size = batch_detector_data.size()[0]
+        batch_size = batch_detector_data.size()[0]  # batch size is a 0'th dimension!
 
-        integrals_by_classes = torch.zeros(size=(batch_size, self.num_classes))
+        integrals_by_classes = torch.zeros(size=(batch_size, self.num_classes)).to(self.__device)
         for ind_class in range(self.num_classes):
-            mask_class = torch.where(ind_class == self.segmented_detector, 1, 0)
             integrals_by_classes[:, ind_class] = (
-                    batch_detector_data * mask_class
-            ).sum(dim=(-2, -1))[:, 0] * self.segments_weights[0, ind_class]
+                    self.batch_zone_integral(batch_detector_data, ind_class) *
+                    self.segments_weights[0, ind_class]
+            )
 
         return integrals_by_classes / torch.unsqueeze(integrals_by_classes.sum(dim=1), 1)
 
+    def to(self, device: str | torch.device | int) -> 'DetectorProcessorClf':
+        if self.__device == torch.device(device):
+            return self
+
+        return DetectorProcessorClf(
+            num_classes=self.num_classes,
+            simulation_parameters=self.simulation_parameters,
+            segmented_detector=self.segmented_detector,
+            device=device
+        )
+
+    @property
+    def device(self) -> str | torch.device | int:
+        return self.__device

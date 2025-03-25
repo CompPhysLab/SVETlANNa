@@ -10,7 +10,21 @@ class PhaseRetrievalResult:
 
     solution: torch.Tensor
     cost_func: float
-    cost_func_evolution: list
-
-    # TODO: взять терминологию как в scipy
+    cost_func_evolution: list[float]
     number_of_iterations: int
+
+    # TODO: create metrics
+    # intesity_distribution: torch.Tensor
+    # target_region: torch.Tensor
+
+    # def get_efficiency(self):
+
+    #     return torch.sum(self._intensity_distribution * self._target_region)
+
+    # def get_power_relation(self):
+
+    #     power_relation = torch.sum(
+    #         self._intensity_distribution * self._target_region
+    #     ) / torch.sum(self._intensity_distribution)
+
+    #     return power_relation
