@@ -393,7 +393,7 @@ class Clerk(Generic[ConditionsType]):
         """
 
         if self._path_checkpoints.exists():
-            # Шf checkpoints file exists, read all checkpoint files names
+            # If checkpoints file exists, read all checkpoint files names
             with open(self._path_checkpoints, "r") as file:
                 all_checkpoints_filenames = file.read().split("\n")
 

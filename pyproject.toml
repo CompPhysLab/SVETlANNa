@@ -18,6 +18,9 @@ dependencies = [
     "anywidget (>=0.9.13,<0.10.0)"
 ]
 
+[project.optional-dependencies]
+pandas = ["pandas (>=2.2.3,<3.0.0)"]
+
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.2"
 jupyter = "^1.1.1"
