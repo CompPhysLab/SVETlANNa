@@ -70,3 +70,11 @@ class ureg(Enum):
 
     def __pow__(self, other):
         return self.value ** other
+
+    def __array__(self, dtype=None, copy=None):
+        import numpy
+        if copy is False:
+            raise ValueError(
+                "`copy=False` isn't supported. A copy is always created."
+            )
+        return numpy.array(self.value, dtype=dtype)
