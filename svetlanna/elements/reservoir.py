@@ -1,4 +1,4 @@
-from svetlanna.specs import ParameterSpecs, SubelementSpecs
+from svetlanna.specs import ParameterSpecs, SubelementSpecs, PrettyReprRepr
 from ..parameters import OptimizableFloat
 from ..simulation_parameters import SimulationParameters
 from ..wavefront import Wavefront
@@ -117,7 +117,15 @@ class SimpleReservoir(Element):
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
         return (
-            *super().to_specs(),
+            ParameterSpecs('feedback_gain', (
+                PrettyReprRepr(self.feedback_gain),
+            )),
+            ParameterSpecs('input_gain', (
+                PrettyReprRepr(self.input_gain),
+            )),
+            ParameterSpecs('delay', (
+                PrettyReprRepr(self.delay),
+            )),
             SubelementSpecs('Nonlinear element', self.nonlinear_element),
             SubelementSpecs('Delay element', self.delay_element)
         )
