@@ -1,8 +1,8 @@
 from typing import Iterable, Literal
 import torch
 from torch import nn
-from . import Wavefront, SimulationParameters
-from .elements import Element
+from svetlanna import Wavefront, SimulationParameters
+from svetlanna.elements import Element
 
 
 class LinearAutoencoder(nn.Module):

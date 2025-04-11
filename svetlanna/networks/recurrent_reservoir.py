@@ -1,6 +1,6 @@
 from typing import Iterable
-from .elements import Element
-from . import Wavefront, SimulationParameters
+from svetlanna.elements import Element
+from svetlanna import Wavefront, SimulationParameters
 
 import torch
 from torch import nn

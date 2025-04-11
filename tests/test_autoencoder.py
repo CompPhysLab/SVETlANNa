@@ -2,7 +2,7 @@ import pytest
 import torch
 
 from svetlanna.wavefront import Wavefront
-from svetlanna.autoencoder import LinearAutoencoder
+from svetlanna.networks.autoencoder import LinearAutoencoder
 
 from tests.test_drnn import sim_params, zero_free_space
 

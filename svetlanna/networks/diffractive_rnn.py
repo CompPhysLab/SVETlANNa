@@ -1,6 +1,6 @@
 import torch
 from torch import nn
-from . import Wavefront, SimulationParameters
+from svetlanna import Wavefront, SimulationParameters
 
 
 class DiffractiveRNN(nn.Module):
