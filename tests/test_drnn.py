@@ -6,7 +6,7 @@ from svetlanna import SimulationParameters
 from svetlanna.elements import FreeSpace
 from svetlanna.detector import Detector
 from svetlanna.wavefront import Wavefront
-from svetlanna.diffractive_rnn import DiffractiveRNN
+from svetlanna.networks.diffractive_rnn import DiffractiveRNN
 
 
 @pytest.fixture()

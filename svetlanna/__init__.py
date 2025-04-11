@@ -7,6 +7,7 @@ from . import elements
 from . import units
 from . import specs
 from .clerk import Clerk
+from . import networks
 
 __all__ = [
     'Parameter',
@@ -18,5 +19,6 @@ __all__ = [
     'elements',
     'units',
     'specs',
-    'Clerk'
+    'Clerk',
+    'networks'
 ]
