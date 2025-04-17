@@ -6,7 +6,7 @@ from svetlanna import elements
 from svetlanna import SimulationParameters
 from svetlanna import Wavefront
 
-from examples import analytical_solutions as anso
+import analytical_solutions as anso
 
 
 square_parameters = [
