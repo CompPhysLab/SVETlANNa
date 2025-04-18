@@ -1,0 +1,43 @@
+<div id="{{ index }}" style="
+    border: 1px solid gray;
+    margin: 0.0rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;">
+{% if subelements|length == 0 %}
+<div style="
+    padding: 0.5rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    background-color: #fefee0;
+    color: black;">
+    <b>({{ index }}) {{ name }}</b>
+</div>
+{% else %}
+<details>
+<summary style="
+    padding: 0.5rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    background-color: #fefee0;
+    color: black;">
+    <b>({{ index }}) {{ name }}</b>
+</summary>
+<div style="padding: 0rem 1rem;">
+<div style="display: flex; flex-direction: column;">
+{% for subelement in subelements %}
+    <div style="margin: 0.5rem;">
+        {{ subelement.element_type }}
+        <div>
+            {{ subelement.html }}
+        </div>
+    </div>
+{% endfor %}
+
+</div>
+</div>
+</details>
+{% endif %}
+</div>

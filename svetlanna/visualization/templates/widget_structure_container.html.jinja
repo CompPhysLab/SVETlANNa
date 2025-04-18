@@ -1,0 +1,14 @@
+<div style="
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    font-family: monospace;
+    cursor: default;
+    max-height: 25rem;">
+{% for element in elements_html %}
+<div style="margin-bottom: 0.3rem;">
+{{ element.html }}
+</div>
+{% endfor %}
+</div>
