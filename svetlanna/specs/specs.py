@@ -9,7 +9,6 @@ from numpy.typing import ArrayLike
 import numpy as np
 import torch
 import numbers
-from ..parameters import ConstrainedParameter
 import base64
 
 
@@ -360,16 +359,22 @@ class PrettyReprRepr(ReprRepr, HTMLRepresentation):
             # If the value is scalar, it can be directly printed out
             if len(shape) == 0:
 
-                # Print minimum and maximum values for ConstrainedParameter
-                if isinstance(self.value, ConstrainedParameter):
+                try:
+                    from svetlanna import ConstrainedParameter
 
-                    min_val = self.value.min_value.item()
-                    max_val = self.value.max_value.item()
+                    # Print minimum and maximum values for ConstrainedParameter
+                    if isinstance(self.value, ConstrainedParameter):
 
-                    s = f'{class_name}\n'
-                    s += f'  ┏ min value {min_val}{units_suffix}\n'
-                    s += f'  ┗ max value {max_val}{units_suffix}\n'
-                    return s + f'{self.value.item()}{units_suffix}'
+                        min_val = self.value.min_value.item()
+                        max_val = self.value.max_value.item()
+
+                        s = f'{class_name}\n'
+                        s += f'  ┏ min value {min_val}{units_suffix}\n'
+                        s += f'  ┗ max value {max_val}{units_suffix}\n'
+                        return s + f'{self.value.item()}{units_suffix}'
+
+                except ImportError:
+                    pass
 
                 return f'{class_name}\n{self.value.item()}{units_suffix}'
 
