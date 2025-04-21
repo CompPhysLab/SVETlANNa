@@ -1,79 +1,21 @@
 .cell-output-ipywidget-background {
     background-color: transparent !important;
- }
-.svetlanna-elements-el-container {
+}
+.svetlanna-structure-container {
     display: flex;
     align-items: center;
     flex-direction: row;
     flex-wrap: nowrap;
-    padding: 0.5rem;
+    padding-bottom: 0.5rem;
     font-family: monospace;
 }
-.svetlanna-element .clickable {
-    cursor: pointer;
-}
-.svetlanna-element {
-    width: 2rem;
-    height: 11rem;
-    text-align: center;
-    color: black;
-    background-color: rgb(254, 254, 224);
-    vertical-align: middle;
-    flex-shrink: 0;
-    margin: 0.05rem;
-    border: 1px solid gray;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    padding: 0.5rem 0;
-}
-.svetlanna-element.FreeSpace {
-    height: 6rem;
-    width: 2.5rem;
-    margin: 0.3rem;
-    background-color: #a0dbd9;
-}
-.svetlanna-element.ThinLens {
-    height: 9rem;
-    border-radius: 30% / 50%;
-}
-.svetlanna-element-index {
-    writing-mode: vertical-rl;
-    text-overflow: ellipsis;
-    overflow: hidden;
-    white-space: nowrap;
-    height: 100%;
-    position: relative;
-    margin: auto;
-    pointer-events: initial;
-    cursor: default;
-}
-.svetlanna-element-index:hover {
-    animation: svetlanna-hoverOverIndexEffect 0s 0.5s forwards;
-}
-@keyframes svetlanna-hoverOverIndexEffect {
-    to {
-        overflow: visible;
-        background-color: rgb(245, 245, 245);
-        height: auto;
-    }
-}
-
 .svetlanna-specs-container {
     display: block;
 }
-.svetlanna-specs-details {
+.svetlanna-specs-element-block {
     padding-left: 2rem;
     max-height: 20rem;
     overflow: scroll;
-}
-.svetlanna-specs-details .spec-img {
-    min-width: 7rem;
-    min-height: 7rem;
-    max-width: 12rem;
-    max-height: 12rem;
-    object-fit: contain;
-    image-rendering: pixelated;
 }
 .svetlanna-specs-container > details {
     border: 1px solid gray;
@@ -83,18 +25,4 @@
     background-color: #cff1f0;
     padding: 0.5rem;
     color: black;
-}
-.svetlanna-field-picker {
-    width: 1rem;
-    height: 1rem;
-    position: relative;
-    left: -0.5rem;
-    top: -0.5rem;
-    background-color: rgb(175, 175, 220);
-    border: 1px solid gray;
-    border-radius: 0.5rem;
-    cursor: pointer;
-}
-.svetlanna-field-picker:hover {
-    background-color: rgb(139, 139, 203);
 }

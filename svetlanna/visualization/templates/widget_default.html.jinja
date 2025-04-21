@@ -1,11 +1,11 @@
-<div id="{{ index }}" style="
+<div style="
     border: 1px solid gray;
     margin: 0.0rem;
     display: flex;
     flex-direction: column;
     align-items: stretch;">
 {% if subelements|length == 0 %}
-<div style="
+<div id="sv-{{ index }}" style="
     padding: 0.5rem;
     text-overflow: ellipsis;
     overflow: hidden;
@@ -23,7 +23,7 @@
     white-space: nowrap;
     background-color: #fefee0;
     color: black;">
-    <b>({{ index }}) {{ name }}</b>
+    <span id="sv-{{ index }}"><b>({{ index }}) {{ name }}</b></span>
 </summary>
 <div style="padding: 0rem 1rem;">
 <div style="display: flex; flex-direction: column;">

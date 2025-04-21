@@ -1,8 +1,10 @@
-from .widgets import LinearOpticalSetupStepwiseForwardWidget
-from .widgets import LinearOpticalSetupWidget
-
+from .widgets import show_specs, show_structure, show_stepwise_forward
+from .widgets import jinja_env, ElementHTML
 
 __all__ = [
-    'LinearOpticalSetupStepwiseForwardWidget',
-    'LinearOpticalSetupWidget'
+    'show_specs',
+    'show_structure',
+    'show_stepwise_forward',
+    'jinja_env',
+    'ElementHTML'
 ]
