@@ -88,11 +88,15 @@ class DiffractiveLayer(Element):
         )
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
+        mask = self.mask.numpy(force=True)
+        mask_min = mask.min()
+        mask_max = mask.max()
+
         return [
             ParameterSpecs(
                 'mask', [
                     PrettyReprRepr(self.mask),
-                    ImageRepr(self.mask.numpy(force=True)),
+                    ImageRepr((255 * (mask - mask_min) / (mask_max - mask_min)).astype('uint8')),
                 ]
             ),
             ParameterSpecs(
