@@ -385,8 +385,6 @@ def show_stepwise_forward(
                     element(input)
 
         # Prepare elements data for widget
-        elements = _ElementsIterator(*elements_to_call, directory='')
-
         elements_json = []
         for element_index, element, context_generator in elements:
             for _ in context_generator:

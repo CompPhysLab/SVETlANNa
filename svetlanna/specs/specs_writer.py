@@ -257,7 +257,7 @@ class _ElementInTree:
 
 class _ElementsIterator:
     def __init__(self, *iterables: Specsable, directory: str | Path) -> None:
-        self.iterables = iterables
+        self.iterables = tuple(iterables)
         self.directory = directory
         self._iterated: dict[int, _ElementInTree] = {}
         self._tree: list[_ElementInTree] | None = None
@@ -308,6 +308,7 @@ class _ElementsIterator:
                 # Repeat the process for all subelements of the tree element
                 yield from f(subelements, element_in_tree.children)
 
+        self._iterated = {}
         self._tree = []
         yield from f(self.iterables, self._tree)
 
