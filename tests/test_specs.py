@@ -1,4 +1,5 @@
 from svetlanna.specs import ParameterSaveContext, ParameterSpecs
+from svetlanna.specs import SubelementSpecs
 from svetlanna.specs import ImageRepr, ReprRepr, NpyFileRepr, PrettyReprRepr
 from svetlanna import ConstrainedParameter
 from pathlib import Path
@@ -8,6 +9,7 @@ import numpy as np
 import pytest
 from PIL import Image
 import torch
+import builtins
 
 ###############################################################################
 #                       ParameterSaveContext tests                            #
@@ -162,7 +164,7 @@ def test_repr_repr_to(tmp_path):
         ConstrainedParameter(10, 0, 20)
     )
 )
-def test_pretty_repr_repr_to(tmp_path, value):
+def test_pretty_repr_repr_to(tmp_path, value, monkeypatch):
     context = ParameterSaveContext(
         parameter_name='test',
         directory=tmp_path,
@@ -184,6 +186,25 @@ def test_pretty_repr_repr_to(tmp_path, value):
     test_out = StringIO()
     repr.to_html(test_out, context)
     assert test_out.getvalue()
+
+    # Test processing of svetlanna absence
+    if isinstance(value, torch.Tensor) and len(value.shape) == 0:
+
+        # monkeypatching import statement
+        original_import = builtins.__import__
+
+        def import_with_no_svetlanna(name, *args, **kwargs):
+            if name == "svetlanna":
+                raise ImportError
+            return original_import(name, *args, **kwargs)
+
+        monkeypatch.setattr(builtins, '__import__', import_with_no_svetlanna)
+
+        # Test if default string is written to the buffer
+        test_out = StringIO()
+        repr.to_str(test_out, context)
+        class_name = value.__class__.__name__
+        assert test_out.getvalue() == f'{class_name}\n{value.item()}\n'
 
 
 ###############################################################################
@@ -254,3 +275,26 @@ def test_parameter_specs():
     )
 
     assert specs.representations == representations
+
+
+###############################################################################
+#                           SubelementSpecs tests                             #
+###############################################################################
+
+
+def test_subelement_specs():
+    specs = [
+        ParameterSpecs('test', [])
+    ]
+
+    class Subelement:
+        def to_specs(self):
+            return specs
+
+    subelement = Subelement()
+    subelement_specs = SubelementSpecs(
+        'test_type',
+        subelement
+    )
+
+    assert subelement_specs.subelement is subelement
