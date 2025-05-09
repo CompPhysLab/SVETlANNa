@@ -4,7 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="47c5d8fd-d3cf-4a3f-96f3-ee02934d0bbe" name="Changes" comment="" />
+    <list default="true" id="47c5d8fd-d3cf-4a3f-96f3-ee02934d0bbe" name="Changes" comment="add rtd documentation">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -49,7 +51,7 @@
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
     "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "project.propVCSSupport.Confirmation",
+    "settings.editor.selected.configurable": "project.propVCSSupport.CommitDialog",
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
@@ -84,8 +86,17 @@
       <updated>1746698326938</updated>
       <workItem from="1746698328051" duration="1966000" />
       <workItem from="1746700365227" duration="10982000" />
-      <workItem from="1746808751228" duration="1196000" />
+      <workItem from="1746808751228" duration="1503000" />
     </task>
+    <task id="LOCAL-00001" summary="add rtd documentation">
+      <option name="closed" value="true" />
+      <created>1746810133797</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1746810133797</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
