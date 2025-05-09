@@ -4,7 +4,197 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="47c5d8fd-d3cf-4a3f-96f3-ee02934d0bbe" name="Changes" comment="git ignore modified: exclude docs/ and docs/build" />
+    <list default="true" id="47c5d8fd-d3cf-4a3f-96f3-ee02934d0bbe" name="Changes" comment="git ignore modified: exclude docs/ and docs/build">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/.buildinfo" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/.nojekyll" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_120_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_144_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_156_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_167_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_172_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_173_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_51_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_75_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_03_mnist_experiments_95_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_14_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_22_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_28_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_08_autoencoder_121_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_08_autoencoder_123_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_08_autoencoder_126_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_08_autoencoder_141_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_08_autoencoder_148_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_09_convolutional_4f_148_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_09_convolutional_4f_154_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_09_convolutional_4f_169_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_09_convolutional_4f_176_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_09_convolutional_4f_62_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_09_convolutional_4f_68_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_diff_networks_examples_09_convolutional_4f_84_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_apertures_11_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_apertures_15_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_apertures_23_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_apertures_27_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_gaussian_beam_propagation_12_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_gaussian_beam_propagation_8_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_lens_10_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_lens_16_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_nonlinear_element_10_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_nonlinear_element_11_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_nonlinear_element_14_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_nonlinear_element_15_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_nonlinear_element_7_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_rectangular_slit_propagation_11_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_rectangular_slit_propagation_15_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_rectangular_slit_propagation_18_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_slm_10_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_slm_12_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_square_aperture_propagation_11_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_square_aperture_propagation_15_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_freeprop_square_aperture_propagation_19_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_phase_retrieval_optimize_example_14_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_phase_retrieval_optimize_example_15_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_phase_retrieval_optimize_example_16_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_phase_retrieval_optimize_lowapi_example_15_0.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_phase_retrieval_optimize_lowapi_example_16_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_images/examples_notebook_phase_retrieval_optimize_lowapi_example_17_1.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/diff_networks_examples/03_mnist_experiments.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/diff_networks_examples/05_reservoir_mackey_glass.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/diff_networks_examples/08_autoencoder.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/diff_networks_examples/09_convolutional_4f.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/freeprop/apertures.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/freeprop/gaussian_beam_propagation.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/freeprop/lens.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/freeprop/nonlinear_element.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/freeprop/rectangular_slit_propagation.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/freeprop/slm.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/freeprop/square_aperture_propagation.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/phase_retrieval/optimize_example.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/examples_notebook/phase_retrieval/optimize_lowapi_example.ipynb.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/freeprop_examples.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/index.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/installation.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/modules.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/network_examples.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/phase_retrieval_examples.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/physics.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/svetlanna.elements.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/svetlanna.networks.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/svetlanna.phase_retrieval_problem.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/svetlanna.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/svetlanna.specs.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_sources/svetlanna.visualization.rst.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/_sphinx_javascript_frameworks_compat.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/basic.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/badge_only.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/Roboto-Slab-Bold.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/Roboto-Slab-Bold.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/Roboto-Slab-Regular.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/Roboto-Slab-Regular.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/fontawesome-webfont.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/fontawesome-webfont.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/fontawesome-webfont.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/fontawesome-webfont.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/fontawesome-webfont.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/lato-bold-italic.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/lato-bold-italic.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/lato-bold.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/lato-bold.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/lato-normal-italic.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/lato-normal-italic.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/lato-normal.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/fonts/lato-normal.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/css/theme.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/doctools.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/documentation_options.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/file.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-bold.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-bold.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-bold.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-bold.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-bolditalic.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-bolditalic.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-bolditalic.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-bolditalic.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-italic.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-italic.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-italic.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-italic.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-regular.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-regular.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-regular.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/Lato/lato-regular.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/RobotoSlab/roboto-slab-v7-bold.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/RobotoSlab/roboto-slab-v7-bold.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/RobotoSlab/roboto-slab-v7-bold.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/RobotoSlab/roboto-slab-v7-bold.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/RobotoSlab/roboto-slab-v7-regular.eot" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/RobotoSlab/roboto-slab-v7-regular.ttf" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/RobotoSlab/roboto-slab-v7-regular.woff" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/fonts/RobotoSlab/roboto-slab-v7-regular.woff2" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/jquery.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/js/badge_only.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/js/theme.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/js/versions.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/language_data.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/logo.jpg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/minus.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/nbsphinx-broken-thumbnail.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/nbsphinx-code-cells.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/nbsphinx-gallery.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/nbsphinx-no-thumbnail.svg" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/plus.png" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/pygments.css" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/searchtools.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/_static/sphinx_highlight.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/diff_networks_examples/03_mnist_experiments.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/diff_networks_examples/03_mnist_experiments.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/diff_networks_examples/05_reservoir_mackey_glass.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/diff_networks_examples/05_reservoir_mackey_glass.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/diff_networks_examples/08_autoencoder.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/diff_networks_examples/08_autoencoder.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/diff_networks_examples/09_convolutional_4f.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/diff_networks_examples/09_convolutional_4f.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/apertures.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/apertures.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/gaussian_beam_propagation.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/gaussian_beam_propagation.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/lens.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/lens.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/nonlinear_element.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/nonlinear_element.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/rectangular_slit_propagation.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/rectangular_slit_propagation.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/slm.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/slm.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/square_aperture_propagation.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/freeprop/square_aperture_propagation.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/phase_retrieval/optimize_example.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/phase_retrieval/optimize_example.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/phase_retrieval/optimize_lowapi_example.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/examples_notebook/phase_retrieval/optimize_lowapi_example.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/freeprop_examples.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/genindex.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/index.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/installation.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/modules.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/network_examples.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/objects.inv" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/phase_retrieval_examples.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/physics.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/py-modindex.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/search.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/searchindex.js" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/svetlanna.elements.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/svetlanna.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/svetlanna.networks.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/svetlanna.phase_retrieval_problem.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/svetlanna.specs.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/docs/html/svetlanna.visualization.html" beforeDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -40,6 +230,7 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "git-widget-placeholder": "gh-pages",
     "ignore.virus.scanning.warn.message": "true",
@@ -60,6 +251,7 @@
       <recent name="C:\Users\alexey\PycharmProjects\SVETlANNa\docs\source\examples_notebook" />
     </key>
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\alexey\PycharmProjects\SVETlANNa\docs" />
       <recent name="C:\Users\alexey\PycharmProjects\SVETlANNa\docs\source\_static" />
       <recent name="C:\Users\alexey\PycharmProjects\SVETlANNa\docs\source\examples_notebook\phase_retrieval" />
       <recent name="C:\Users\alexey\PycharmProjects\SVETlANNa\docs\source\examples_notebook" />
@@ -84,7 +276,7 @@
       <updated>1746698326938</updated>
       <workItem from="1746698328051" duration="1966000" />
       <workItem from="1746700365227" duration="10982000" />
-      <workItem from="1746808751228" duration="3556000" />
+      <workItem from="1746808751228" duration="3809000" />
     </task>
     <task id="LOCAL-00001" summary="add rtd documentation">
       <option name="closed" value="true" />
@@ -110,7 +302,15 @@
       <option name="project" value="LOCAL" />
       <updated>1746812529098</updated>
     </task>
-    <option name="localTasksCounter" value="4" />
+    <task id="LOCAL-00004" summary="git ignore modified: exclude docs/ and docs/build">
+      <option name="closed" value="true" />
+      <created>1746812611079</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1746812611079</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
