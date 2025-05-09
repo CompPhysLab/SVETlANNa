@@ -1,0 +1,105 @@
+svetlanna
+=================
+
+Subpackages
+-----------
+
+.. toctree::
+   :maxdepth: 4
+
+   svetlanna.elements
+   svetlanna.networks
+   svetlanna.phase_retrieval_problem
+   svetlanna.specs
+   svetlanna.visualization
+
+Submodules
+----------
+
+svetlanna.axes\_math module
+---------------------------
+
+.. automodule:: svetlanna.axes_math
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.clerk module
+----------------------
+
+.. automodule:: svetlanna.clerk
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.detector module
+-------------------------
+
+.. automodule:: svetlanna.detector
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.logging module
+------------------------
+
+.. automodule:: svetlanna.logging
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.parameters module
+---------------------------
+
+.. automodule:: svetlanna.parameters
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.setup module
+----------------------
+
+.. automodule:: svetlanna.setup
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.simulation\_parameters module
+---------------------------------------
+
+.. automodule:: svetlanna.simulation_parameters
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.transforms module
+---------------------------
+
+.. automodule:: svetlanna.transforms
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.units module
+----------------------
+
+.. automodule:: svetlanna.units
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.wavefront module
+--------------------------
+
+.. automodule:: svetlanna.wavefront
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: svetlanna
+   :members:
+   :show-inheritance:
+   :undoc-members:

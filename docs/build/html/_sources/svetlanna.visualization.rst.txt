@@ -1,0 +1,21 @@
+svetlanna.visualization package
+===============================
+
+Submodules
+----------
+
+svetlanna.visualization.widgets module
+--------------------------------------
+
+.. automodule:: svetlanna.visualization.widgets
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: svetlanna.visualization
+   :members:
+   :show-inheritance:
+   :undoc-members:

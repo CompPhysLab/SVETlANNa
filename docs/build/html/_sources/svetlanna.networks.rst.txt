@@ -1,0 +1,37 @@
+svetlanna.networks package
+==========================
+
+Submodules
+----------
+
+svetlanna.networks.autoencoder module
+-------------------------------------
+
+.. automodule:: svetlanna.networks.autoencoder
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.networks.diffractive\_conv module
+-------------------------------------------
+
+.. automodule:: svetlanna.networks.diffractive_conv
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.networks.diffractive\_rnn module
+------------------------------------------
+
+.. automodule:: svetlanna.networks.diffractive_rnn
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: svetlanna.networks
+   :members:
+   :show-inheritance:
+   :undoc-members:

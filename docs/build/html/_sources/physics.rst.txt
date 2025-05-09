@@ -1,0 +1,62 @@
+Physical Basis
+==============
+
+Introduction
+------------
+
+Optical diffractive neural networks (DNNs) are machine learning systems that perform computation through the physical propagation of light. Instead of relying on traditional electronic architectures, these networks use optical fields that pass through structured diffractive layers, where each layer modulates the phase and/or amplitude of the incoming light.
+
+Simulating these networks accurately requires a foundation in *Fourier optics*, which provides tools for modeling light propagation and diffraction in scalar wave optics. In particular, light propagation between layers in diffractive neural networks is governed by scalar wave equations and their approximations in the spatial or frequency domain.
+
+Fourier Optics
+--------------
+
+Fourier optics is a theoretical framework used to describe how coherent light propagates and interacts with optical systems. It treats the optical field as a complex scalar wave and uses the Fourier transform to analyze diffraction and focusing effects. This approach is particularly suitable under the *paraxial approximation*, where angles of propagation are small and wavefront curvature is preserved.
+
+In diffractive neural networks, each layer can be thought of as a trainable optical mask, while propagation between layers acts as a linear operator—essentially implementing a Fourier-like transformation of the optical field.
+
+Propagation Methods
+-------------------
+
+To model light propagation between layers, this library implements several scalar diffraction methods. These methods approximate the Helmholtz equation under different regimes of distance and accuracy.
+
+1. Angular Spectrum Method
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Angular Spectrum Method (ASM) represents the optical field as a superposition of plane waves with various spatial frequencies. It is derived directly from the Helmholtz equation and involves computing the 2D Fourier transform of the field:
+
+.. math::
+
+    U(x, y, z) = \mathcal{F}^{-1} \left\{ \mathcal{F}\{U(x, y, 0)\} \cdot H(f_x, f_y, z) \right\}
+
+where:
+
+- :math:`\mathcal{F}` and :math:`\mathcal{F}^{-1}` denote the forward and inverse 2D Fourier transforms,
+- :math:`U(x, y, 0)` is the complex field at the input plane,
+- :math:`H(f_x, f_y, z)` is the transfer function given by:
+
+.. math::
+
+    H(f_x, f_y, z) = \exp \left( i 2\pi z \sqrt{\frac{1}{\lambda^2} - f_x^2 - f_y^2} \right)
+
+This method is accurate for both near- and far-field propagation, and does not require any paraxial approximation.
+
+2. Fresnel Approximation
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Fresnel approximation simplifies the diffraction integral under the assumption of moderate propagation distances. It retains the quadratic phase term and enables efficient computation via Fourier transforms.
+
+In the Fresnel regime, the field at a distance :math:`z` is given by:
+
+.. math::
+
+    U(x, y, z) = \frac{e^{ikz}}{i \lambda z} \exp\left( \frac{ik}{2z}(x^2 + y^2) \right)
+                \cdot \mathcal{F}^{-1} \left\{ \mathcal{F}\left\{U(x', y', 0) \cdot
+                \exp\left( \frac{ik}{2z}(x'^2 + y'^2) \right) \right\} \right\}
+
+where:
+
+- :math:`\lambda` is the wavelength,
+- :math:`k = \frac{2\pi}{\lambda}` is the wavenumber.
+
+The Fresnel approximation is especially useful when propagation distances are not extremely short and computational speed is important.

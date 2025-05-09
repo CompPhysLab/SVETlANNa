@@ -1,0 +1,560 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>svetlanna.phase_retrieval_problem package &mdash; SVETlANNa 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="svetlanna.specs package" href="svetlanna.specs.html" />
+    <link rel="prev" title="svetlanna.networks package" href="svetlanna.networks.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SVETlANNa
+              <img src="_static/logo.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="physics.html">Physical Basis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Command reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="svetlanna.html">svetlanna</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="svetlanna.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.elements.html">svetlanna.elements package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.networks.html">svetlanna.networks package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">svetlanna.phase_retrieval_problem package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.specs.html">svetlanna.specs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.visualization.html">svetlanna.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.axes_math">svetlanna.axes_math module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.clerk">svetlanna.clerk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.detector">svetlanna.detector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.logging">svetlanna.logging module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.parameters">svetlanna.parameters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.setup">svetlanna.setup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.simulation_parameters">svetlanna.simulation_parameters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.transforms">svetlanna.transforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.units">svetlanna.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.wavefront">svetlanna.wavefront module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SVETlANNa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Command reference</a></li>
+          <li class="breadcrumb-item"><a href="svetlanna.html">svetlanna</a></li>
+      <li class="breadcrumb-item active">svetlanna.phase_retrieval_problem package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/svetlanna.phase_retrieval_problem.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="svetlanna-phase-retrieval-problem-package">
+<h1>svetlanna.phase_retrieval_problem package<a class="headerlink" href="#svetlanna-phase-retrieval-problem-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-svetlanna.phase_retrieval_problem.algorithms">
+<span id="svetlanna-phase-retrieval-problem-algorithms-module"></span><h2>svetlanna.phase_retrieval_problem.algorithms module<a class="headerlink" href="#module-svetlanna.phase_retrieval_problem.algorithms" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.algorithms.gerchberg_saxton_algorithm">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.algorithms.</span></span><span class="sig-name descname"><span class="pre">gerchberg_saxton_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_approximation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult" title="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult"><span class="pre">PhaseRetrievalResult</span></a></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.algorithms.gerchberg_saxton_algorithm" title="Link to this definition"></a></dt>
+<dd><p>Gerchberg-Saxton algorithm(GS) for solving the phase retrieval problem</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>target_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity profile in the Fourier plane</p>
+</dd>
+<dt>source_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity distribution before the optical setup(in the image plane)</p>
+</dd>
+<dt>forward<span class="classifier">Callable</span></dt><dd><p>Function which describes forward propagation through the optical system</p>
+</dd>
+<dt>reverse<span class="classifier">Callable</span></dt><dd><p>Function which describes reverse propagation through the optical system</p>
+</dd>
+<dt>initial_approximation<span class="classifier">torch.Tensor</span></dt><dd><p>Initial approximation for the phase profile</p>
+</dd>
+<dt>tol<span class="classifier">float</span></dt><dd><p>Accuracy for the algorithm</p>
+</dd>
+<dt>maxiter<span class="classifier">int</span></dt><dd><p>Maximum number of iterations</p>
+</dd>
+<dt>target_phase<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Phase profile on the Fourier plane(optional for the generating
+target intensity profile problem) for reconstructing phase profile
+problem, by default None</p>
+</dd>
+<dt>target_region<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Region to preserve phase and amplitude profiles in the Fourier plane
+for reconstructing phase profile problem(optional for the generating
+target intensity profile problem), by default None</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>prr.PhaseRetrievalResult</dt><dd><p>Exemplar of class PhaseRetrievalResult which presents result of
+optimization</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.algorithms.hybrid_input_output">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.algorithms.</span></span><span class="sig-name descname"><span class="pre">hybrid_input_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_approximation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult" title="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult"><span class="pre">PhaseRetrievalResult</span></a></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.algorithms.hybrid_input_output" title="Link to this definition"></a></dt>
+<dd><p>Hybrid Input-Output(HIO) algorithm for for solving the phase retrieval
+problem</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>target_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity profile in the Fourier plane</p>
+</dd>
+<dt>source_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity distribution before the optical setup(in the image plane)</p>
+</dd>
+<dt>forward<span class="classifier">Callable</span></dt><dd><p>Function which describes forward propagation through the optical system</p>
+</dd>
+<dt>reverse<span class="classifier">Callable</span></dt><dd><p>Function which describes reverse propagation through the optical system</p>
+</dd>
+<dt>initial_approximation<span class="classifier">torch.Tensor</span></dt><dd><p>Initial approximation for the phase profile</p>
+</dd>
+<dt>tol<span class="classifier">float</span></dt><dd><p>Accuracy for the algorithm</p>
+</dd>
+<dt>maxiter<span class="classifier">int</span></dt><dd><p>Maximum number of iterations</p>
+</dd>
+<dt>target_phase<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Phase profile on the Fourier plane(optional for the generating
+target intensity profile problem) for reconstructing phase profile
+problem, by default None</p>
+</dd>
+<dt>target_region<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Region to preserve phase and amplitude profiles in the Fourier plane
+for reconstructing phase profile problem(optional for the generating
+target intensity profile problem), by default None</p>
+</dd>
+<dt>constant_factor: float</dt><dd><p>Learning rate value for the HIO algorithm, by default 0.9</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h3>Returns<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>prr.PhaseRetrievalResult</dt><dd><p>Exemplar of class PhaseRetrievalResult which presents result of
+optimization</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.phase_retrieval_problem.phase_retrieval">
+<span id="svetlanna-phase-retrieval-problem-phase-retrieval-module"></span><h2>svetlanna.phase_retrieval_problem.phase_retrieval module<a class="headerlink" href="#module-svetlanna.phase_retrieval_problem.phase_retrieval" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.phase_retrieval.</span></span><span class="sig-name descname"><span class="pre">AlgorithmOptions</span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">TypedDict</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions.constant_factor">
+<span class="sig-name descname"><span class="pre">constant_factor</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions.constant_factor" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions.disp">
+<span class="sig-name descname"><span class="pre">disp</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions.disp" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions.maxiter">
+<span class="sig-name descname"><span class="pre">maxiter</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions.maxiter" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions.tol">
+<span class="sig-name descname"><span class="pre">tol</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions.tol" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.phase_retrieval.</span></span><span class="sig-name descname"><span class="pre">SetupLike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>A class for phase_retrieval_problem with personal realizations of
+forward and reverse methods instead of methods in
+svetlanna.setup.LinearOpticalSetup</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Protocol<span class="classifier">_type_</span></dt><dd><p>_description_</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike.forward" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike.reverse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval.retrieve_phase">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.phase_retrieval.</span></span><span class="sig-name descname"><span class="pre">retrieve_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optical_setup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.setup.LinearOpticalSetup" title="svetlanna.setup.LinearOpticalSetup"><span class="pre">LinearOpticalSetup</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike" title="svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike"><span class="pre">SetupLike</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'GS'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HIO'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'GS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions" title="svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions"><span class="pre">AlgorithmOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult" title="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult"><span class="pre">PhaseRetrievalResult</span></a></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval.retrieve_phase" title="Link to this definition"></a></dt>
+<dt class="sig sig-object py">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.phase_retrieval.</span></span><span class="sig-name descname"><span class="pre">retrieve_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optical_setup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.setup.LinearOpticalSetup" title="svetlanna.setup.LinearOpticalSetup"><span class="pre">LinearOpticalSetup</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike" title="svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike"><span class="pre">SetupLike</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'GS'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HIO'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'GS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions" title="svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions"><span class="pre">AlgorithmOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult" title="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult"><span class="pre">PhaseRetrievalResult</span></a></span></span></dt>
+<dd><p>Function for solving phase retrieval problem: generating target
+intensity profile or reconstructing the phase profile of the field</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>source_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity distribution before the optical setup</p>
+</dd>
+<dt>optical_setup<span class="classifier">LinearOpticalSetup | SetupLike</span></dt><dd><p>Optical system through which the beam is propagated</p>
+</dd>
+<dt>target_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity profile in the Fourier plane</p>
+</dd>
+<dt>target_phase<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Phase profile on the Fourier plane(optional for the generating
+target intensity profile problem)</p>
+</dd>
+<dt>target_region<span class="classifier">torch.Tensor, optional</span></dt><dd><p>Region to preserve phase and amplitude profiles in the Fourier plane(
+optional for the generating target intensity profile problem)</p>
+</dd>
+<dt>initial_phase<span class="classifier">torch.Tensor, optional</span></dt><dd><p>Initial approximation for the phase profile, by default None</p>
+</dd>
+<dt>method<span class="classifier">Literal['GS', 'HIO'], optional</span></dt><dd><p>Algorithms for phase retrieval problem, by default ‘GS’</p>
+</dd>
+<dt>options<span class="classifier">dict, optional</span></dt><dd><p>Dictionary with optimization parameters, by default {
+‘tol’: 1e-16,   # criteria for stop optimization
+‘maxiter’: 100, # maximum number of iterations
+‘constant_factor’: 0.9,    # convergence parameter for HIO
+‘disp’: False   # show result of optimization
+}</p>
+</dd>
+</dl>
+</section>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>prr.PhaseRetrievalResult</dt><dd><p>Exemplar of class PhaseRetrievalResult which presents result of
+optimization</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h3>Raises<a class="headerlink" href="#raises" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>Unknown optimization method</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.phase_retrieval_problem.phase_retrieval_result">
+<span id="svetlanna-phase-retrieval-problem-phase-retrieval-result-module"></span><h2>svetlanna.phase_retrieval_problem.phase_retrieval_result module<a class="headerlink" href="#module-svetlanna.phase_retrieval_problem.phase_retrieval_result" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.phase_retrieval_result.</span></span><span class="sig-name descname"><span class="pre">PhaseRetrievalResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_func_evolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents the phase retrieval result</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult.cost_func">
+<span class="sig-name descname"><span class="pre">cost_func</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult.cost_func" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult.cost_func_evolution">
+<span class="sig-name descname"><span class="pre">cost_func_evolution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult.cost_func_evolution" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult.number_of_iterations">
+<span class="sig-name descname"><span class="pre">number_of_iterations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult.number_of_iterations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult.solution">
+<span class="sig-name descname"><span class="pre">solution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult.solution" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.phase_retrieval_problem">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-svetlanna.phase_retrieval_problem" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.PhaseRetrievalResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.</span></span><span class="sig-name descname"><span class="pre">PhaseRetrievalResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">solution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_func</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cost_func_evolution</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">number_of_iterations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.PhaseRetrievalResult" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Represents the phase retrieval result</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.PhaseRetrievalResult.cost_func">
+<span class="sig-name descname"><span class="pre">cost_func</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.PhaseRetrievalResult.cost_func" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.PhaseRetrievalResult.cost_func_evolution">
+<span class="sig-name descname"><span class="pre">cost_func_evolution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.PhaseRetrievalResult.cost_func_evolution" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.PhaseRetrievalResult.number_of_iterations">
+<span class="sig-name descname"><span class="pre">number_of_iterations</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.PhaseRetrievalResult.number_of_iterations" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.PhaseRetrievalResult.solution">
+<span class="sig-name descname"><span class="pre">solution</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.phase_retrieval_problem.PhaseRetrievalResult.solution" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.SetupLike">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.</span></span><span class="sig-name descname"><span class="pre">SetupLike</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.SetupLike" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>A class for phase_retrieval_problem with personal realizations of
+forward and reverse methods instead of methods in
+svetlanna.setup.LinearOpticalSetup</p>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Protocol<span class="classifier">_type_</span></dt><dd><p>_description_</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.SetupLike.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.SetupLike.forward" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.SetupLike.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.SetupLike.reverse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.gerchberg_saxton_algorithm">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.</span></span><span class="sig-name descname"><span class="pre">gerchberg_saxton_algorithm</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_approximation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult" title="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult"><span class="pre">PhaseRetrievalResult</span></a></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.gerchberg_saxton_algorithm" title="Link to this definition"></a></dt>
+<dd><p>Gerchberg-Saxton algorithm(GS) for solving the phase retrieval problem</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>target_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity profile in the Fourier plane</p>
+</dd>
+<dt>source_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity distribution before the optical setup(in the image plane)</p>
+</dd>
+<dt>forward<span class="classifier">Callable</span></dt><dd><p>Function which describes forward propagation through the optical system</p>
+</dd>
+<dt>reverse<span class="classifier">Callable</span></dt><dd><p>Function which describes reverse propagation through the optical system</p>
+</dd>
+<dt>initial_approximation<span class="classifier">torch.Tensor</span></dt><dd><p>Initial approximation for the phase profile</p>
+</dd>
+<dt>tol<span class="classifier">float</span></dt><dd><p>Accuracy for the algorithm</p>
+</dd>
+<dt>maxiter<span class="classifier">int</span></dt><dd><p>Maximum number of iterations</p>
+</dd>
+<dt>target_phase<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Phase profile on the Fourier plane(optional for the generating
+target intensity profile problem) for reconstructing phase profile
+problem, by default None</p>
+</dd>
+<dt>target_region<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Region to preserve phase and amplitude profiles in the Fourier plane
+for reconstructing phase profile problem(optional for the generating
+target intensity profile problem), by default None</p>
+</dd>
+</dl>
+</section>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>prr.PhaseRetrievalResult</dt><dd><p>Exemplar of class PhaseRetrievalResult which presents result of
+optimization</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.hybrid_input_output">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.</span></span><span class="sig-name descname"><span class="pre">hybrid_input_output</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forward</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reverse</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_approximation</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tol</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">constant_factor</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0.9</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult" title="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult"><span class="pre">PhaseRetrievalResult</span></a></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.hybrid_input_output" title="Link to this definition"></a></dt>
+<dd><p>Hybrid Input-Output(HIO) algorithm for for solving the phase retrieval
+problem</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>target_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity profile in the Fourier plane</p>
+</dd>
+<dt>source_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity distribution before the optical setup(in the image plane)</p>
+</dd>
+<dt>forward<span class="classifier">Callable</span></dt><dd><p>Function which describes forward propagation through the optical system</p>
+</dd>
+<dt>reverse<span class="classifier">Callable</span></dt><dd><p>Function which describes reverse propagation through the optical system</p>
+</dd>
+<dt>initial_approximation<span class="classifier">torch.Tensor</span></dt><dd><p>Initial approximation for the phase profile</p>
+</dd>
+<dt>tol<span class="classifier">float</span></dt><dd><p>Accuracy for the algorithm</p>
+</dd>
+<dt>maxiter<span class="classifier">int</span></dt><dd><p>Maximum number of iterations</p>
+</dd>
+<dt>target_phase<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Phase profile on the Fourier plane(optional for the generating
+target intensity profile problem) for reconstructing phase profile
+problem, by default None</p>
+</dd>
+<dt>target_region<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Region to preserve phase and amplitude profiles in the Fourier plane
+for reconstructing phase profile problem(optional for the generating
+target intensity profile problem), by default None</p>
+</dd>
+<dt>constant_factor: float</dt><dd><p>Learning rate value for the HIO algorithm, by default 0.9</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>prr.PhaseRetrievalResult</dt><dd><p>Exemplar of class PhaseRetrievalResult which presents result of
+optimization</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.phase_retrieval_problem.retrieve_phase">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.phase_retrieval_problem.</span></span><span class="sig-name descname"><span class="pre">retrieve_phase</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">source_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optical_setup</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.setup.LinearOpticalSetup" title="svetlanna.setup.LinearOpticalSetup"><span class="pre">LinearOpticalSetup</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike" title="svetlanna.phase_retrieval_problem.phase_retrieval.SetupLike"><span class="pre">SetupLike</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_intensity</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target_region</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">initial_phase</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'GS'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'HIO'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'GS'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">options</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions" title="svetlanna.phase_retrieval_problem.phase_retrieval.AlgorithmOptions"><span class="pre">AlgorithmOptions</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult" title="svetlanna.phase_retrieval_problem.phase_retrieval_result.PhaseRetrievalResult"><span class="pre">PhaseRetrievalResult</span></a></span></span><a class="headerlink" href="#svetlanna.phase_retrieval_problem.retrieve_phase" title="Link to this definition"></a></dt>
+<dd><p>Function for solving phase retrieval problem: generating target
+intensity profile or reconstructing the phase profile of the field</p>
+<section id="id11">
+<h3>Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>source_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity distribution before the optical setup</p>
+</dd>
+<dt>optical_setup<span class="classifier">LinearOpticalSetup | SetupLike</span></dt><dd><p>Optical system through which the beam is propagated</p>
+</dd>
+<dt>target_intensity<span class="classifier">torch.Tensor</span></dt><dd><p>Intensity profile in the Fourier plane</p>
+</dd>
+<dt>target_phase<span class="classifier">torch.Tensor | None, optional</span></dt><dd><p>Phase profile on the Fourier plane(optional for the generating
+target intensity profile problem)</p>
+</dd>
+<dt>target_region<span class="classifier">torch.Tensor, optional</span></dt><dd><p>Region to preserve phase and amplitude profiles in the Fourier plane(
+optional for the generating target intensity profile problem)</p>
+</dd>
+<dt>initial_phase<span class="classifier">torch.Tensor, optional</span></dt><dd><p>Initial approximation for the phase profile, by default None</p>
+</dd>
+<dt>method<span class="classifier">Literal['GS', 'HIO'], optional</span></dt><dd><p>Algorithms for phase retrieval problem, by default ‘GS’</p>
+</dd>
+<dt>options<span class="classifier">dict, optional</span></dt><dd><p>Dictionary with optimization parameters, by default {
+‘tol’: 1e-16,   # criteria for stop optimization
+‘maxiter’: 100, # maximum number of iterations
+‘constant_factor’: 0.9,    # convergence parameter for HIO
+‘disp’: False   # show result of optimization
+}</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h3>Returns<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>prr.PhaseRetrievalResult</dt><dd><p>Exemplar of class PhaseRetrievalResult which presents result of
+optimization</p>
+</dd>
+</dl>
+</section>
+<section id="id13">
+<h3>Raises<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>Unknown optimization method</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="svetlanna.networks.html" class="btn btn-neutral float-left" title="svetlanna.networks package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="svetlanna.specs.html" class="btn btn-neutral float-right" title="svetlanna.specs package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CompPhysLab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

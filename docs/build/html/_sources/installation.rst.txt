@@ -1,0 +1,22 @@
+Installation
+============
+
+Create a virtual environment (e.g., see venv documentation)
+Install the PyTorch (it is up to the user to choose a version)
+
+.. code-block:: python
+
+   pip install torch
+
+Install the Poetry, or check that its version is 2.0.0 or greater
+
+.. code-block:: python
+
+   pip install poetry
+
+
+In the library folder execute the command
+
+.. code-block:: python
+
+   poetry install

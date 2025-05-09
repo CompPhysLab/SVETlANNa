@@ -1,0 +1,322 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Gaussain Beam propagation &mdash; SVETlANNa 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Use of a nonlinear element" href="nonlinear_element.html" />
+    <link rel="prev" title="Lens" href="lens.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SVETlANNa
+              <img src="../../_static/logo.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../physics.html">Physical Basis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Command reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="../../freeprop_examples.html">Examples of solving forward light propagation problems</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="apertures.html">Diffraction on the apertures</a></li>
+<li class="toctree-l3"><a class="reference internal" href="lens.html">Lens</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Gaussain Beam propagation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Creating-numerical-mesh-with-using-SimulationParameters-class">Creating numerical mesh with using <code class="docutils literal notranslate"><span class="pre">SimulationParameters</span></code> class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Creating-preloaded-beams">Creating preloaded beams</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Arbitrary-wavefront-propagation">Arbitrary wavefront propagation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="nonlinear_element.html">Use of a nonlinear element</a></li>
+<li class="toctree-l3"><a class="reference internal" href="rectangular_slit_propagation.html">Diffraction on the thin slit</a></li>
+<li class="toctree-l3"><a class="reference internal" href="slm.html">Use of SLM</a></li>
+<li class="toctree-l3"><a class="reference internal" href="square_aperture_propagation.html">Propagation through the square aperture</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../phase_retrieval_examples.html">Examples of phase retrieval algorithms</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../network_examples.html">Examples of diffractive optical networks</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SVETlANNa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="../../freeprop_examples.html">Examples of solving forward light propagation problems</a></li>
+      <li class="breadcrumb-item active">Gaussain Beam propagation</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples_notebook/freeprop/gaussian_beam_propagation.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[6]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">svetlanna</span><span class="w"> </span><span class="kn">import</span> <span class="n">elements</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">svetlanna</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationParameters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">svetlanna.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">ureg</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">svetlanna</span><span class="w"> </span><span class="kn">import</span> <span class="n">wavefront</span> <span class="k">as</span> <span class="n">w</span>
+</pre></div>
+</div>
+</div>
+<section id="Gaussain-Beam-propagation">
+<h1>Gaussain Beam propagation<a class="headerlink" href="#Gaussain-Beam-propagation" title="Link to this heading"></a></h1>
+<p>In this example we will use <code class="docutils literal notranslate"><span class="pre">svetlanna.wavefront</span></code> functional to create some wavefronts.</p>
+<p>Firstly, it’s necessary to create the numerical mesh using <code class="docutils literal notranslate"><span class="pre">SimulationParameters</span></code> class. You must define your screen size <span class="math notranslate nohighlight">\(l_x\times l_y\)</span>, number of nodes <span class="math notranslate nohighlight">\(N_x\times N_y\)</span> along axis and wavefront’s wavelength(group of wavelengths).</p>
+<p>Secondly, you can use <code class="docutils literal notranslate"><span class="pre">svetlanna.Wavefront.&lt;wavefront_type&gt;</span></code> functional to create required wavefront. Available types: Gaussian beam, planar wave and spherical wave. Moreover, it’s possible to pass arbitrary <code class="docutils literal notranslate"><span class="pre">torch.Tensor</span></code> object that describes your specific wavefront to <code class="docutils literal notranslate"><span class="pre">svetlanna.Wavefront(&lt;torch.Tensor&gt;)</span></code>.</p>
+<p><strong>Remark:</strong> you can create <code class="docutils literal notranslate"><span class="pre">torch.tensor([wavelength1,</span> <span class="pre">wavelength2,</span> <span class="pre">...,</span> <span class="pre">wavelengthN])</span></code> object and pass it to <code class="docutils literal notranslate"><span class="pre">SimulationParameters</span></code> if it’s necessary to propagate several wavefronts with different wavelengths.</p>
+<section id="Creating-numerical-mesh-with-using-SimulationParameters-class">
+<h2>Creating numerical mesh with using <code class="docutils literal notranslate"><span class="pre">SimulationParameters</span></code> class<a class="headerlink" href="#Creating-numerical-mesh-with-using-SimulationParameters-class" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">Nx</span> <span class="o">=</span> <span class="mi">1500</span>   <span class="c1"># number of nodes in x direction</span>
+<span class="n">Ny</span> <span class="o">=</span> <span class="mi">1500</span>   <span class="c1"># number of nodes in y direction</span>
+
+<span class="n">lx</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mm</span>    <span class="c1"># size of the grid in x direction</span>
+<span class="n">ly</span> <span class="o">=</span> <span class="mi">16</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mm</span>  <span class="c1"># size of the grid in y direction</span>
+
+<span class="n">wavelength</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mi">330</span><span class="p">,</span> <span class="mi">1064</span><span class="p">])</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">nm</span>  <span class="c1"># wavelength of the light</span>
+
+<span class="c1"># creating SimulationParameters exemplar</span>
+<span class="n">sim_params</span> <span class="o">=</span> <span class="n">SimulationParameters</span><span class="p">({</span>
+    <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">lx</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">lx</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Nx</span><span class="p">),</span>
+    <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">ly</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">ly</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">Ny</span><span class="p">),</span>
+    <span class="s1">&#39;wavelength&#39;</span><span class="p">:</span> <span class="n">wavelength</span><span class="p">,</span>
+<span class="p">})</span>
+<br/></pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="c1"># return 2d-tensors of x and y coordinates</span>
+<span class="n">x_grid</span><span class="p">,</span> <span class="n">y_grid</span> <span class="o">=</span> <span class="n">sim_params</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">x_axis</span><span class="o">=</span><span class="s1">&#39;W&#39;</span><span class="p">,</span> <span class="n">y_axis</span><span class="o">=</span><span class="s1">&#39;H&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Creating-preloaded-beams">
+<h2>Creating preloaded beams<a class="headerlink" href="#Creating-preloaded-beams" title="Link to this heading"></a></h2>
+<p>Let’s create two Gaussian beams with wavelengths defined above. Both of beams will propagate along distance <span class="math notranslate nohighlight">\(z\)</span></p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[100]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">w0</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">mm</span>  <span class="c1"># waist radius of the Gaussian Beam</span>
+<span class="n">z</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">cm</span>  <span class="c1"># propagation distance</span>
+
+<span class="c1"># return svetlanna.Wavefront class exemplar</span>
+<span class="n">output_field</span> <span class="o">=</span> <span class="n">w</span><span class="o">.</span><span class="n">Wavefront</span><span class="o">.</span><span class="n">gaussian_beam</span><span class="p">(</span>
+    <span class="n">simulation_parameters</span><span class="o">=</span><span class="n">sim_params</span><span class="p">,</span>
+    <span class="n">waist_radius</span><span class="o">=</span><span class="n">w0</span><span class="p">,</span>
+    <span class="n">distance</span><span class="o">=</span><span class="n">z</span>
+<span class="p">)</span>
+
+<span class="c1"># .intensity property of svetlanna.Wavefront class exemplar</span>
+<span class="c1"># returns 2d-tensor which describes intensity profile of the wavefront</span>
+<span class="n">output_intensity</span> <span class="o">=</span> <span class="n">output_field</span><span class="o">.</span><span class="n">intensity</span>
+</pre></div>
+</div>
+</div>
+<p>Visualize intensity profiles:</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[101]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">beam1</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x_grid</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">y_grid</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">output_intensity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;hot&#39;</span><span class="p">)</span>
+<span class="n">beam2</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x_grid</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">y_grid</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">output_intensity</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;hot&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;330 nm&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;1064 nm&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x, [mm]&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;y, [mm]&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x, [mm]&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;y, [mm]&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">beam1</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Intensity&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">beam2</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Intensity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[101]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.colorbar.Colorbar at 0x14b5b5c7e90&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/examples_notebook_freeprop_gaussian_beam_propagation_8_1.png" src="../../_images/examples_notebook_freeprop_gaussian_beam_propagation_8_1.png" />
+</div>
+</div>
+</section>
+<section id="Arbitrary-wavefront-propagation">
+<h2>Arbitrary wavefront propagation<a class="headerlink" href="#Arbitrary-wavefront-propagation" title="Link to this heading"></a></h2>
+<p>You can use <code class="docutils literal notranslate"><span class="pre">svetlanna.elements.FreeSpace</span></code> class to propagate arbitrary wavefront using Angular Spectrum method or Fresnel method. It’s necessary to define:</p>
+<ol class="arabic simple">
+<li><p>Propagation distance</p></li>
+<li><p>Method</p></li>
+<li><p>Input wavefront into <code class="docutils literal notranslate"><span class="pre">.forward(incident_wavefront=&lt;svetlanna.Wavefront&gt;)</span></code> method for <code class="docutils literal notranslate"><span class="pre">FreeSpace</span></code> class</p></li>
+</ol>
+<p>Let’s propagate our beams using Angular Spectrum method on distance <span class="math notranslate nohighlight">\(z_0\)</span>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[102]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">z0</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">cm</span>  <span class="c1"># propagation distance</span>
+
+<span class="n">free_space</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">FreeSpace</span><span class="p">(</span>
+    <span class="n">simulation_parameters</span><span class="o">=</span><span class="n">sim_params</span><span class="p">,</span>
+    <span class="n">distance</span><span class="o">=</span><span class="n">z0</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s2">&quot;AS&quot;</span>
+<span class="p">)</span>
+
+<span class="c1"># .forward() return svetlanna.Wavefront class exemplar</span>
+<span class="n">free_space_output</span> <span class="o">=</span> <span class="n">free_space</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">incident_wavefront</span><span class="o">=</span><span class="n">output_field</span><span class="p">)</span>
+
+<span class="n">free_space_output_intensity</span> <span class="o">=</span> <span class="n">free_space_output</span><span class="o">.</span><span class="n">intensity</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[103]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="n">beam1</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x_grid</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">y_grid</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">free_space_output_intensity</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;rainbow&#39;</span><span class="p">)</span>
+<span class="n">beam2</span> <span class="o">=</span> <span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">pcolormesh</span><span class="p">(</span><span class="n">x_grid</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">y_grid</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">free_space_output_intensity</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;rainbow&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;330 nm wavefront </span><span class="se">\n</span><span class="s1"> after using FreeSpace element&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="s1">&#39;1064 nm wavefront </span><span class="se">\n</span><span class="s1"> after using FreeSpace element&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_aspect</span><span class="p">(</span><span class="s1">&#39;equal&#39;</span><span class="p">)</span>
+
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x, [mm]&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;y, [mm]&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s1">&#39;x, [mm]&#39;</span><span class="p">)</span>
+<span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;y, [mm]&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">beam1</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Intensity&#39;</span><span class="p">)</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">beam2</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Intensity&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[103]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.colorbar.Colorbar at 0x14bfadf9a50&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/examples_notebook_freeprop_gaussian_beam_propagation_12_1.png" src="../../_images/examples_notebook_freeprop_gaussian_beam_propagation_12_1.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="lens.html" class="btn btn-neutral float-left" title="Lens" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="nonlinear_element.html" class="btn btn-neutral float-right" title="Use of a nonlinear element" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CompPhysLab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

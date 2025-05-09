@@ -1,0 +1,1408 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>svetlanna.elements package &mdash; SVETlANNa 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="svetlanna.networks package" href="svetlanna.networks.html" />
+    <link rel="prev" title="svetlanna" href="svetlanna.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SVETlANNa
+              <img src="_static/logo.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="physics.html">Physical Basis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Command reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="svetlanna.html">svetlanna</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="svetlanna.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4 current"><a class="current reference internal" href="#">svetlanna.elements package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.networks.html">svetlanna.networks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.phase_retrieval_problem.html">svetlanna.phase_retrieval_problem package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.specs.html">svetlanna.specs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.visualization.html">svetlanna.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.axes_math">svetlanna.axes_math module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.clerk">svetlanna.clerk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.detector">svetlanna.detector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.logging">svetlanna.logging module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.parameters">svetlanna.parameters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.setup">svetlanna.setup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.simulation_parameters">svetlanna.simulation_parameters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.transforms">svetlanna.transforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.units">svetlanna.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.wavefront">svetlanna.wavefront module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SVETlANNa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Command reference</a></li>
+          <li class="breadcrumb-item"><a href="svetlanna.html">svetlanna</a></li>
+      <li class="breadcrumb-item active">svetlanna.elements package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/svetlanna.elements.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="svetlanna-elements-package">
+<h1>svetlanna.elements package<a class="headerlink" href="#svetlanna-elements-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-svetlanna.elements.aperture">
+<span id="svetlanna-elements-aperture-module"></span><h2>svetlanna.elements.aperture module<a class="headerlink" href="#module-svetlanna.elements.aperture" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.Aperture">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.aperture.</span></span><span class="sig-name descname"><span class="pre">Aperture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.aperture.Aperture" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.aperture.MulElement" title="svetlanna.elements.aperture.MulElement"><code class="xref py py-class docutils literal notranslate"><span class="pre">MulElement</span></code></a></p>
+<p>Aperture of the optical element with transmission function, which takes
+the value 0 or 1</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.Aperture.get_transmission_function">
+<span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.aperture.Aperture.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Method which returns the transmission function of
+the element</p>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>transmission function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.Aperture.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.aperture.Aperture.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.Aperture.transmission_function_axes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function_axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.elements.aperture.Aperture.transmission_function_axes" title="Link to this definition"></a></dt>
+<dd><p>Axes of the transmission function.
+For example, <cite>(‘H’, ‘W’)</cite></p>
+<section id="id1">
+<h3>Returns<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple[str, …]</dt><dd><p>Axes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.MulElement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.aperture.</span></span><span class="sig-name descname"><span class="pre">MulElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.aperture.MulElement" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ABC</span></code></p>
+<p>Class that generalize all elements with E-&gt;T&#64;E like forward function,
+where T is transmission function</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.MulElement.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.aperture.MulElement.forward" title="Link to this definition"></a></dt>
+<dd><p>Calculate the field after propagating through the
+element</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input_field<span class="classifier">Wavefront</span></dt><dd><p>Field incident on the aperture</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h3>Returns<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>The field after propagating through the element</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.MulElement.get_transmission_function">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.aperture.MulElement.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Method which returns the transmission function of
+the element</p>
+<section id="id3">
+<h3>Returns<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>transmission function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.MulElement.transmission_function_axes">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function_axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.elements.aperture.MulElement.transmission_function_axes" title="Link to this definition"></a></dt>
+<dd><p>Axes of the transmission function.
+For example, <cite>(‘H’, ‘W’)</cite></p>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple[str, …]</dt><dd><p>Axes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.RectangularAperture">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.aperture.</span></span><span class="sig-name descname"><span class="pre">RectangularAperture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.aperture.RectangularAperture" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.aperture.MulElement" title="svetlanna.elements.aperture.MulElement"><code class="xref py py-class docutils literal notranslate"><span class="pre">MulElement</span></code></a></p>
+<p>A rectangle-shaped aperture with a transmission function taking either
+a value of 0 or 1</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.RectangularAperture.get_transmission_function">
+<span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.aperture.RectangularAperture.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Method which returns the transmission function of
+the element</p>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>transmission function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.RectangularAperture.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.aperture.RectangularAperture.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.RectangularAperture.transmission_function_axes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function_axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.elements.aperture.RectangularAperture.transmission_function_axes" title="Link to this definition"></a></dt>
+<dd><p>Axes of the transmission function.
+For example, <cite>(‘H’, ‘W’)</cite></p>
+<section id="id6">
+<h3>Returns<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple[str, …]</dt><dd><p>Axes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.RoundAperture">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.aperture.</span></span><span class="sig-name descname"><span class="pre">RoundAperture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.aperture.RoundAperture" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.aperture.MulElement" title="svetlanna.elements.aperture.MulElement"><code class="xref py py-class docutils literal notranslate"><span class="pre">MulElement</span></code></a></p>
+<p>A round-shaped aperture with a transmission function taking either
+a value of 0 or 1</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.RoundAperture.get_transmission_function">
+<span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.aperture.RoundAperture.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Method which returns the transmission function of
+the element</p>
+<section id="id7">
+<h3>Returns<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>transmission function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.RoundAperture.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.aperture.RoundAperture.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.aperture.RoundAperture.transmission_function_axes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function_axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.elements.aperture.RoundAperture.transmission_function_axes" title="Link to this definition"></a></dt>
+<dd><p>Axes of the transmission function.
+For example, <cite>(‘H’, ‘W’)</cite></p>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple[str, …]</dt><dd><p>Axes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.elements.diffractive_layer">
+<span id="svetlanna-elements-diffractive-layer-module"></span><h2>svetlanna.elements.diffractive_layer module<a class="headerlink" href="#module-svetlanna.elements.diffractive_layer" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.diffractive_layer.DiffractiveLayer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.diffractive_layer.</span></span><span class="sig-name descname"><span class="pre">DiffractiveLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6.283185307179586</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.diffractive_layer.DiffractiveLayer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class that described the field after propagating through the
+passive diffractive layer with a given phase mask</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.diffractive_layer.DiffractiveLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.diffractive_layer.DiffractiveLayer.forward" title="Link to this definition"></a></dt>
+<dd><p>Method that calculates the field after propagating through the SLM</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input_field<span class="classifier">Wavefront</span></dt><dd><p>Field incident on the SLM</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>The field after propagating through the SLM</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.diffractive_layer.DiffractiveLayer.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.diffractive_layer.DiffractiveLayer.reverse" title="Link to this definition"></a></dt>
+<dd><p>Method that calculates the field after passing the SLM in back
+propagation</p>
+<section id="id11">
+<h3>Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>transmitted_field<span class="classifier">Wavefront</span></dt><dd><p>Field incident on the SLM in back propagation
+(transmitted field in forward propagation)</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h3>Returns<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>Field transmitted on the SLM in back propagation
+(incident field in forward propagation)</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.diffractive_layer.DiffractiveLayer.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.diffractive_layer.DiffractiveLayer.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.diffractive_layer.DiffractiveLayer.transmission_function">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.diffractive_layer.DiffractiveLayer.transmission_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.elements.element">
+<span id="svetlanna-elements-element-module"></span><h2>svetlanna.elements.element module<a class="headerlink" href="#module-svetlanna.elements.element" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.element.Element">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.element.</span></span><span class="sig-name descname"><span class="pre">Element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.element.Element" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>A class that describes each element of the system</p>
+<section id="id13">
+<h3>Parameters<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>nn<span class="classifier">_type_</span></dt><dd><p>_description_</p>
+</dd>
+<dt>metaclass<span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default ABCMeta</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.element.Element.forward">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.element.Element.forward" title="Link to this definition"></a></dt>
+<dd><p>Forward propagation through the optical element</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.element.Element.make_buffer">
+<span class="sig-name descname"><span class="pre">make_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">persistent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_T</span></span></span><a class="headerlink" href="#svetlanna.elements.element.Element.make_buffer" title="Link to this definition"></a></dt>
+<dd><p>Make buffer for internal use.</p>
+<p>Use case:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">self.mask</span> <span class="pre">=</span> <span class="pre">make_buffer('mask',</span> <span class="pre">some_tensor)</span>
+<span class="pre">`</span></code>
+This allow torch to properly process <cite>.to</cite> method on Element
+by marking that <cite>mask</cite> should be transferred to required device.</p>
+<section id="id14">
+<h4>Parameters<a class="headerlink" href="#id14" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>name<span class="classifier">str</span></dt><dd><p>name of the new buffer
+(it is more convenient to use name of new attribute)</p>
+</dd>
+<dt>value<span class="classifier">_T</span></dt><dd><p>tensor to be buffered</p>
+</dd>
+<dt>persistent<span class="classifier">bool, optional</span></dt><dd><p>see torch docs on buffers, by default False</p>
+</dd>
+</dl>
+</section>
+<section id="id15">
+<h4>Returns<a class="headerlink" href="#id15" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>_T</dt><dd><p>the value passed to the method</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.element.Element.process_parameter">
+<span class="sig-name descname"><span class="pre">process_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_V</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_V</span></span></span><a class="headerlink" href="#svetlanna.elements.element.Element.process_parameter" title="Link to this definition"></a></dt>
+<dd><p>Process element parameter passed by user.
+Automatically registers buffer for non-parametric tensors.</p>
+<p>Use case:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">self.mask</span> <span class="pre">=</span> <span class="pre">process_parameter('mask',</span> <span class="pre">some_tensor)</span>
+<span class="pre">`</span></code></p>
+<section id="id16">
+<h4>Parameters<a class="headerlink" href="#id16" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>name<span class="classifier">str</span></dt><dd><p>name of the new buffer
+(it is more convenient to use name of new attribute)</p>
+</dd>
+<dt>value<span class="classifier">_V</span></dt><dd><p>the value of the element parameter</p>
+</dd>
+</dl>
+</section>
+<section id="id17">
+<h4>Returns<a class="headerlink" href="#id17" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>_V</dt><dd><p>the value passed to the method</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.element.Element.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.SubelementSpecs" title="svetlanna.specs.specs.SubelementSpecs"><span class="pre">SubelementSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.element.Element.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.elements.free_space">
+<span id="svetlanna-elements-free-space-module"></span><h2>svetlanna.elements.free_space module<a class="headerlink" href="#module-svetlanna.elements.free_space" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.free_space.FreeSpace">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.free_space.</span></span><span class="sig-name descname"><span class="pre">FreeSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'fresnel'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'AS'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.free_space.FreeSpace" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class that describes a propagation of the field in free space
+between two optical elements</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.free_space.FreeSpace.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.free_space.FreeSpace.forward" title="Link to this definition"></a></dt>
+<dd><p>Calculates the field after propagating in the free space</p>
+<section id="id18">
+<h3>Parameters<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input_field<span class="classifier">Wavefront</span></dt><dd><p>Field before propagation in free space</p>
+</dd>
+</dl>
+</section>
+<section id="id19">
+<h3>Returns<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>Field after propagation in free space</p>
+</dd>
+</dl>
+</section>
+<section id="raises">
+<h3>Raises<a class="headerlink" href="#raises" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>Occurs when a non-existent direct distribution method is chosen</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.free_space.FreeSpace.impulse_response_angular_spectrum">
+<span class="sig-name descname"><span class="pre">impulse_response_angular_spectrum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.free_space.FreeSpace.impulse_response_angular_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Creates the impulse response function for angular spectrum method</p>
+<section id="id20">
+<h3>Returns<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>2d impulse response function for angular spectrum method</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.free_space.FreeSpace.impulse_response_fresnel">
+<span class="sig-name descname"><span class="pre">impulse_response_fresnel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.free_space.FreeSpace.impulse_response_fresnel" title="Link to this definition"></a></dt>
+<dd><p>Creates the impulse response function for fresnel approximation</p>
+<section id="id21">
+<h3>Returns<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>2d impulse response function for fresnel approximation</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.free_space.FreeSpace.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.free_space.FreeSpace.reverse" title="Link to this definition"></a></dt>
+<dd><p>Calculate the field after it propagates in the free space
+in the backward direction.</p>
+<section id="id22">
+<h3>Parameters<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>transmission_field<span class="classifier">Wavefront</span></dt><dd><p>Field to be propagated in the backward direction</p>
+</dd>
+</dl>
+</section>
+<section id="id23">
+<h3>Returns<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>Propagated in the backward direction field</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.free_space.FreeSpace.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.free_space.FreeSpace.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.elements.lens">
+<span id="svetlanna-elements-lens-module"></span><h2>svetlanna.elements.lens module<a class="headerlink" href="#module-svetlanna.elements.lens" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.lens.ThinLens">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.lens.</span></span><span class="sig-name descname"><span class="pre">ThinLens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">focal_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.lens.ThinLens" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class that described the field after propagating through the
+thin lens.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.lens.ThinLens.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.lens.ThinLens.forward" title="Link to this definition"></a></dt>
+<dd><p>Calculates the field after propagation through the thin lens.</p>
+<section id="id24">
+<h3>Parameters<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input_field<span class="classifier">Wavefront</span></dt><dd><p>The field incident on the thin lens.</p>
+</dd>
+</dl>
+</section>
+<section id="id25">
+<h3>Returns<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>The field after propagation through the thin lens.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.lens.ThinLens.get_transmission_function">
+<span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.lens.ThinLens.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Returns the transmission function of the thin lens.</p>
+<section id="id26">
+<h3>Returns<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>The transmission function of the thin lens.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.lens.ThinLens.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.lens.ThinLens.reverse" title="Link to this definition"></a></dt>
+<dd><p>Calculates the field after passing through the lens during
+back propagation.</p>
+<section id="id27">
+<h3>Parameters<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>transmission_field<span class="classifier">Wavefront</span></dt><dd><p>The field incident on the lens during back propagation.
+This corresponds to the transmitted field in forward propagation.</p>
+</dd>
+</dl>
+</section>
+<section id="id28">
+<h3>Returns<a class="headerlink" href="#id28" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>The field transmitted through the lens during back propagation.
+This corresponds to the incident field in forward propagation.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.lens.ThinLens.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.lens.ThinLens.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.lens.ThinLens.transmission_function">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.lens.ThinLens.transmission_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.elements.nonlinear_element">
+<span id="svetlanna-elements-nonlinear-element-module"></span><h2>svetlanna.elements.nonlinear_element module<a class="headerlink" href="#module-svetlanna.elements.nonlinear_element" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.nonlinear_element.FunctionModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.nonlinear_element.</span></span><span class="sig-name descname"><span class="pre">FunctionModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.nonlinear_element.FunctionModule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>A class for transforming an arbitrary function with multiple parameters.
+Allows training function parameters</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.nonlinear_element.FunctionModule.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_argument</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.nonlinear_element.FunctionModule.forward" title="Link to this definition"></a></dt>
+<dd><p>forward method for a class inherited from torch.nn.Module</p>
+<section id="id29">
+<h3>Parameters<a class="headerlink" href="#id29" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>function_argument<span class="classifier">torch.Tensor</span></dt><dd><p>Argument of the function</p>
+</dd>
+</dl>
+</section>
+<section id="id30">
+<h3>Returns<a class="headerlink" href="#id30" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>Function with trainable parameters</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.nonlinear_element.NonlinearElement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.nonlinear_element.</span></span><span class="sig-name descname"><span class="pre">NonlinearElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.nonlinear_element.NonlinearElement" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class representing a nonlinear optical element with a given amplitude
+response function. Preserves the phase distribution of the incident
+wavefront</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.nonlinear_element.NonlinearElement.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.nonlinear_element.NonlinearElement.forward" title="Link to this definition"></a></dt>
+<dd><p>Method calculating the wavefront after passing a nonlinear optical
+element</p>
+<section id="id31">
+<h3>Parameters<a class="headerlink" href="#id31" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>incident_wavefront<span class="classifier">Wavefront</span></dt><dd><p>Wavefront before the nonlinear optical element</p>
+</dd>
+</dl>
+</section>
+<section id="id32">
+<h3>Returns<a class="headerlink" href="#id32" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>Wavefront passing through a nonlinear optical element</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.elements.reservoir">
+<span id="svetlanna-elements-reservoir-module"></span><h2>svetlanna.elements.reservoir module<a class="headerlink" href="#module-svetlanna.elements.reservoir" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.reservoir.SimpleReservoir">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.reservoir.</span></span><span class="sig-name descname"><span class="pre">SimpleReservoir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonlinear_element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><span class="pre">Element</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.setup.LinearOpticalSetup" title="svetlanna.setup.LinearOpticalSetup"><span class="pre">LinearOpticalSetup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><span class="pre">Element</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.setup.LinearOpticalSetup" title="svetlanna.setup.LinearOpticalSetup"><span class="pre">LinearOpticalSetup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">feedback_gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.reservoir.SimpleReservoir" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>Reservoir element.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.reservoir.SimpleReservoir.append_feedback_queue">
+<span class="sig-name descname"><span class="pre">append_feedback_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.reservoir.SimpleReservoir.append_feedback_queue" title="Link to this definition"></a></dt>
+<dd><p>Append a new wavefront to the feedback queue.</p>
+<section id="id33">
+<h3>Parameters<a class="headerlink" href="#id33" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>field<span class="classifier">Wavefront</span></dt><dd><p>The new wavefront to be added to the end of the queue.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.reservoir.SimpleReservoir.drop_feedback_queue">
+<span class="sig-name descname"><span class="pre">drop_feedback_queue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#svetlanna.elements.reservoir.SimpleReservoir.drop_feedback_queue" title="Link to this definition"></a></dt>
+<dd><p>Clear all elements from the feedback queue.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.reservoir.SimpleReservoir.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.reservoir.SimpleReservoir.forward" title="Link to this definition"></a></dt>
+<dd><p>Forward propagation through the optical element</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.reservoir.SimpleReservoir.pop_feedback_queue">
+<span class="sig-name descname"><span class="pre">pop_feedback_queue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.reservoir.SimpleReservoir.pop_feedback_queue" title="Link to this definition"></a></dt>
+<dd><p>Retrieve and remove the first element from the feedback queue
+if available.</p>
+<section id="id34">
+<h3>Parameters<a class="headerlink" href="#id34" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>field<span class="classifier">Wavefront</span></dt><dd><p>The first wavefront in the queue, or None if the queue is empty
+or not full yet.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.reservoir.SimpleReservoir.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.SubelementSpecs" title="svetlanna.specs.specs.SubelementSpecs"><span class="pre">SubelementSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.reservoir.SimpleReservoir.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.elements.slm">
+<span id="svetlanna-elements-slm-module"></span><h2>svetlanna.elements.slm module<a class="headerlink" href="#module-svetlanna.elements.slm" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.slm.SpatialLightModulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.slm.</span></span><span class="sig-name descname"><span class="pre">SpatialLightModulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">simulation_parameters:</span> <span class="pre">~svetlanna.simulation_parameters.SimulationParameters,</span> <span class="pre">mask:</span> <span class="pre">~torch.Tensor,</span> <span class="pre">height:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">~torch.Tensor</span> <span class="pre">|</span> <span class="pre">~torch.nn.parameter.Parameter</span> <span class="pre">|</span> <span class="pre">~svetlanna.parameters.Parameter,</span> <span class="pre">width:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">~torch.Tensor</span> <span class="pre">|</span> <span class="pre">~torch.nn.parameter.Parameter</span> <span class="pre">|</span> <span class="pre">~svetlanna.parameters.Parameter,</span> <span class="pre">location:</span> <span class="pre">~typing.Tuple</span> <span class="pre">=</span> <span class="pre">(0.0,</span> <span class="pre">0.0),</span> <span class="pre">number_of_levels:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">256,</span> <span class="pre">step_function:</span> <span class="pre">~typing.Callable[[~torch.Tensor],</span> <span class="pre">~torch.Tensor]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">relu&gt;,</span> <span class="pre">mode:</span> <span class="pre">~typing.Literal['nearest',</span> <span class="pre">'bilinear',</span> <span class="pre">'bicubic',</span> <span class="pre">'area',</span> <span class="pre">'nearest-exact']</span> <span class="pre">=</span> <span class="pre">'nearest'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.slm.SpatialLightModulator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class that described the field after propagating through the
+Spatial Light Modulator with a given phase mask</p>
+<section id="id35">
+<h3>Parameters<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Element<span class="classifier">_type_</span></dt><dd><p>_description_</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.slm.SpatialLightModulator.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.slm.SpatialLightModulator.forward" title="Link to this definition"></a></dt>
+<dd><p>Forward propagation through the optical element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.slm.SpatialLightModulator.get_aperture">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_aperture</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.slm.SpatialLightModulator.get_aperture" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.slm.SpatialLightModulator.resized_mask">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resized_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.slm.SpatialLightModulator.resized_mask" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.slm.SpatialLightModulator.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.slm.SpatialLightModulator.reverse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.slm.SpatialLightModulator.transmission_function">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.slm.SpatialLightModulator.transmission_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.elements">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-svetlanna.elements" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.Aperture">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">Aperture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.Aperture" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.aperture.MulElement" title="svetlanna.elements.aperture.MulElement"><code class="xref py py-class docutils literal notranslate"><span class="pre">MulElement</span></code></a></p>
+<p>Aperture of the optical element with transmission function, which takes
+the value 0 or 1</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.Aperture.get_transmission_function">
+<span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.Aperture.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Method which returns the transmission function of
+the element</p>
+<section id="id36">
+<h3>Returns<a class="headerlink" href="#id36" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>transmission function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.Aperture.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.Aperture.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.Aperture.transmission_function_axes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function_axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.elements.Aperture.transmission_function_axes" title="Link to this definition"></a></dt>
+<dd><p>Axes of the transmission function.
+For example, <cite>(‘H’, ‘W’)</cite></p>
+<section id="id37">
+<h3>Returns<a class="headerlink" href="#id37" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple[str, …]</dt><dd><p>Axes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.DiffractiveLayer">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">DiffractiveLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">mask_norm</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">6.283185307179586</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.DiffractiveLayer" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class that described the field after propagating through the
+passive diffractive layer with a given phase mask</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.DiffractiveLayer.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.DiffractiveLayer.forward" title="Link to this definition"></a></dt>
+<dd><p>Method that calculates the field after propagating through the SLM</p>
+<section id="id38">
+<h3>Parameters<a class="headerlink" href="#id38" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input_field<span class="classifier">Wavefront</span></dt><dd><p>Field incident on the SLM</p>
+</dd>
+</dl>
+</section>
+<section id="id39">
+<h3>Returns<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>The field after propagating through the SLM</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.DiffractiveLayer.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.DiffractiveLayer.reverse" title="Link to this definition"></a></dt>
+<dd><p>Method that calculates the field after passing the SLM in back
+propagation</p>
+<section id="id40">
+<h3>Parameters<a class="headerlink" href="#id40" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>transmitted_field<span class="classifier">Wavefront</span></dt><dd><p>Field incident on the SLM in back propagation
+(transmitted field in forward propagation)</p>
+</dd>
+</dl>
+</section>
+<section id="id41">
+<h3>Returns<a class="headerlink" href="#id41" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>Field transmitted on the SLM in back propagation
+(incident field in forward propagation)</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.DiffractiveLayer.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.DiffractiveLayer.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.DiffractiveLayer.transmission_function">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.DiffractiveLayer.transmission_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.Element">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">Element</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.Element" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>A class that describes each element of the system</p>
+<section id="id42">
+<h3>Parameters<a class="headerlink" href="#id42" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>nn<span class="classifier">_type_</span></dt><dd><p>_description_</p>
+</dd>
+<dt>metaclass<span class="classifier">_type_, optional</span></dt><dd><p>_description_, by default ABCMeta</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.Element.forward">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.Element.forward" title="Link to this definition"></a></dt>
+<dd><p>Forward propagation through the optical element</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.Element.make_buffer">
+<span class="sig-name descname"><span class="pre">make_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_T</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">persistent</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_T</span></span></span><a class="headerlink" href="#svetlanna.elements.Element.make_buffer" title="Link to this definition"></a></dt>
+<dd><p>Make buffer for internal use.</p>
+<p>Use case:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">self.mask</span> <span class="pre">=</span> <span class="pre">make_buffer('mask',</span> <span class="pre">some_tensor)</span>
+<span class="pre">`</span></code>
+This allow torch to properly process <cite>.to</cite> method on Element
+by marking that <cite>mask</cite> should be transferred to required device.</p>
+<section id="id43">
+<h4>Parameters<a class="headerlink" href="#id43" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>name<span class="classifier">str</span></dt><dd><p>name of the new buffer
+(it is more convenient to use name of new attribute)</p>
+</dd>
+<dt>value<span class="classifier">_T</span></dt><dd><p>tensor to be buffered</p>
+</dd>
+<dt>persistent<span class="classifier">bool, optional</span></dt><dd><p>see torch docs on buffers, by default False</p>
+</dd>
+</dl>
+</section>
+<section id="id44">
+<h4>Returns<a class="headerlink" href="#id44" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>_T</dt><dd><p>the value passed to the method</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.Element.process_parameter">
+<span class="sig-name descname"><span class="pre">process_parameter</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_V</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">_V</span></span></span><a class="headerlink" href="#svetlanna.elements.Element.process_parameter" title="Link to this definition"></a></dt>
+<dd><p>Process element parameter passed by user.
+Automatically registers buffer for non-parametric tensors.</p>
+<p>Use case:
+<code class="docutils literal notranslate"><span class="pre">`</span>
+<span class="pre">self.mask</span> <span class="pre">=</span> <span class="pre">process_parameter('mask',</span> <span class="pre">some_tensor)</span>
+<span class="pre">`</span></code></p>
+<section id="id45">
+<h4>Parameters<a class="headerlink" href="#id45" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>name<span class="classifier">str</span></dt><dd><p>name of the new buffer
+(it is more convenient to use name of new attribute)</p>
+</dd>
+<dt>value<span class="classifier">_V</span></dt><dd><p>the value of the element parameter</p>
+</dd>
+</dl>
+</section>
+<section id="id46">
+<h4>Returns<a class="headerlink" href="#id46" title="Link to this heading"></a></h4>
+<dl class="simple">
+<dt>_V</dt><dd><p>the value passed to the method</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.Element.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.SubelementSpecs" title="svetlanna.specs.specs.SubelementSpecs"><span class="pre">SubelementSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.Element.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.FreeSpace">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">FreeSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">distance</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'fresnel'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'AS'</span></span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.FreeSpace" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class that describes a propagation of the field in free space
+between two optical elements</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.FreeSpace.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.FreeSpace.forward" title="Link to this definition"></a></dt>
+<dd><p>Calculates the field after propagating in the free space</p>
+<section id="id47">
+<h3>Parameters<a class="headerlink" href="#id47" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input_field<span class="classifier">Wavefront</span></dt><dd><p>Field before propagation in free space</p>
+</dd>
+</dl>
+</section>
+<section id="id48">
+<h3>Returns<a class="headerlink" href="#id48" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>Field after propagation in free space</p>
+</dd>
+</dl>
+</section>
+<section id="id49">
+<h3>Raises<a class="headerlink" href="#id49" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>ValueError</dt><dd><p>Occurs when a non-existent direct distribution method is chosen</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.FreeSpace.impulse_response_angular_spectrum">
+<span class="sig-name descname"><span class="pre">impulse_response_angular_spectrum</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.FreeSpace.impulse_response_angular_spectrum" title="Link to this definition"></a></dt>
+<dd><p>Creates the impulse response function for angular spectrum method</p>
+<section id="id50">
+<h3>Returns<a class="headerlink" href="#id50" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>2d impulse response function for angular spectrum method</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.FreeSpace.impulse_response_fresnel">
+<span class="sig-name descname"><span class="pre">impulse_response_fresnel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.FreeSpace.impulse_response_fresnel" title="Link to this definition"></a></dt>
+<dd><p>Creates the impulse response function for fresnel approximation</p>
+<section id="id51">
+<h3>Returns<a class="headerlink" href="#id51" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>2d impulse response function for fresnel approximation</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.FreeSpace.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.FreeSpace.reverse" title="Link to this definition"></a></dt>
+<dd><p>Calculate the field after it propagates in the free space
+in the backward direction.</p>
+<section id="id52">
+<h3>Parameters<a class="headerlink" href="#id52" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>transmission_field<span class="classifier">Wavefront</span></dt><dd><p>Field to be propagated in the backward direction</p>
+</dd>
+</dl>
+</section>
+<section id="id53">
+<h3>Returns<a class="headerlink" href="#id53" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>Propagated in the backward direction field</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.FreeSpace.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.FreeSpace.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.FunctionModule">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">FunctionModule</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">function_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.FunctionModule" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Module</span></code></p>
+<p>A class for transforming an arbitrary function with multiple parameters.
+Allows training function parameters</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.FunctionModule.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">function_argument</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.FunctionModule.forward" title="Link to this definition"></a></dt>
+<dd><p>forward method for a class inherited from torch.nn.Module</p>
+<section id="id54">
+<h3>Parameters<a class="headerlink" href="#id54" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>function_argument<span class="classifier">torch.Tensor</span></dt><dd><p>Argument of the function</p>
+</dd>
+</dl>
+</section>
+<section id="id55">
+<h3>Returns<a class="headerlink" href="#id55" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>Function with trainable parameters</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.NonlinearElement">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">NonlinearElement</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_function</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.NonlinearElement" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class representing a nonlinear optical element with a given amplitude
+response function. Preserves the phase distribution of the incident
+wavefront</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.NonlinearElement.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.NonlinearElement.forward" title="Link to this definition"></a></dt>
+<dd><p>Method calculating the wavefront after passing a nonlinear optical
+element</p>
+<section id="id56">
+<h3>Parameters<a class="headerlink" href="#id56" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>incident_wavefront<span class="classifier">Wavefront</span></dt><dd><p>Wavefront before the nonlinear optical element</p>
+</dd>
+</dl>
+</section>
+<section id="id57">
+<h3>Returns<a class="headerlink" href="#id57" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>Wavefront passing through a nonlinear optical element</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.RectangularAperture">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">RectangularAperture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">height</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">width</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.RectangularAperture" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.aperture.MulElement" title="svetlanna.elements.aperture.MulElement"><code class="xref py py-class docutils literal notranslate"><span class="pre">MulElement</span></code></a></p>
+<p>A rectangle-shaped aperture with a transmission function taking either
+a value of 0 or 1</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.RectangularAperture.get_transmission_function">
+<span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.RectangularAperture.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Method which returns the transmission function of
+the element</p>
+<section id="id58">
+<h3>Returns<a class="headerlink" href="#id58" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>transmission function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.RectangularAperture.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.RectangularAperture.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.RectangularAperture.transmission_function_axes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function_axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.elements.RectangularAperture.transmission_function_axes" title="Link to this definition"></a></dt>
+<dd><p>Axes of the transmission function.
+For example, <cite>(‘H’, ‘W’)</cite></p>
+<section id="id59">
+<h3>Returns<a class="headerlink" href="#id59" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple[str, …]</dt><dd><p>Axes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.RoundAperture">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">RoundAperture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.RoundAperture" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.aperture.MulElement" title="svetlanna.elements.aperture.MulElement"><code class="xref py py-class docutils literal notranslate"><span class="pre">MulElement</span></code></a></p>
+<p>A round-shaped aperture with a transmission function taking either
+a value of 0 or 1</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.RoundAperture.get_transmission_function">
+<span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.RoundAperture.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Method which returns the transmission function of
+the element</p>
+<section id="id60">
+<h3>Returns<a class="headerlink" href="#id60" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>transmission function</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.RoundAperture.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.RoundAperture.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.RoundAperture.transmission_function_axes">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function_axes</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#svetlanna.elements.RoundAperture.transmission_function_axes" title="Link to this definition"></a></dt>
+<dd><p>Axes of the transmission function.
+For example, <cite>(‘H’, ‘W’)</cite></p>
+<section id="id61">
+<h3>Returns<a class="headerlink" href="#id61" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>tuple[str, …]</dt><dd><p>Axes</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.SimpleReservoir">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">SimpleReservoir</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">nonlinear_element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><span class="pre">Element</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.setup.LinearOpticalSetup" title="svetlanna.setup.LinearOpticalSetup"><span class="pre">LinearOpticalSetup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay_element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><span class="pre">Element</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.setup.LinearOpticalSetup" title="svetlanna.setup.LinearOpticalSetup"><span class="pre">LinearOpticalSetup</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">feedback_gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_gain</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">delay</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.SimpleReservoir" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>Reservoir element.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.SimpleReservoir.append_feedback_queue">
+<span class="sig-name descname"><span class="pre">append_feedback_queue</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">field</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.SimpleReservoir.append_feedback_queue" title="Link to this definition"></a></dt>
+<dd><p>Append a new wavefront to the feedback queue.</p>
+<section id="id62">
+<h3>Parameters<a class="headerlink" href="#id62" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>field<span class="classifier">Wavefront</span></dt><dd><p>The new wavefront to be added to the end of the queue.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.SimpleReservoir.drop_feedback_queue">
+<span class="sig-name descname"><span class="pre">drop_feedback_queue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#svetlanna.elements.SimpleReservoir.drop_feedback_queue" title="Link to this definition"></a></dt>
+<dd><p>Clear all elements from the feedback queue.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.SimpleReservoir.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.SimpleReservoir.forward" title="Link to this definition"></a></dt>
+<dd><p>Forward propagation through the optical element</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.SimpleReservoir.pop_feedback_queue">
+<span class="sig-name descname"><span class="pre">pop_feedback_queue</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.SimpleReservoir.pop_feedback_queue" title="Link to this definition"></a></dt>
+<dd><p>Retrieve and remove the first element from the feedback queue
+if available.</p>
+<section id="id63">
+<h3>Parameters<a class="headerlink" href="#id63" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>field<span class="classifier">Wavefront</span></dt><dd><p>The first wavefront in the queue, or None if the queue is empty
+or not full yet.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.SimpleReservoir.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.SubelementSpecs" title="svetlanna.specs.specs.SubelementSpecs"><span class="pre">SubelementSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.SimpleReservoir.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.SpatialLightModulator">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">SpatialLightModulator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">simulation_parameters:</span> <span class="pre">~svetlanna.simulation_parameters.SimulationParameters,</span> <span class="pre">mask:</span> <span class="pre">~torch.Tensor,</span> <span class="pre">height:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">~torch.Tensor</span> <span class="pre">|</span> <span class="pre">~torch.nn.parameter.Parameter</span> <span class="pre">|</span> <span class="pre">~svetlanna.parameters.Parameter,</span> <span class="pre">width:</span> <span class="pre">float</span> <span class="pre">|</span> <span class="pre">~torch.Tensor</span> <span class="pre">|</span> <span class="pre">~torch.nn.parameter.Parameter</span> <span class="pre">|</span> <span class="pre">~svetlanna.parameters.Parameter,</span> <span class="pre">location:</span> <span class="pre">~typing.Tuple</span> <span class="pre">=</span> <span class="pre">(0.0,</span> <span class="pre">0.0),</span> <span class="pre">number_of_levels:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">256,</span> <span class="pre">step_function:</span> <span class="pre">~typing.Callable[[~torch.Tensor],</span> <span class="pre">~torch.Tensor]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">relu&gt;,</span> <span class="pre">mode:</span> <span class="pre">~typing.Literal['nearest',</span> <span class="pre">'bilinear',</span> <span class="pre">'bicubic',</span> <span class="pre">'area',</span> <span class="pre">'nearest-exact']</span> <span class="pre">=</span> <span class="pre">'nearest'</span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.SpatialLightModulator" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class that described the field after propagating through the
+Spatial Light Modulator with a given phase mask</p>
+<section id="id64">
+<h3>Parameters<a class="headerlink" href="#id64" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Element<span class="classifier">_type_</span></dt><dd><p>_description_</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.SpatialLightModulator.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.SpatialLightModulator.forward" title="Link to this definition"></a></dt>
+<dd><p>Forward propagation through the optical element</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.SpatialLightModulator.get_aperture">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_aperture</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.SpatialLightModulator.get_aperture" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.SpatialLightModulator.resized_mask">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">resized_mask</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.SpatialLightModulator.resized_mask" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.SpatialLightModulator.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.SpatialLightModulator.reverse" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.SpatialLightModulator.transmission_function">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.SpatialLightModulator.transmission_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.elements.ThinLens">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.elements.</span></span><span class="sig-name descname"><span class="pre">ThinLens</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">focal_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Tensor</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Parameter</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="svetlanna.html#svetlanna.parameters.Parameter" title="svetlanna.parameters.Parameter"><span class="pre">Parameter</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">radius</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">float</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">inf</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.elements.ThinLens" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.elements.element.Element" title="svetlanna.elements.element.Element"><code class="xref py py-class docutils literal notranslate"><span class="pre">Element</span></code></a></p>
+<p>A class that described the field after propagating through the
+thin lens.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.ThinLens.forward">
+<span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">incident_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.ThinLens.forward" title="Link to this definition"></a></dt>
+<dd><p>Calculates the field after propagation through the thin lens.</p>
+<section id="id65">
+<h3>Parameters<a class="headerlink" href="#id65" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input_field<span class="classifier">Wavefront</span></dt><dd><p>The field incident on the thin lens.</p>
+</dd>
+</dl>
+</section>
+<section id="id66">
+<h3>Returns<a class="headerlink" href="#id66" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>The field after propagation through the thin lens.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.ThinLens.get_transmission_function">
+<span class="sig-name descname"><span class="pre">get_transmission_function</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tensor</span></span></span><a class="headerlink" href="#svetlanna.elements.ThinLens.get_transmission_function" title="Link to this definition"></a></dt>
+<dd><p>Returns the transmission function of the thin lens.</p>
+<section id="id67">
+<h3>Returns<a class="headerlink" href="#id67" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>torch.Tensor</dt><dd><p>The transmission function of the thin lens.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.ThinLens.reverse">
+<span class="sig-name descname"><span class="pre">reverse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">transmission_wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="svetlanna.html#svetlanna.wavefront.Wavefront" title="svetlanna.wavefront.Wavefront"><span class="pre">Wavefront</span></a></span></span><a class="headerlink" href="#svetlanna.elements.ThinLens.reverse" title="Link to this definition"></a></dt>
+<dd><p>Calculates the field after passing through the lens during
+back propagation.</p>
+<section id="id68">
+<h3>Parameters<a class="headerlink" href="#id68" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>transmission_field<span class="classifier">Wavefront</span></dt><dd><p>The field incident on the lens during back propagation.
+This corresponds to the transmitted field in forward propagation.</p>
+</dd>
+</dl>
+</section>
+<section id="id69">
+<h3>Returns<a class="headerlink" href="#id69" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Wavefront</dt><dd><p>The field transmitted through the lens during back propagation.
+This corresponds to the incident field in forward propagation.</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.elements.ThinLens.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.elements.ThinLens.to_specs" title="Link to this definition"></a></dt>
+<dd><p>Create specs</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="svetlanna.elements.ThinLens.transmission_function">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">transmission_function</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Tensor</span></em><a class="headerlink" href="#svetlanna.elements.ThinLens.transmission_function" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="svetlanna.html" class="btn btn-neutral float-left" title="svetlanna" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="svetlanna.networks.html" class="btn btn-neutral float-right" title="svetlanna.networks package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CompPhysLab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,15 @@
+Examples of solving forward light propagation problems
+=======================
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   examples_notebook/freeprop/apertures
+   examples_notebook/freeprop/lens
+   examples_notebook/freeprop/gaussian_beam_propagation
+   examples_notebook/freeprop/nonlinear_element
+   examples_notebook/freeprop/rectangular_slit_propagation
+   examples_notebook/freeprop/slm
+   examples_notebook/freeprop/square_aperture_propagation
+

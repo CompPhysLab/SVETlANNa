@@ -1,0 +1,1026 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>svetlanna.specs package &mdash; SVETlANNa 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="svetlanna.visualization package" href="svetlanna.visualization.html" />
+    <link rel="prev" title="svetlanna.phase_retrieval_problem package" href="svetlanna.phase_retrieval_problem.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SVETlANNa
+              <img src="_static/logo.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="physics.html">Physical Basis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Command reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="svetlanna.html">svetlanna</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="svetlanna.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.elements.html">svetlanna.elements package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.networks.html">svetlanna.networks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.phase_retrieval_problem.html">svetlanna.phase_retrieval_problem package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">svetlanna.specs package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.visualization.html">svetlanna.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.axes_math">svetlanna.axes_math module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.clerk">svetlanna.clerk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.detector">svetlanna.detector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.logging">svetlanna.logging module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.parameters">svetlanna.parameters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.setup">svetlanna.setup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.simulation_parameters">svetlanna.simulation_parameters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.transforms">svetlanna.transforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.units">svetlanna.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.wavefront">svetlanna.wavefront module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SVETlANNa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Command reference</a></li>
+          <li class="breadcrumb-item"><a href="svetlanna.html">svetlanna</a></li>
+      <li class="breadcrumb-item active">svetlanna.specs package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/svetlanna.specs.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="svetlanna-specs-package">
+<h1>svetlanna.specs package<a class="headerlink" href="#svetlanna-specs-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-svetlanna.specs.specs">
+<span id="svetlanna-specs-specs-module"></span><h2>svetlanna.specs.specs module<a class="headerlink" href="#module-svetlanna.specs.specs" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.HTMLRepresentation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">HTMLRepresentation</span></span><a class="headerlink" href="#svetlanna.specs.specs.HTMLRepresentation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.Representation" title="svetlanna.specs.specs.Representation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Representation</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterSaveContext_</span></code>]</p>
+<p>Representation that can be exported to the HTML</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.HTMLRepresentation.to_html">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ParameterSaveContext_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#svetlanna.specs.specs.HTMLRepresentation.to_html" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a HTML file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id44"><span class="problematic" id="id45">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ImageRepr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">ImageRepr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'1'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'L'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'LA'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'I'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'P'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'RGB'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'RGBA'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ImageRepr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.StrRepresentation" title="svetlanna.specs.specs.StrRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.MarkdownRepresentation" title="svetlanna.specs.specs.MarkdownRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkdownRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.HTMLRepresentation" title="svetlanna.specs.specs.HTMLRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTMLRepresentation</span></code></a></p>
+<p>Representation of the parameter as an image.
+Image generation is based on the <cite>pillow</cite> package.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ImageRepr.draw_image">
+<span class="sig-name descname"><span class="pre">draw_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Image</span></span></span><a class="headerlink" href="#svetlanna.specs.specs.ImageRepr.draw_image" title="Link to this definition"></a></dt>
+<dd><p>Draw image into the file, using <cite>pillow</cite> package.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>context<span class="classifier">ParameterSaveContext</span></dt><dd><p>the parameter save context</p>
+</dd>
+<dt>filepath<span class="classifier">Path</span></dt><dd><p>path to the image file to be created</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ImageRepr.to_html">
+<span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ImageRepr.to_html" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a HTML file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id2">
+<h3>Parameters<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id46"><span class="problematic" id="id47">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ImageRepr.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ImageRepr.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id48"><span class="problematic" id="id49">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ImageRepr.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ImageRepr.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id4">
+<h3>Parameters<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id50"><span class="problematic" id="id51">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.MarkdownRepresentation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">MarkdownRepresentation</span></span><a class="headerlink" href="#svetlanna.specs.specs.MarkdownRepresentation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.Representation" title="svetlanna.specs.specs.Representation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Representation</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterSaveContext_</span></code>]</p>
+<p>Representation that can be exported to markdown file</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.MarkdownRepresentation.to_markdown">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ParameterSaveContext_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#svetlanna.specs.specs.MarkdownRepresentation.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id5">
+<h3>Parameters<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id52"><span class="problematic" id="id53">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.NpyFileRepr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">NpyFileRepr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.NpyFileRepr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.StrRepresentation" title="svetlanna.specs.specs.StrRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.MarkdownRepresentation" title="svetlanna.specs.specs.MarkdownRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkdownRepresentation</span></code></a></p>
+<p>Representation of the parameter as a <cite>.npy</cite> file.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.NpyFileRepr.save_to_file">
+<span class="sig-name descname"><span class="pre">save_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.NpyFileRepr.save_to_file" title="Link to this definition"></a></dt>
+<dd><p>Save the parameter related data to <cite>npy</cite> file.</p>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>context<span class="classifier">ParameterSaveContext</span></dt><dd><p>the parameter save context</p>
+</dd>
+<dt>filepath<span class="classifier">Path</span></dt><dd><p>path to the file to be created</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.NpyFileRepr.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.NpyFileRepr.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id7">
+<h3>Parameters<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id54"><span class="problematic" id="id55">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.NpyFileRepr.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.NpyFileRepr.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id8">
+<h3>Parameters<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id56"><span class="problematic" id="id57">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ParameterSaveContext">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">ParameterSaveContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ParameterSaveContext" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Generates different context managers that can be used
+to write a parameter data to output stream or file.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ParameterSaveContext.file">
+<span class="sig-name descname"><span class="pre">file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">BufferedWriter</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.specs.specs.ParameterSaveContext.file" title="Link to this definition"></a></dt>
+<dd><p>Context manager for the output file</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>filepath<span class="classifier">Path</span></dt><dd><p>filepath</p>
+</dd>
+</dl>
+</section>
+<section id="yields">
+<h3>Yields<a class="headerlink" href="#yields" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Generator[BufferedWriter, Any, None]</dt><dd><p>Buffer</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ParameterSaveContext.get_new_filepath">
+<span class="sig-name descname"><span class="pre">get_new_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#svetlanna.specs.specs.ParameterSaveContext.get_new_filepath" title="Link to this definition"></a></dt>
+<dd><p>Create a new filepath for a specific extension.
+The generated filename of a specific extension will have a unique name
+ending with <cite>_&lt;n&gt;.&lt;extension&gt;</cite>, where <cite>&lt;n&gt;</cite> is auto-incrementing index.</p>
+<section id="id10">
+<h3>Parameters<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>extension<span class="classifier">str</span></dt><dd><p>filename extension</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Path</dt><dd><p>relative path to the file</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ParameterSaveContext.rel_filepath">
+<span class="sig-name descname"><span class="pre">rel_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#svetlanna.specs.specs.ParameterSaveContext.rel_filepath" title="Link to this definition"></a></dt>
+<dd><p>Get relative to specs file filepath</p>
+<section id="id11">
+<h3>Parameters<a class="headerlink" href="#id11" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>filepath<span class="classifier">Path</span></dt><dd><p>absolute path</p>
+</dd>
+</dl>
+</section>
+<section id="id12">
+<h3>Returns<a class="headerlink" href="#id12" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Path</dt><dd><p>relative path</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ParameterSpecs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">ParameterSpecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">representations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#svetlanna.specs.specs.Representation" title="svetlanna.specs.specs.Representation"><span class="pre">Representation</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ParameterSpecs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container with all representations for the parameter.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.PrettyReprRepr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">PrettyReprRepr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.PrettyReprRepr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.ReprRepr" title="svetlanna.specs.specs.ReprRepr"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReprRepr</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.HTMLRepresentation" title="svetlanna.specs.specs.HTMLRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTMLRepresentation</span></code></a></p>
+<p>Same as ReprRepr but with better handling of
+Parameters and BoundedParameter</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.PrettyReprRepr.to_html">
+<span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.PrettyReprRepr.to_html" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a HTML file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id13">
+<h3>Parameters<a class="headerlink" href="#id13" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id58"><span class="problematic" id="id59">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.PrettyReprRepr.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.PrettyReprRepr.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id14">
+<h3>Parameters<a class="headerlink" href="#id14" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id60"><span class="problematic" id="id61">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.PrettyReprRepr.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.PrettyReprRepr.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id15">
+<h3>Parameters<a class="headerlink" href="#id15" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id62"><span class="problematic" id="id63">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ReprRepr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">ReprRepr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ReprRepr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.StrRepresentation" title="svetlanna.specs.specs.StrRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.MarkdownRepresentation" title="svetlanna.specs.specs.MarkdownRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkdownRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.HTMLRepresentation" title="svetlanna.specs.specs.HTMLRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTMLRepresentation</span></code></a></p>
+<p>Representation of the parameter as a plain text.
+The <cite>__repr__</cite> method is used to generate the text.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ReprRepr.to_html">
+<span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ReprRepr.to_html" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a HTML file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id16">
+<h3>Parameters<a class="headerlink" href="#id16" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id64"><span class="problematic" id="id65">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ReprRepr.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ReprRepr.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id17">
+<h3>Parameters<a class="headerlink" href="#id17" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id66"><span class="problematic" id="id67">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.ReprRepr.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.ReprRepr.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id18">
+<h3>Parameters<a class="headerlink" href="#id18" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id68"><span class="problematic" id="id69">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.Representation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">Representation</span></span><a class="headerlink" href="#svetlanna.specs.specs.Representation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterSaveContext_</span></code>]</p>
+<p>Base class for a parameter representation</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.Specsable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">Specsable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.Specsable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Represents any specsable object</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.Specsable.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#svetlanna.specs.specs.SubelementSpecs" title="svetlanna.specs.specs.SubelementSpecs"><span class="pre">SubelementSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.specs.specs.Specsable.to_specs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.StrRepresentation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">StrRepresentation</span></span><a class="headerlink" href="#svetlanna.specs.specs.StrRepresentation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.Representation" title="svetlanna.specs.specs.Representation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Representation</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterSaveContext_</span></code>]</p>
+<p>Representation that can be exported in the text format</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.StrRepresentation.to_str">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ParameterSaveContext_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#svetlanna.specs.specs.StrRepresentation.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id19">
+<h3>Parameters<a class="headerlink" href="#id19" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id70"><span class="problematic" id="id71">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.specs.SubelementSpecs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs.</span></span><span class="sig-name descname"><span class="pre">SubelementSpecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subelement_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subelement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs.SubelementSpecs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container for named subelement</p>
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.specs.specs_writer">
+<span id="svetlanna-specs-specs-writer-module"></span><h2>svetlanna.specs.specs_writer module<a class="headerlink" href="#module-svetlanna.specs.specs_writer" title="Link to this heading"></a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.specs.specs_writer.context_generator">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs_writer.</span></span><span class="sig-name descname"><span class="pre">context_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subelements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#svetlanna.specs.specs.SubelementSpecs" title="svetlanna.specs.specs.SubelementSpecs"><span class="pre">SubelementSpecs</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">_WriterContext</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.specs.specs_writer.context_generator" title="Link to this definition"></a></dt>
+<dd><p>Generate _WriterContext for the element</p>
+<section id="id20">
+<h3>Parameters<a class="headerlink" href="#id20" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>element<span class="classifier">Specsable</span></dt><dd><p>Element</p>
+</dd>
+<dt>element_index<span class="classifier">int</span></dt><dd><p>Index of the element. It is used to create
+unique directory for element specs.</p>
+</dd>
+<dt>directory<span class="classifier">str | Path</span></dt><dd><p>Directory where element directory is created</p>
+</dd>
+</dl>
+</section>
+<section id="id21">
+<h3>Yields<a class="headerlink" href="#id21" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>_WriterContext</dt><dd><p>context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.specs.specs_writer.write_elements_tree_to_markdown">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs_writer.</span></span><span class="sig-name descname"><span class="pre">write_elements_tree_to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">_ElementInTree</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs_writer.write_elements_tree_to_markdown" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.specs.specs_writer.write_elements_tree_to_str">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs_writer.</span></span><span class="sig-name descname"><span class="pre">write_elements_tree_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tree</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">_ElementInTree</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs_writer.write_elements_tree_to_str" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.specs.specs_writer.write_specs">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs_writer.</span></span><span class="sig-name descname"><span class="pre">write_specs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">iterables</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'specs.txt'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'specs'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs_writer.write_specs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.specs.specs_writer.write_specs_to_html">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs_writer.</span></span><span class="sig-name descname"><span class="pre">write_specs_to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer_context_generator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">_WriterContext</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs_writer.write_specs_to_html" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.specs.specs_writer.write_specs_to_markdown">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs_writer.</span></span><span class="sig-name descname"><span class="pre">write_specs_to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer_context_generator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">_WriterContext</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs_writer.write_specs_to_markdown" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.specs.specs_writer.write_specs_to_str">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.specs.specs_writer.</span></span><span class="sig-name descname"><span class="pre">write_specs_to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">writer_context_generator</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">_WriterContext</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.specs_writer.write_specs_to_str" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</section>
+<section id="module-svetlanna.specs">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-svetlanna.specs" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.HTMLRepresentation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">HTMLRepresentation</span></span><a class="headerlink" href="#svetlanna.specs.HTMLRepresentation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.Representation" title="svetlanna.specs.specs.Representation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Representation</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterSaveContext_</span></code>]</p>
+<p>Representation that can be exported to the HTML</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.HTMLRepresentation.to_html">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ParameterSaveContext_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#svetlanna.specs.HTMLRepresentation.to_html" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a HTML file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id22">
+<h3>Parameters<a class="headerlink" href="#id22" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id72"><span class="problematic" id="id73">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.ImageRepr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">ImageRepr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'1'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'L'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'LA'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'I'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'P'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'RGB'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'RGBA'</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'L'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'png'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">show_image</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ImageRepr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.StrRepresentation" title="svetlanna.specs.specs.StrRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.MarkdownRepresentation" title="svetlanna.specs.specs.MarkdownRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkdownRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.HTMLRepresentation" title="svetlanna.specs.specs.HTMLRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTMLRepresentation</span></code></a></p>
+<p>Representation of the parameter as an image.
+Image generation is based on the <cite>pillow</cite> package.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ImageRepr.draw_image">
+<span class="sig-name descname"><span class="pre">draw_image</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Image</span></span></span><a class="headerlink" href="#svetlanna.specs.ImageRepr.draw_image" title="Link to this definition"></a></dt>
+<dd><p>Draw image into the file, using <cite>pillow</cite> package.</p>
+<section id="id23">
+<h3>Parameters<a class="headerlink" href="#id23" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>context<span class="classifier">ParameterSaveContext</span></dt><dd><p>the parameter save context</p>
+</dd>
+<dt>filepath<span class="classifier">Path</span></dt><dd><p>path to the image file to be created</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ImageRepr.to_html">
+<span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ImageRepr.to_html" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a HTML file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id24">
+<h3>Parameters<a class="headerlink" href="#id24" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id74"><span class="problematic" id="id75">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ImageRepr.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ImageRepr.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id25">
+<h3>Parameters<a class="headerlink" href="#id25" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id76"><span class="problematic" id="id77">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ImageRepr.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ImageRepr.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id26">
+<h3>Parameters<a class="headerlink" href="#id26" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id78"><span class="problematic" id="id79">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.MarkdownRepresentation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">MarkdownRepresentation</span></span><a class="headerlink" href="#svetlanna.specs.MarkdownRepresentation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.Representation" title="svetlanna.specs.specs.Representation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Representation</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterSaveContext_</span></code>]</p>
+<p>Representation that can be exported to markdown file</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.MarkdownRepresentation.to_markdown">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ParameterSaveContext_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#svetlanna.specs.MarkdownRepresentation.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id27">
+<h3>Parameters<a class="headerlink" href="#id27" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id80"><span class="problematic" id="id81">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.NpyFileRepr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">NpyFileRepr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">_SupportsArray</span><span class="p"><span class="pre">[</span></span><span class="pre">dtype</span><span class="p"><span class="pre">[</span></span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">_NestedSequence</span><span class="p"><span class="pre">[</span></span><span class="pre">bool</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">int</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">float</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">complex</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">bytes</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.NpyFileRepr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.StrRepresentation" title="svetlanna.specs.specs.StrRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.MarkdownRepresentation" title="svetlanna.specs.specs.MarkdownRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkdownRepresentation</span></code></a></p>
+<p>Representation of the parameter as a <cite>.npy</cite> file.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.NpyFileRepr.save_to_file">
+<span class="sig-name descname"><span class="pre">save_to_file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.NpyFileRepr.save_to_file" title="Link to this definition"></a></dt>
+<dd><p>Save the parameter related data to <cite>npy</cite> file.</p>
+<section id="id28">
+<h3>Parameters<a class="headerlink" href="#id28" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>context<span class="classifier">ParameterSaveContext</span></dt><dd><p>the parameter save context</p>
+</dd>
+<dt>filepath<span class="classifier">Path</span></dt><dd><p>path to the file to be created</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.NpyFileRepr.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.NpyFileRepr.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id29">
+<h3>Parameters<a class="headerlink" href="#id29" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id82"><span class="problematic" id="id83">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.NpyFileRepr.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.NpyFileRepr.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id30">
+<h3>Parameters<a class="headerlink" href="#id30" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id84"><span class="problematic" id="id85">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.ParameterSaveContext">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">ParameterSaveContext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">directory</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ParameterSaveContext" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Generates different context managers that can be used
+to write a parameter data to output stream or file.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ParameterSaveContext.file">
+<span class="sig-name descname"><span class="pre">file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Generator</span><span class="p"><span class="pre">[</span></span><span class="pre">BufferedWriter</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">None</span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.specs.ParameterSaveContext.file" title="Link to this definition"></a></dt>
+<dd><p>Context manager for the output file</p>
+<section id="id31">
+<h3>Parameters<a class="headerlink" href="#id31" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>filepath<span class="classifier">Path</span></dt><dd><p>filepath</p>
+</dd>
+</dl>
+</section>
+<section id="id32">
+<h3>Yields<a class="headerlink" href="#id32" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Generator[BufferedWriter, Any, None]</dt><dd><p>Buffer</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ParameterSaveContext.get_new_filepath">
+<span class="sig-name descname"><span class="pre">get_new_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extension</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#svetlanna.specs.ParameterSaveContext.get_new_filepath" title="Link to this definition"></a></dt>
+<dd><p>Create a new filepath for a specific extension.
+The generated filename of a specific extension will have a unique name
+ending with <cite>_&lt;n&gt;.&lt;extension&gt;</cite>, where <cite>&lt;n&gt;</cite> is auto-incrementing index.</p>
+<section id="id33">
+<h3>Parameters<a class="headerlink" href="#id33" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>extension<span class="classifier">str</span></dt><dd><p>filename extension</p>
+</dd>
+</dl>
+</section>
+<section id="id34">
+<h3>Returns<a class="headerlink" href="#id34" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Path</dt><dd><p>relative path to the file</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ParameterSaveContext.rel_filepath">
+<span class="sig-name descname"><span class="pre">rel_filepath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Path</span></span></span><a class="headerlink" href="#svetlanna.specs.ParameterSaveContext.rel_filepath" title="Link to this definition"></a></dt>
+<dd><p>Get relative to specs file filepath</p>
+<section id="id35">
+<h3>Parameters<a class="headerlink" href="#id35" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>filepath<span class="classifier">Path</span></dt><dd><p>absolute path</p>
+</dd>
+</dl>
+</section>
+<section id="id36">
+<h3>Returns<a class="headerlink" href="#id36" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>Path</dt><dd><p>relative path</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.ParameterSpecs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">ParameterSpecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">parameter_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">representations</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#svetlanna.specs.specs.Representation" title="svetlanna.specs.specs.Representation"><span class="pre">Representation</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ParameterSpecs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container with all representations for the parameter.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.PrettyReprRepr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">PrettyReprRepr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.PrettyReprRepr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.ReprRepr" title="svetlanna.specs.specs.ReprRepr"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReprRepr</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.HTMLRepresentation" title="svetlanna.specs.specs.HTMLRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTMLRepresentation</span></code></a></p>
+<p>Same as ReprRepr but with better handling of
+Parameters and BoundedParameter</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.PrettyReprRepr.to_html">
+<span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.PrettyReprRepr.to_html" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a HTML file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id37">
+<h3>Parameters<a class="headerlink" href="#id37" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id86"><span class="problematic" id="id87">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.PrettyReprRepr.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.PrettyReprRepr.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id38">
+<h3>Parameters<a class="headerlink" href="#id38" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id88"><span class="problematic" id="id89">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.PrettyReprRepr.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.PrettyReprRepr.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id39">
+<h3>Parameters<a class="headerlink" href="#id39" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id90"><span class="problematic" id="id91">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.ReprRepr">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">ReprRepr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ReprRepr" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.StrRepresentation" title="svetlanna.specs.specs.StrRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">StrRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.MarkdownRepresentation" title="svetlanna.specs.specs.MarkdownRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MarkdownRepresentation</span></code></a>, <a class="reference internal" href="#svetlanna.specs.specs.HTMLRepresentation" title="svetlanna.specs.specs.HTMLRepresentation"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTMLRepresentation</span></code></a></p>
+<p>Representation of the parameter as a plain text.
+The <cite>__repr__</cite> method is used to generate the text.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ReprRepr.to_html">
+<span class="sig-name descname"><span class="pre">to_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ReprRepr.to_html" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a HTML file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id40">
+<h3>Parameters<a class="headerlink" href="#id40" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id92"><span class="problematic" id="id93">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ReprRepr.to_markdown">
+<span class="sig-name descname"><span class="pre">to_markdown</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ReprRepr.to_markdown" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown in a markdown file.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id41">
+<h3>Parameters<a class="headerlink" href="#id41" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id94"><span class="problematic" id="id95">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.ReprRepr.to_str">
+<span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.ParameterSaveContext" title="svetlanna.specs.specs.ParameterSaveContext"><span class="pre">ParameterSaveContext</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.ReprRepr.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id42">
+<h3>Parameters<a class="headerlink" href="#id42" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id96"><span class="problematic" id="id97">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.Representation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">Representation</span></span><a class="headerlink" href="#svetlanna.specs.Representation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterSaveContext_</span></code>]</p>
+<p>Base class for a parameter representation</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.Specsable">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">Specsable</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.Specsable" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<p>Represents any specsable object</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.Specsable.to_specs">
+<span class="sig-name descname"><span class="pre">to_specs</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Iterable</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#svetlanna.specs.specs.ParameterSpecs" title="svetlanna.specs.specs.ParameterSpecs"><span class="pre">ParameterSpecs</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference internal" href="#svetlanna.specs.specs.SubelementSpecs" title="svetlanna.specs.specs.SubelementSpecs"><span class="pre">SubelementSpecs</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#svetlanna.specs.Specsable.to_specs" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.StrRepresentation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">StrRepresentation</span></span><a class="headerlink" href="#svetlanna.specs.StrRepresentation" title="Link to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="#svetlanna.specs.specs.Representation" title="svetlanna.specs.specs.Representation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Representation</span></code></a>[<code class="xref py py-obj docutils literal notranslate"><span class="pre">ParameterSaveContext_</span></code>]</p>
+<p>Representation that can be exported in the text format</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="svetlanna.specs.StrRepresentation.to_str">
+<em class="property"><span class="pre">abstract</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">to_str</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">out</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">TextIO</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">context</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">ParameterSaveContext_</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="headerlink" href="#svetlanna.specs.StrRepresentation.to_str" title="Link to this definition"></a></dt>
+<dd><p>Write the parameter related data to be shown as a plain text.
+The text should be written to the <cite>out</cite> stream.</p>
+<section id="id43">
+<h3>Parameters<a class="headerlink" href="#id43" title="Link to this heading"></a></h3>
+<dl>
+<dt>out<span class="classifier">TextIO</span></dt><dd><p>output text stream</p>
+</dd>
+<dt>context<span class="classifier"><a href="#id98"><span class="problematic" id="id99">ParameterSaveContext_</span></a></span></dt><dd><p>the parameter save context</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.specs.SubelementSpecs">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.specs.</span></span><span class="sig-name descname"><span class="pre">SubelementSpecs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subelement_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subelement</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.specs.SubelementSpecs" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Container for named subelement</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="svetlanna.phase_retrieval_problem.html" class="btn btn-neutral float-left" title="svetlanna.phase_retrieval_problem package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="svetlanna.visualization.html" class="btn btn-neutral float-right" title="svetlanna.visualization package" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CompPhysLab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

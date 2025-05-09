@@ -1,0 +1,682 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reservoir computing for time series prediction of Mackey-Glass sequence &mdash; SVETlANNa 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=e59714d7" />
+      <link rel="stylesheet" type="text/css" href="../../_static/nbsphinx-code-cells.css?v=2aa19091" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+      <script>window.MathJax = {"tex": {"inlineMath": [["$", "$"], ["\\(", "\\)"]], "processEscapes": true}, "options": {"ignoreHtmlClass": "tex2jax_ignore|mathjax_ignore|document", "processHtmlClass": "tex2jax_process|mathjax_process|math|output_area"}}</script>
+      <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Diffractive Autoencoder for MNIST classification task" href="08_autoencoder.html" />
+    <link rel="prev" title="Feed-forward Diffractive Optical Neural Network for MNIST task" href="03_mnist_experiments.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            SVETlANNa
+              <img src="../../_static/logo.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../physics.html">Physical Basis</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules.html">Command reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Examples</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../freeprop_examples.html">Examples of solving forward light propagation problems</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../phase_retrieval_examples.html">Examples of phase retrieval algorithms</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="../../network_examples.html">Examples of diffractive optical networks</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="03_mnist_experiments.html">Feed-forward Diffractive Optical Neural Network for MNIST task</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Reservoir computing for time series prediction of Mackey-Glass sequence</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#Mackey-Glass">Mackey-Glass</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Reservoir">Reservoir</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Dataset">Dataset</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Neural-network">Neural network</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#Training">Training</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="08_autoencoder.html">Diffractive Autoencoder for MNIST classification task</a></li>
+<li class="toctree-l3"><a class="reference internal" href="09_convolutional_4f.html">Convolutional Diffractive Network</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">SVETlANNa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Examples</a></li>
+          <li class="breadcrumb-item"><a href="../../network_examples.html">Examples of diffractive optical networks</a></li>
+      <li class="breadcrumb-item active">Reservoir computing for time series prediction of Mackey-Glass sequence</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/examples_notebook/diff_networks_examples/05_reservoir_mackey_glass.ipynb.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="Reservoir-computing-for-time-series-prediction-of-Mackey-Glass-sequence">
+<h1>Reservoir computing for time series prediction of Mackey-Glass sequence<a class="headerlink" href="#Reservoir-computing-for-time-series-prediction-of-Mackey-Glass-sequence" title="Link to this heading"></a></h1>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[11]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span><span class="w"> </span><span class="nn">svetlanna</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">svetlanna.units</span><span class="w"> </span><span class="kn">import</span> <span class="n">ureg</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">svetlanna.detector</span><span class="w"> </span><span class="kn">import</span> <span class="n">Detector</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">svetlanna.simulation_parameters</span><span class="w"> </span><span class="kn">import</span> <span class="n">SimulationParameters</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">deque</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
+</pre></div>
+</div>
+</div>
+<section id="Mackey-Glass">
+<h2>Mackey-Glass<a class="headerlink" href="#Mackey-Glass" title="Link to this heading"></a></h2>
+<p>The Mackey-Glass equation (DOI: 10.1126/science.267326, 4b) is given by:</p>
+<div class="math notranslate nohighlight">
+\[\frac{dx}{dt} = \frac{\beta \theta^n x(t-\tau)}{\theta^n + x^n(t-\tau)} - \gamma x(t)\]</div>
+<p>In discrete form:</p>
+<div class="math notranslate nohighlight">
+\[x[t+1] = \frac{\beta \theta^n x[t-\tau]}{\theta^n + x^n[t-\tau]} - \gamma x[t]\]</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[5]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="nb">float</span><span class="p">)</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">mackey_glass_generator</span><span class="p">(</span>
+    <span class="n">x0</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">T</span><span class="p">],</span>
+    <span class="n">n</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">beta</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">gamma</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+    <span class="n">theta</span><span class="p">:</span> <span class="nb">float</span>
+<span class="p">):</span>
+    <span class="n">queue</span><span class="p">:</span> <span class="n">deque</span><span class="p">[</span><span class="n">T</span><span class="p">]</span> <span class="o">=</span> <span class="n">deque</span><span class="p">(</span><span class="n">x0</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">popleft</span><span class="p">()</span>
+        <span class="n">x_prev</span> <span class="o">=</span> <span class="n">queue</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">new_x</span> <span class="o">=</span> <span class="n">beta</span> <span class="o">*</span> <span class="n">theta</span><span class="o">**</span><span class="n">n</span> <span class="o">*</span> <span class="n">x</span> <span class="o">/</span> <span class="p">(</span><span class="n">theta</span><span class="o">**</span><span class="n">n</span> <span class="o">+</span> <span class="n">x</span><span class="o">**</span><span class="n">n</span><span class="p">)</span> <span class="o">-</span> <span class="n">gamma</span> <span class="o">*</span> <span class="n">x_prev</span>
+
+        <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_x</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">new_x</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Reservoir">
+<h2>Reservoir<a class="headerlink" href="#Reservoir" title="Link to this heading"></a></h2>
+<p>A simple reservoir model (the main idea is explained in <a class="reference external" href="https://doi.org/10.1364/OE.20.022783">https://doi.org/10.1364/OE.20.022783</a>):</p>
+<div class="math notranslate nohighlight">
+\[x_{out}[i] = F_{NL}(\beta x_{in}[i] + \alpha F_{D}(x_{out}[i-\tau]))\]</div>
+<p>where <span class="math notranslate nohighlight">\(x_{in}\)</span> is the input signal, <span class="math notranslate nohighlight">\(\tau\)</span> is the time delay, <span class="math notranslate nohighlight">\(F_{NL}\)</span> is the nonlinear element, <span class="math notranslate nohighlight">\(F_{D}\)</span> is the delay element, <span class="math notranslate nohighlight">\(\alpha\)</span> is the input gain, and <span class="math notranslate nohighlight">\(\beta\)</span> is the feedback gain.</p>
+<p>In this example, <span class="math notranslate nohighlight">\(F_{NL}\)</span> is a diffractive layer with a random mask, and <span class="math notranslate nohighlight">\(F_{D}\)</span> consists of nonlinear element with a nonlinear amplitude response</p>
+<div class="math notranslate nohighlight">
+\[|\vec{E}_{out}|=\dfrac{|\vec{E}_{in}|^2}{1 + |\vec{E}_{in}|^2}\]</div>
+<p>and free space.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">L</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">cm</span>  <span class="c1"># size of the simulation domain</span>
+<span class="n">N</span> <span class="o">=</span> <span class="mi">5</span>  <span class="c1"># mesh size</span>
+
+
+<span class="n">sim_params</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">SimulationParameters</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s1">&#39;W&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span>
+        <span class="s1">&#39;H&#39;</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="o">-</span><span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">L</span><span class="o">/</span><span class="mi">2</span><span class="p">,</span> <span class="n">N</span><span class="p">),</span>
+        <span class="s1">&#39;wavelength&#39;</span><span class="p">:</span> <span class="mi">1</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">um</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+<span class="c1"># Diffractive layer</span>
+<span class="n">difflayer</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">DiffractiveLayer</span><span class="p">(</span>
+    <span class="n">sim_params</span><span class="p">,</span>
+    <span class="n">mask</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">rand</span><span class="p">((</span><span class="n">N</span><span class="p">,</span> <span class="n">N</span><span class="p">)),</span>
+    <span class="n">mask_norm</span><span class="o">=</span><span class="mi">1</span>
+<span class="p">)</span>
+
+<span class="c1"># Element with nonlinear response</span>
+<span class="n">nonlinear_element</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">NonlinearElement</span><span class="p">(</span>
+    <span class="n">simulation_parameters</span><span class="o">=</span><span class="n">sim_params</span><span class="p">,</span>
+    <span class="n">response_function</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">x</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Free space</span>
+<span class="n">fs</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">FreeSpace</span><span class="p">(</span>
+    <span class="n">sim_params</span><span class="p">,</span>
+    <span class="n">distance</span><span class="o">=</span><span class="mi">2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">cm</span><span class="p">,</span>
+    <span class="n">method</span><span class="o">=</span><span class="s1">&#39;AS&#39;</span>
+<span class="p">)</span>
+
+<span class="c1"># The reservoir system</span>
+<span class="n">reservoir</span> <span class="o">=</span> <span class="n">sv</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">SimpleReservoir</span><span class="p">(</span>
+    <span class="n">sim_params</span><span class="p">,</span>
+    <span class="n">nonlinear_element</span><span class="o">=</span><span class="n">difflayer</span><span class="p">,</span>
+    <span class="n">delay_element</span><span class="o">=</span><span class="n">sv</span><span class="o">.</span><span class="n">LinearOpticalSetup</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">nonlinear_element</span><span class="p">,</span> <span class="n">fs</span><span class="p">]</span>
+    <span class="p">),</span>
+    <span class="n">feedback_gain</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+    <span class="n">input_gain</span><span class="o">=</span><span class="mf">1.</span><span class="p">,</span>
+    <span class="n">delay</span><span class="o">=</span><span class="mi">10</span>
+<span class="p">)</span>
+
+<span class="c1"># Detector</span>
+<span class="n">detector</span> <span class="o">=</span> <span class="n">Detector</span><span class="p">(</span>
+    <span class="n">sim_params</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<p>To enable masking of the input signal, one should create a custom module that applies masking in the forward method and then calculates the average of the detector output over a single symbol.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[27]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ReservoirSystem</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">simulation_parameters</span><span class="p">:</span> <span class="n">SimulationParameters</span><span class="p">,</span>
+        <span class="n">reservoir</span><span class="p">:</span> <span class="n">sv</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">SimpleReservoir</span><span class="p">,</span>
+        <span class="n">detector</span><span class="p">:</span> <span class="n">sv</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">Element</span><span class="p">,</span>
+        <span class="n">mask</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
+    <span class="p">):</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">mask</span> <span class="o">=</span> <span class="n">mask</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">simulation_parameters</span> <span class="o">=</span> <span class="n">simulation_parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reservoir</span> <span class="o">=</span> <span class="n">reservoir</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">detector</span> <span class="o">=</span> <span class="n">detector</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+
+        <span class="c1"># before new sequence one should drop the wavefronts</span>
+        <span class="c1"># stored in the feedback line</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reservoir</span><span class="o">.</span><span class="n">drop_feedback_queue</span><span class="p">()</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">simulation_parameters</span><span class="o">.</span><span class="n">axes_size</span><span class="p">(</span><span class="s1">&#39;W&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">simulation_parameters</span><span class="o">.</span><span class="n">axes_size</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">mask_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># For each symbol in the sequence</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+            <span class="n">masked_input</span> <span class="o">=</span> <span class="n">u</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">mask</span>
+
+            <span class="n">detector_signal</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="c1"># For each mask frame in the mask</span>
+            <span class="k">for</span> <span class="n">u_masked</span> <span class="ow">in</span> <span class="n">masked_input</span><span class="p">:</span>
+                <span class="c1"># Encode the signal in the amplitude of incident field</span>
+                <span class="n">wf</span> <span class="o">=</span> <span class="n">u_masked</span> <span class="o">*</span> <span class="n">sv</span><span class="o">.</span><span class="n">Wavefront</span><span class="o">.</span><span class="n">gaussian_beam</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">simulation_parameters</span><span class="p">,</span>
+                    <span class="n">waist_radius</span><span class="o">=</span><span class="mf">0.2</span> <span class="o">*</span> <span class="n">ureg</span><span class="o">.</span><span class="n">cm</span>
+                <span class="p">)</span>
+                <span class="c1"># Calculate the propagation through the reservoir</span>
+                <span class="n">wf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">reservoir</span><span class="p">(</span><span class="n">wf</span><span class="p">)</span>
+                <span class="n">detector_signal</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">detector</span><span class="p">(</span><span class="n">wf</span><span class="p">)</span>
+
+            <span class="c1"># Calculate average signal on the detector during the symbol</span>
+            <span class="c1"># The output of this module is a vector of real value</span>
+            <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">detector_signal</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span> <span class="o">/</span> <span class="n">mask_size</span>
+
+        <span class="k">return</span> <span class="n">res</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="Dataset">
+<h2>Dataset<a class="headerlink" href="#Dataset" title="Link to this heading"></a></h2>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[ ]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">MG_TRAIN_SIZE</span> <span class="o">=</span> <span class="mi">200</span>
+
+<span class="n">MG_X_PREHEAT_NUM</span> <span class="o">=</span> <span class="mi">100</span>  <span class="c1"># Number of preheat symbols</span>
+<span class="n">MG_X_NUM</span> <span class="o">=</span> <span class="n">MG_X_PREHEAT_NUM</span> <span class="o">+</span> <span class="mi">200</span>
+<span class="n">MG_DATASET_PREHEAT_NUM</span> <span class="o">=</span> <span class="mi">200</span>  <span class="c1"># preheat for dataset</span>
+</pre></div>
+</div>
+</div>
+<p>First, we create a dataset from the Mackey-Glass sequence.</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[42]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">MGDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">size</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">initial_step</span><span class="p">:</span> <span class="nb">int</span>
+    <span class="p">):</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">u_generator</span> <span class="o">=</span> <span class="n">mackey_glass_generator</span><span class="p">(</span>
+            <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mf">1.</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
+            <span class="n">n</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">beta</span><span class="o">=</span><span class="mf">0.3</span><span class="p">,</span>
+            <span class="n">gamma</span><span class="o">=-</span><span class="mf">0.9</span><span class="p">,</span>
+            <span class="n">theta</span><span class="o">=</span><span class="mi">4</span>
+        <span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">initial_step</span><span class="p">):</span>
+            <span class="nb">next</span><span class="p">(</span><span class="n">u_generator</span><span class="p">)</span>
+
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">MG_X_NUM</span> <span class="o">+</span> <span class="n">size</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+            <span class="n">u</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="n">u_generator</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">u</span> <span class="o">=</span> <span class="n">u</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_size</span> <span class="o">=</span> <span class="n">size</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_size</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[</span><span class="n">idx</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">MG_X_NUM</span><span class="p">])</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">u</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">idx</span> <span class="o">+</span> <span class="n">MG_X_NUM</span> <span class="o">+</span> <span class="mi">1</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[43]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">mg_dataset</span> <span class="o">=</span> <span class="n">MGDataset</span><span class="p">(</span>
+    <span class="n">size</span><span class="o">=</span><span class="n">MG_TRAIN_SIZE</span><span class="p">,</span>
+    <span class="n">initial_step</span><span class="o">=</span><span class="n">MG_DATASET_PREHEAT_NUM</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[44]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">mg_dataset</span><span class="o">.</span><span class="n">u</span><span class="p">,</span> <span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="n">markersize</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;symbol index&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;$x_</span><span class="si">{in}</span><span class="s1">$&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">xlim</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">200</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_14_0.png" src="../../_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_14_0.png" />
+</div>
+</div>
+<p>Then, we process this dataset through the reservoir system. The final dataset will contain the input signal <span class="math notranslate nohighlight">\(x_{in}\)</span>, the signal vector at the detector after propagation through the reservoir system <span class="math notranslate nohighlight">\(y_{reservoir}\)</span> and the required prediction of the next signal <span class="math notranslate nohighlight">\(y\)</span>:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[45]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">ReservoirResponseDataset</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">Dataset</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="p">:</span> <span class="n">MGDataset</span><span class="p">,</span>
+        <span class="n">reservoir_system</span><span class="p">:</span> <span class="n">ReservoirSystem</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xy</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">))):</span>
+            <span class="n">x</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">y_reservoir</span> <span class="o">=</span> <span class="n">reservoir_system</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y_reservoir</span><span class="p">,</span> <span class="n">y</span><span class="p">))</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">xy</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[46]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">reservoir_system</span> <span class="o">=</span> <span class="n">ReservoirSystem</span><span class="p">(</span>
+    <span class="n">sim_params</span><span class="p">,</span>
+    <span class="n">reservoir</span><span class="p">,</span>
+    <span class="n">detector</span><span class="p">,</span>
+    <span class="n">mask</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">1.</span><span class="p">,</span> <span class="mf">0.8</span><span class="p">,])</span>
+<span class="p">)</span>
+
+<span class="n">train_dataset</span> <span class="o">=</span> <span class="n">ReservoirResponseDataset</span><span class="p">(</span>
+    <span class="n">mg_dataset</span><span class="p">,</span>
+    <span class="n">reservoir_system</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|██████████| 200/200 [00:25&lt;00:00,  7.87it/s]
+</pre></div></div>
+</div>
+</section>
+<section id="Neural-network">
+<h2>Neural network<a class="headerlink" href="#Neural-network" title="Link to this heading"></a></h2>
+<p>After the reservoir system with a detector, the linear output layer is applied. The weights of this layer will be trained during the training process. The resulting neural network is as follows:</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[47]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">class</span><span class="w"> </span><span class="nc">Net</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Module</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">simulation_parameters</span><span class="p">:</span> <span class="n">SimulationParameters</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">linear_layer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">Linear</span><span class="p">(</span>
+            <span class="n">in_features</span><span class="o">=</span><span class="n">simulation_parameters</span><span class="o">.</span><span class="n">axes_size</span><span class="p">(</span><span class="s1">&#39;W&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">simulation_parameters</span><span class="o">.</span><span class="n">axes_size</span><span class="p">(</span><span class="s1">&#39;H&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">out_features</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">linear_layer</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[48]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">torch</span><span class="o">.</span><span class="n">manual_seed</span><span class="p">(</span><span class="mi">25</span><span class="p">)</span>
+
+<span class="n">net</span> <span class="o">=</span> <span class="n">Net</span><span class="p">(</span>
+    <span class="n">sim_params</span>
+<span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y_reservoir</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">40</span><span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">MG_X_PREHEAT_NUM</span><span class="p">:],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;(Reservoir + Net) required output&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">net</span><span class="p">(</span><span class="n">y_reservoir</span><span class="p">)[</span><span class="n">MG_X_PREHEAT_NUM</span><span class="p">:]</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;(Reservoir + Net) output&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[49]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x12d5e5410&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_22_1.png" src="../../_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_22_1.png" />
+</div>
+</div>
+</section>
+<section id="Training">
+<h2>Training<a class="headerlink" href="#Training" title="Link to this heading"></a></h2>
+<p>Some default training routines</p>
+<div class="nbinput nblast docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[50]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">train_dataloader</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">DataLoader</span><span class="p">(</span><span class="n">train_dataset</span><span class="p">,</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">shuffle</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="n">optimizer</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">AdamW</span><span class="p">(</span>
+    <span class="n">params</span><span class="o">=</span><span class="n">net</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+    <span class="n">lr</span><span class="o">=</span><span class="mf">2e-2</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">loss_func</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">nn</span><span class="o">.</span><span class="n">MSELoss</span><span class="p">()</span>
+
+<span class="n">epoch_train_losses</span> <span class="o">=</span> <span class="p">[]</span>
+</pre></div>
+</div>
+</div>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[51]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="n">n_epochs</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">for</span> <span class="n">epoch</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="o">.</span><span class="n">tqdm</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">n_epochs</span><span class="p">)):</span>
+
+    <span class="n">train_losses</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">train_dataloader</span><span class="p">:</span>
+
+        <span class="n">u_pred</span> <span class="o">=</span> <span class="n">net</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">loss</span> <span class="o">=</span> <span class="n">loss_func</span><span class="p">(</span><span class="n">u</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">MG_X_PREHEAT_NUM</span><span class="p">:],</span> <span class="n">u_pred</span><span class="p">[</span><span class="n">MG_X_PREHEAT_NUM</span><span class="p">:])</span>
+
+        <span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">step</span><span class="p">()</span>
+        <span class="n">optimizer</span><span class="o">.</span><span class="n">zero_grad</span><span class="p">()</span>
+
+        <span class="n">train_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">loss</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+
+    <span class="n">epoch_train_losses</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">train_losses</span><span class="p">))</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+    <span class="k">if</span> <span class="n">epoch</span> <span class="o">%</span> <span class="mi">10</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epoch #</span><span class="si">{</span><span class="n">epoch</span><span class="si">}</span><span class="s1"> mean loss:&#39;</span><span class="p">,</span> <span class="n">epoch_train_losses</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+  9%|▉         | 9/100 [00:00&lt;00:02, 41.00it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch #0 mean loss: 1.4420512914657593
+Epoch #10 mean loss: 0.12267999351024628
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 27%|██▋       | 27/100 [00:00&lt;00:01, 49.60it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch #20 mean loss: 0.11480734497308731
+Epoch #30 mean loss: 0.10821171849966049
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 50%|█████     | 50/100 [00:01&lt;00:00, 50.17it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch #40 mean loss: 0.10631066560745239
+Epoch #50 mean loss: 0.10427819192409515
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 68%|██████▊   | 68/100 [00:01&lt;00:00, 50.70it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch #60 mean loss: 0.10449296981096268
+Epoch #70 mean loss: 0.10347328335046768
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+ 90%|█████████ | 90/100 [00:01&lt;00:00, 48.50it/s]
+</pre></div></div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+Epoch #80 mean loss: 0.10367363691329956
+Epoch #90 mean loss: 0.1031264141201973
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area stderr docutils container">
+<div class="highlight"><pre>
+100%|██████████| 100/100 [00:02&lt;00:00, 48.25it/s]
+</pre></div></div>
+</div>
+<p>Evaluation</p>
+<div class="nbinput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="input_area highlight-ipython3 notranslate"><div class="highlight"><pre><span></span><span class="k">with</span> <span class="n">torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">():</span>
+    <span class="n">x</span><span class="p">,</span> <span class="n">y_reservoir</span><span class="p">,</span> <span class="n">y</span> <span class="o">=</span> <span class="n">train_dataset</span><span class="p">[</span><span class="mi">40</span><span class="p">]</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="n">MG_X_PREHEAT_NUM</span><span class="p">:],</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;(Reservoir + Net) required output&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">net</span><span class="p">(</span><span class="n">y_reservoir</span><span class="p">)[</span><span class="n">MG_X_PREHEAT_NUM</span><span class="p">:]</span><span class="o">.</span><span class="n">numpy</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;(Reservoir + Net) output&#39;</span><span class="p">)</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="nboutput docutils container">
+<div class="prompt highlight-none notranslate"><div class="highlight"><pre><span></span>[52]:
+</pre></div>
+</div>
+<div class="output_area docutils container">
+<div class="highlight"><pre>
+&lt;matplotlib.legend.Legend at 0x12fe6d650&gt;
+</pre></div></div>
+</div>
+<div class="nboutput nblast docutils container">
+<div class="prompt empty docutils container">
+</div>
+<div class="output_area docutils container">
+<img alt="../../_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_28_1.png" src="../../_images/examples_notebook_diff_networks_examples_05_reservoir_mackey_glass_28_1.png" />
+</div>
+</div>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="03_mnist_experiments.html" class="btn btn-neutral float-left" title="Feed-forward Diffractive Optical Neural Network for MNIST task" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="08_autoencoder.html" class="btn btn-neutral float-right" title="Diffractive Autoencoder for MNIST classification task" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CompPhysLab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

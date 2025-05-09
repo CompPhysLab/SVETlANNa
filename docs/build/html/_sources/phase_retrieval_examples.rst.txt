@@ -1,0 +1,9 @@
+Examples of phase retrieval algorithms
+=======================
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   examples_notebook/phase_retrieval/optimize_example
+   examples_notebook/phase_retrieval/optimize_lowapi_example

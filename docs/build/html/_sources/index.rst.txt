@@ -1,0 +1,23 @@
+.. SVETlANNa documentation master file, created by
+   sphinx-quickstart on Thu May  8 13:02:34 2025.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
+
+SVETlANNa documentation
+=======================
+
+SVETlANNa is an open-source Python library for simulation of free-space optical set-ups and neuromorphic systems such as Diffractive Neural Networks. It is primarily built on the PyTorch framework, leveraging key features such as tensor-based computations and efficient parallel processing. At its core, SvetlANNa relies on the Fourier optics, supporting multiple propagation models, including the Angular spectrum method and the Fresnel approximation.
+
+There is a supporting github project `SVETlANNa.docs <https://github.com/CompPhysLab/SVETlANNa.docs>`_ containing numerous application examples in the Jupyter notebook format. This project will be opened upon the release.
+
+The name of the library is composed of the Russian word "svet", which is the "light" in English and the abbreviation ANN standing for an artificial neural network, and simultaneously the whole word sounds like a Russian female name Svetlana.
+
+
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   physics
+   modules
+   installation
+   examples

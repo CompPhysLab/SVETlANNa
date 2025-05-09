@@ -1,0 +1,384 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>svetlanna.visualization package &mdash; SVETlANNa 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script crossorigin="anonymous" integrity="sha256-Ae2Vz/4ePdIu6ZyI/5ZGsYnb+m0JlOmKPjt6XZ9JJkA=" src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Installation" href="installation.html" />
+    <link rel="prev" title="svetlanna.specs package" href="svetlanna.specs.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            SVETlANNa
+              <img src="_static/logo.jpg" class="logo" alt="Logo"/>
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="physics.html">Physical Basis</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="modules.html">Command reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="svetlanna.html">svetlanna</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="svetlanna.html#subpackages">Subpackages</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.elements.html">svetlanna.elements package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.networks.html">svetlanna.networks package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.phase_retrieval_problem.html">svetlanna.phase_retrieval_problem package</a></li>
+<li class="toctree-l4"><a class="reference internal" href="svetlanna.specs.html">svetlanna.specs package</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">svetlanna.visualization package</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#submodules">Submodules</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.axes_math">svetlanna.axes_math module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.clerk">svetlanna.clerk module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.detector">svetlanna.detector module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.logging">svetlanna.logging module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.parameters">svetlanna.parameters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.setup">svetlanna.setup module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.simulation_parameters">svetlanna.simulation_parameters module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.transforms">svetlanna.transforms module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.units">svetlanna.units module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna.wavefront">svetlanna.wavefront module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="svetlanna.html#module-svetlanna">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="examples.html">Examples</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">SVETlANNa</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="modules.html">Command reference</a></li>
+          <li class="breadcrumb-item"><a href="svetlanna.html">svetlanna</a></li>
+      <li class="breadcrumb-item active">svetlanna.visualization package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/svetlanna.visualization.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="svetlanna-visualization-package">
+<h1>svetlanna.visualization package<a class="headerlink" href="#svetlanna-visualization-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+</section>
+<section id="module-svetlanna.visualization.widgets">
+<span id="svetlanna-visualization-widgets-module"></span><h2>svetlanna.visualization.widgets module<a class="headerlink" href="#module-svetlanna.visualization.widgets" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.ElementHTML">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">ElementHTML</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.visualization.widgets.ElementHTML" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Representation of an element in HTML format.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.ElementHTML.element_type">
+<span class="sig-name descname"><span class="pre">element_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#svetlanna.visualization.widgets.ElementHTML.element_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.ElementHTML.html">
+<span class="sig-name descname"><span class="pre">html</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#svetlanna.visualization.widgets.ElementHTML.html" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.SpecsWidget">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">SpecsWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.visualization.widgets.SpecsWidget" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AnyWidget</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.SpecsWidget.elements">
+<span class="sig-name descname"><span class="pre">elements</span></span><a class="headerlink" href="#svetlanna.visualization.widgets.SpecsWidget.elements" title="Link to this definition"></a></dt>
+<dd><p>An instance of a Python list.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.SpecsWidget.structure_html">
+<span class="sig-name descname"><span class="pre">structure_html</span></span><a class="headerlink" href="#svetlanna.visualization.widgets.SpecsWidget.structure_html" title="Link to this definition"></a></dt>
+<dd><p>A trait for unicode strings.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.StepwiseForwardWidget">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">StepwiseForwardWidget</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.visualization.widgets.StepwiseForwardWidget" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">AnyWidget</span></code></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.StepwiseForwardWidget.elements">
+<span class="sig-name descname"><span class="pre">elements</span></span><a class="headerlink" href="#svetlanna.visualization.widgets.StepwiseForwardWidget.elements" title="Link to this definition"></a></dt>
+<dd><p>An instance of a Python list.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.StepwiseForwardWidget.structure_html">
+<span class="sig-name descname"><span class="pre">structure_html</span></span><a class="headerlink" href="#svetlanna.visualization.widgets.StepwiseForwardWidget.structure_html" title="Link to this definition"></a></dt>
+<dd><p>A trait for unicode strings.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.default_widget_html_method">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">default_widget_html_method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">index</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">element_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">subelements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#svetlanna.visualization.widgets.ElementHTML" title="svetlanna.visualization.widgets.ElementHTML"><span class="pre">ElementHTML</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#svetlanna.visualization.widgets.default_widget_html_method" title="Link to this definition"></a></dt>
+<dd><p>Default <cite>_widget_html_</cite> method used for rendering <cite>Specsable</cite> elements.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>index<span class="classifier">int</span></dt><dd><p>The unique index of the element.
+Should be used as an id of HTML element containing the element.</p>
+</dd>
+<dt>name<span class="classifier">str</span></dt><dd><p>Human readable name of the element</p>
+</dd>
+<dt>element_type<span class="classifier">str | None</span></dt><dd><p>Human readable type of the element as a subelement, if any</p>
+</dd>
+<dt>subelements<span class="classifier">list[ElementHTML]</span></dt><dd><p>Subelements of the element.</p>
+</dd>
+</dl>
+</section>
+<section id="returns">
+<h3>Returns<a class="headerlink" href="#returns" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>str</dt><dd><p>rendered HTML</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.draw_wavefront">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">draw_wavefront</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wavefront</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">types_to_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'A'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'I'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'phase'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Re'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Im'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('I',</span> <span class="pre">'phase')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">bytes</span></span></span><a class="headerlink" href="#svetlanna.visualization.widgets.draw_wavefront" title="Link to this definition"></a></dt>
+<dd><p>Show field propagation in the setup via widget.
+Currently only wavefronts of shape <cite>(W, H)</cite> are supported.</p>
+<section id="id1">
+<h3>Parameters<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>wavefront<span class="classifier">Tensor</span></dt><dd><p>The Input wavefront</p>
+</dd>
+<dt>simulation_parameters<span class="classifier">SimulationParameters</span></dt><dd><p>Simulation parameters</p>
+</dd>
+<dt>types_to_plot<span class="classifier">tuple[StepwisePlotTypes, …], optional</span></dt><dd><p>Field properties to plot, by default (‘I’, ‘phase’)</p>
+</dd>
+</dl>
+</section>
+<section id="id2">
+<h3>Returns<a class="headerlink" href="#id2" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>bytes</dt><dd><p>byte-coded image</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.generate_structure_html">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">generate_structure_html</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">subelements</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">_ElementInTree</span><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">str</span></span></span><a class="headerlink" href="#svetlanna.visualization.widgets.generate_structure_html" title="Link to this definition"></a></dt>
+<dd><p>Generate HTML for a setup structure.</p>
+<section id="id3">
+<h3>Parameters<a class="headerlink" href="#id3" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>subelements<span class="classifier">list[_ElementInTree]</span></dt><dd><p>Elements tree</p>
+</dd>
+</dl>
+</section>
+<section id="id4">
+<h3>Returns<a class="headerlink" href="#id4" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>str</dt><dd><p>Rendered HTML</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.show_specs">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">show_specs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">specsable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.visualization.widgets.SpecsWidget" title="svetlanna.visualization.widgets.SpecsWidget"><span class="pre">SpecsWidget</span></a></span></span><a class="headerlink" href="#svetlanna.visualization.widgets.show_specs" title="Link to this definition"></a></dt>
+<dd><p>Display a setup structure with interactive specs preview</p>
+<section id="id5">
+<h3>Returns<a class="headerlink" href="#id5" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>SpecsWidget</dt><dd><p>The widget</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.show_stepwise_forward">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">show_stepwise_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">specsable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">types_to_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'A'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'I'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'phase'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Re'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Im'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('I',</span> <span class="pre">'phase')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.visualization.widgets.StepwiseForwardWidget" title="svetlanna.visualization.widgets.StepwiseForwardWidget"><span class="pre">StepwiseForwardWidget</span></a></span></span><a class="headerlink" href="#svetlanna.visualization.widgets.show_stepwise_forward" title="Link to this definition"></a></dt>
+<dd><p>Display the wavefront propagation through a setup structure
+using a widget interface. Currently only wavefronts
+of shape <cite>(W, H)</cite> are supported.</p>
+<section id="id6">
+<h3>Parameters<a class="headerlink" href="#id6" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input<span class="classifier">torch.Tensor</span></dt><dd><p>The Input wavefront</p>
+</dd>
+<dt>simulation_parameters<span class="classifier">SimulationParameters</span></dt><dd><p>Simulation parameters</p>
+</dd>
+<dt>types_to_plot<span class="classifier">tuple[StepwisePlotTypes, …], optional</span></dt><dd><p>Field properties to plot, by default (‘I’, ‘phase’)</p>
+</dd>
+</dl>
+</section>
+<section id="id7">
+<h3>Returns<a class="headerlink" href="#id7" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>StepwiseForwardWidget</dt><dd><p>The widget</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.widgets.show_structure">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.widgets.</span></span><span class="sig-name descname"><span class="pre">show_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">specsable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.visualization.widgets.show_structure" title="Link to this definition"></a></dt>
+<dd><p>Display a setup structure using IPython’s HTML display.
+Useful for previewing specs hierarchies in notebooks.</p>
+</dd></dl>
+
+</section>
+<section id="module-svetlanna.visualization">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-svetlanna.visualization" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="svetlanna.visualization.ElementHTML">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.</span></span><span class="sig-name descname"><span class="pre">ElementHTML</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">element_type</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">html</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.visualization.ElementHTML" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Representation of an element in HTML format.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.visualization.ElementHTML.element_type">
+<span class="sig-name descname"><span class="pre">element_type</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#svetlanna.visualization.ElementHTML.element_type" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="svetlanna.visualization.ElementHTML.html">
+<span class="sig-name descname"><span class="pre">html</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#svetlanna.visualization.ElementHTML.html" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.show_specs">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.</span></span><span class="sig-name descname"><span class="pre">show_specs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">specsable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.visualization.widgets.SpecsWidget" title="svetlanna.visualization.widgets.SpecsWidget"><span class="pre">SpecsWidget</span></a></span></span><a class="headerlink" href="#svetlanna.visualization.show_specs" title="Link to this definition"></a></dt>
+<dd><p>Display a setup structure with interactive specs preview</p>
+<section id="id8">
+<h3>Returns<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>SpecsWidget</dt><dd><p>The widget</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.show_stepwise_forward">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.</span></span><span class="sig-name descname"><span class="pre">show_stepwise_forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">specsable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Tensor</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">simulation_parameters</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.html#svetlanna.simulation_parameters.SimulationParameters" title="svetlanna.simulation_parameters.SimulationParameters"><span class="pre">SimulationParameters</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">types_to_plot</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'A'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'I'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'phase'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Re'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'Im'</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">('I',</span> <span class="pre">'phase')</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="#svetlanna.visualization.widgets.StepwiseForwardWidget" title="svetlanna.visualization.widgets.StepwiseForwardWidget"><span class="pre">StepwiseForwardWidget</span></a></span></span><a class="headerlink" href="#svetlanna.visualization.show_stepwise_forward" title="Link to this definition"></a></dt>
+<dd><p>Display the wavefront propagation through a setup structure
+using a widget interface. Currently only wavefronts
+of shape <cite>(W, H)</cite> are supported.</p>
+<section id="id9">
+<h3>Parameters<a class="headerlink" href="#id9" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>input<span class="classifier">torch.Tensor</span></dt><dd><p>The Input wavefront</p>
+</dd>
+<dt>simulation_parameters<span class="classifier">SimulationParameters</span></dt><dd><p>Simulation parameters</p>
+</dd>
+<dt>types_to_plot<span class="classifier">tuple[StepwisePlotTypes, …], optional</span></dt><dd><p>Field properties to plot, by default (‘I’, ‘phase’)</p>
+</dd>
+</dl>
+</section>
+<section id="id10">
+<h3>Returns<a class="headerlink" href="#id10" title="Link to this heading"></a></h3>
+<dl class="simple">
+<dt>StepwiseForwardWidget</dt><dd><p>The widget</p>
+</dd>
+</dl>
+</section>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="svetlanna.visualization.show_structure">
+<span class="sig-prename descclassname"><span class="pre">svetlanna.visualization.</span></span><span class="sig-name descname"><span class="pre">show_structure</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">specsable</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="svetlanna.specs.html#svetlanna.specs.specs.Specsable" title="svetlanna.specs.specs.Specsable"><span class="pre">Specsable</span></a></span></em><span class="sig-paren">)</span><a class="headerlink" href="#svetlanna.visualization.show_structure" title="Link to this definition"></a></dt>
+<dd><p>Display a setup structure using IPython’s HTML display.
+Useful for previewing specs hierarchies in notebooks.</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="svetlanna.specs.html" class="btn btn-neutral float-left" title="svetlanna.specs package" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="installation.html" class="btn btn-neutral float-right" title="Installation" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, CompPhysLab.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

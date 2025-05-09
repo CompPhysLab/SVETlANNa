@@ -1,0 +1,11 @@
+Examples of diffractive optical networks
+========================================
+
+.. toctree::
+   :maxdepth: 1
+   :caption: Contents:
+
+   examples_notebook/diff_networks_examples/03_mnist_experiments
+   examples_notebook/diff_networks_examples/05_reservoir_mackey_glass
+   examples_notebook/diff_networks_examples/08_autoencoder
+   examples_notebook/diff_networks_examples/09_convolutional_4f

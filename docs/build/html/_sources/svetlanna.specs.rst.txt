@@ -1,0 +1,29 @@
+svetlanna.specs package
+=======================
+
+Submodules
+----------
+
+svetlanna.specs.specs module
+----------------------------
+
+.. automodule:: svetlanna.specs.specs
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.specs.specs\_writer module
+------------------------------------
+
+.. automodule:: svetlanna.specs.specs_writer
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: svetlanna.specs
+   :members:
+   :show-inheritance:
+   :undoc-members:

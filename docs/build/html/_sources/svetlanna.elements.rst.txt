@@ -1,0 +1,77 @@
+svetlanna.elements package
+==========================
+
+Submodules
+----------
+
+svetlanna.elements.aperture module
+----------------------------------
+
+.. automodule:: svetlanna.elements.aperture
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.elements.diffractive\_layer module
+--------------------------------------------
+
+.. automodule:: svetlanna.elements.diffractive_layer
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.elements.element module
+---------------------------------
+
+.. automodule:: svetlanna.elements.element
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.elements.free\_space module
+-------------------------------------
+
+.. automodule:: svetlanna.elements.free_space
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.elements.lens module
+------------------------------
+
+.. automodule:: svetlanna.elements.lens
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.elements.nonlinear\_element module
+--------------------------------------------
+
+.. automodule:: svetlanna.elements.nonlinear_element
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.elements.reservoir module
+-----------------------------------
+
+.. automodule:: svetlanna.elements.reservoir
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.elements.slm module
+-----------------------------
+
+.. automodule:: svetlanna.elements.slm
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: svetlanna.elements
+   :members:
+   :show-inheritance:
+   :undoc-members:

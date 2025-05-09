@@ -1,0 +1,37 @@
+svetlanna.phase\_retrieval\_problem package
+===========================================
+
+Submodules
+----------
+
+svetlanna.phase\_retrieval\_problem.algorithms module
+-----------------------------------------------------
+
+.. automodule:: svetlanna.phase_retrieval_problem.algorithms
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.phase\_retrieval\_problem.phase\_retrieval module
+-----------------------------------------------------------
+
+.. automodule:: svetlanna.phase_retrieval_problem.phase_retrieval
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+svetlanna.phase\_retrieval\_problem.phase\_retrieval\_result module
+-------------------------------------------------------------------
+
+.. automodule:: svetlanna.phase_retrieval_problem.phase_retrieval_result
+   :members:
+   :show-inheritance:
+   :undoc-members:
+
+Module contents
+---------------
+
+.. automodule:: svetlanna.phase_retrieval_problem
+   :members:
+   :show-inheritance:
+   :undoc-members:

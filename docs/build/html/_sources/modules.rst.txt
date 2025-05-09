@@ -1,0 +1,7 @@
+Command reference
+=================
+
+.. toctree::
+   :maxdepth: 4
+
+   svetlanna
