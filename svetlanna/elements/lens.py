@@ -19,7 +19,7 @@ class ThinLens(Element):
         self,
         simulation_parameters: SimulationParameters,
         focal_length: OptimizableFloat,
-        radius: float = torch.inf
+        radius: float = torch.inf,
     ):
         """Thin lens element.
 
@@ -36,26 +36,19 @@ class ThinLens(Element):
 
         super().__init__(simulation_parameters)
 
-        self.focal_length = self.process_parameter(
-            'focal_length', focal_length
-        )
-        self.radius = self.process_parameter(
-            'radius', radius
-        )
+        self.focal_length = self.process_parameter("focal_length", focal_length)
+        self.radius = self.process_parameter("radius", radius)
 
         # Compute wave_number as a tensor
         wave_number, axes = tensor_dot(
             2 * torch.pi / self.simulation_parameters.axes.wavelength,
             torch.tensor([[1]], device=self.simulation_parameters.device),
-            'wavelength',
-            ('H', 'W')
+            "wavelength",
+            ("H", "W"),
         )  # shape: ('wavelength', 1, 1) or (1, 1)
 
         # Registering Buffer for _wave_number
-        self._wave_number = self.make_buffer(
-            '_wave_number',
-            wave_number
-        )
+        self._wave_number = self.make_buffer("_wave_number", wave_number)
 
         self._calc_axes = axes  # axes tuple used during calculations
 
@@ -67,8 +60,7 @@ class ThinLens(Element):
 
         # Registering Buffer for _radius_squared
         self._radius_squared = self.make_buffer(
-            '_radius_squared',
-            x_grid**2 + y_grid**2
+            "_radius_squared", x_grid**2 + y_grid**2
         )
 
         # Create a mask that acts as an aperture:
@@ -78,18 +70,30 @@ class ThinLens(Element):
             self._radius_mask = 1.0
         else:
             self._radius_mask = self.make_buffer(
-                '_radius_mask',
+                "_radius_mask",
                 (self._radius_squared <= self.radius**2).to(
                     dtype=torch.get_default_dtype()  # cast bool to float
-                )
+                ),
             )
 
     @property
     def transmission_function(self) -> torch.Tensor:
+        """
+        Calculates the transmission function of the optical system.
+
+            This function computes the complex-valued transmission function based on
+            the radius mask, radius squared, wave number, and focal length.  It uses
+            an exponential function to represent the phase shift introduced by the
+            optical element.
+
+            Returns:
+                torch.Tensor: The calculated transmission function as a PyTorch tensor.
+        """
         return torch.exp(
-            - 1j * self._radius_mask * self._radius_squared * (
-                self._wave_number / (2 * self.focal_length)
-            )
+            -1j
+            * self._radius_mask
+            * self._radius_squared
+            * (self._wave_number / (2 * self.focal_length))
         )
 
     def get_transmission_function(self) -> torch.Tensor:
@@ -121,7 +125,7 @@ class ThinLens(Element):
             incident_wavefront,
             self.transmission_function,
             self._calc_axes,
-            self.simulation_parameters
+            self.simulation_parameters,
         )
 
     def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
@@ -144,30 +148,47 @@ class ThinLens(Element):
             transmission_wavefront,
             torch.conj(self.transmission_function),
             self._calc_axes,
-            self.simulation_parameters
+            self.simulation_parameters,
         )
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
+        """
+        Returns a list of ParameterSpecs for the object's parameters.
+
+            Args:
+                None
+
+            Returns:
+                Iterable[ParameterSpecs]: An iterable containing ParameterSpecs objects,
+                                         representing the focal length and radius
+                                         of the object.
+        """
         return [
             ParameterSpecs(
-                'focal_length', [
+                "focal_length",
+                [
                     PrettyReprRepr(self.focal_length),
-                ]
+                ],
             ),
-            ParameterSpecs(
-                'radius', [
-                    PrettyReprRepr(self.radius)
-                ]
-            )
+            ParameterSpecs("radius", [PrettyReprRepr(self.radius)]),
         ]
 
     @staticmethod
     def _widget_html_(
-        index: int,
-        name: str,
-        element_type: str | None,
-        subelements: list[ElementHTML]
+        index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
     ) -> str:
-        return jinja_env.get_template('widget_lens.html.jinja').render(
+        """
+        Renders the HTML for a widget using a Jinja2 template.
+
+          Args:
+              index: The index of the widget.
+              name: The name of the widget.
+              element_type: The type of element (optional).
+              subelements: A list of sub-elements to include in the widget.
+
+          Returns:
+              str: The rendered HTML string for the widget.
+        """
+        return jinja_env.get_template("widget_lens.html.jinja").render(
             index=index, name=name, subelements=subelements
         )

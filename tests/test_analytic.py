@@ -19,7 +19,7 @@ square_parameters = [
     "width_test",
     "height_test",
     "expected_error",
-    "error_energy"
+    "error_energy",
 ]
 
 
@@ -29,52 +29,58 @@ square_parameters = [
         (
             8,  # ox_size, mm
             8,  # oy_size, mm
-            1200,   # ox_nodes
-            1300,   # oy_nodes
+            1200,  # ox_nodes
+            1300,  # oy_nodes
             540 * 1e-6,  # wavelength_test, mm
-            600,    # distance_test, mm
+            600,  # distance_test, mm
             4,  # width_test, mm
             2,  # height_test, mm
             0.075,  # expected error
-            0.05    # error_energy
+            0.05,  # error_energy
         ),
         (
             10,  # ox_size, mm
             10,  # oy_size, mm
-            1400,   # ox_nodes
-            1300,   # oy_nodes
-            torch.linspace(330 * 1e-6, 660 * 1e-6, 5),  # wavelength_test tensor, mm    # noqa: E501
-            150,    # distance_test, mm
-            3,    # width_test, mm
-            3,    # height_test, mm
+            1400,  # ox_nodes
+            1300,  # oy_nodes
+            torch.linspace(
+                330 * 1e-6, 660 * 1e-6, 5
+            ),  # wavelength_test tensor, mm    # noqa: E501
+            150,  # distance_test, mm
+            3,  # width_test, mm
+            3,  # height_test, mm
             0.065,  # expected error
-            0.05    # error_energy
+            0.05,  # error_energy
         ),
         (
             8,  # ox_size, mm
             8,  # oy_size, mm
-            1200,   # ox_nodes
-            1300,   # oy_nodes
-            torch.linspace(330 * 1e-6, 660 * 1e-6, 5, dtype=torch.float64),  # wavelength_test tensor, mm    # noqa: E501
-            600,    # distance_test, mm
+            1200,  # ox_nodes
+            1300,  # oy_nodes
+            torch.linspace(
+                330 * 1e-6, 660 * 1e-6, 5, dtype=torch.float64
+            ),  # wavelength_test tensor, mm    # noqa: E501
+            600,  # distance_test, mm
             2,  # width_test, mm
             2,  # height_test, mm
             0.075,  # expected error
-            0.05    # error_energy
+            0.05,  # error_energy
         ),
         (
             8,  # ox_size, mm
             8,  # oy_size, mm
-            1200,   # ox_nodes
-            1300,   # oy_nodes
-            torch.linspace(330 * 1e-6, 660 * 1e-6, 5, dtype=torch.float64),  # wavelength_test tensor, mm    # noqa: E501
-            600,    # distance_test, mm
+            1200,  # ox_nodes
+            1300,  # oy_nodes
+            torch.linspace(
+                330 * 1e-6, 660 * 1e-6, 5, dtype=torch.float64
+            ),  # wavelength_test tensor, mm    # noqa: E501
+            600,  # distance_test, mm
             4,  # width_test, mm
             2,  # height_test, mm
             0.075,  # expected std
-            0.05    # error_energy
-        )
-    ]
+            0.05,  # error_energy
+        ),
+    ],
 )
 def test_rectangle_fresnel(
     ox_size: float,
@@ -86,7 +92,7 @@ def test_rectangle_fresnel(
     width_test: float,
     height_test: float,
     expected_error: float,
-    error_energy: float
+    error_energy: float,
 ):
     """Test for the free propagation problem on the example of diffraction of
     the plane wave on the rectangular aperture
@@ -117,13 +123,13 @@ def test_rectangle_fresnel(
 
     params = SimulationParameters(
         {
-            'W': torch.linspace(
-                -ox_size/2, ox_size/2, ox_nodes, dtype=torch.float64
+            "W": torch.linspace(
+                -ox_size / 2, ox_size / 2, ox_nodes, dtype=torch.float64
             ),
-            'H': torch.linspace(
-                -oy_size/2, oy_size/2, oy_nodes, dtype=torch.float64
+            "H": torch.linspace(
+                -oy_size / 2, oy_size / 2, oy_nodes, dtype=torch.float64
             ),
-            'wavelength': wavelength_test
+            "wavelength": wavelength_test,
         }
     )
 
@@ -131,30 +137,22 @@ def test_rectangle_fresnel(
     dy = oy_size / oy_nodes
 
     incident_field = Wavefront.plane_wave(
-        simulation_parameters=params,
-        distance=distance_test,
-        wave_direction=[0, 0, 1]
+        simulation_parameters=params, distance=distance_test, wave_direction=[0, 0, 1]
     )
 
     # field after the square aperture
     transmission_field = elements.RectangularAperture(
-        simulation_parameters=params,
-        height=height_test,
-        width=width_test
+        simulation_parameters=params, height=height_test, width=width_test
     )(incident_field)
 
     # field on the screen by using Fresnel propagation method
     output_field_fresnel = elements.FreeSpace(
-        simulation_parameters=params,
-        distance=distance_test,
-        method='fresnel'
-        )(transmission_field)
+        simulation_parameters=params, distance=distance_test, method="fresnel"
+    )(transmission_field)
     # field on the screen by using Angular Spectrum method
     output_field_as = elements.FreeSpace(
-        simulation_parameters=params,
-        distance=distance_test,
-        method='AS'
-        )(transmission_field)
+        simulation_parameters=params, distance=distance_test, method="AS"
+    )(transmission_field)
 
     # intensity distribution on the screen by using Fresnel propagation method
     intensity_output_fresnel = output_field_fresnel.intensity
@@ -170,40 +168,36 @@ def test_rectangle_fresnel(
         y_nodes=oy_nodes,
         width=width_test,
         height=height_test,
-        wavelength=wavelength_test
+        wavelength=wavelength_test,
     ).intensity()
 
     if isinstance(intensity_analytic, np.ndarray):
         intensity_analytic = torch.from_numpy(intensity_analytic)
 
     energy_analytic = torch.sum(intensity_analytic, dim=(-2, -1)) * dx * dy
-    energy_numeric_fresnel = torch.sum(
-        intensity_output_fresnel, dim=(-2, -1)
-    ) * dx * dy
+    energy_numeric_fresnel = torch.sum(intensity_output_fresnel, dim=(-2, -1)) * dx * dy
     energy_numeric_as = torch.sum(intensity_output_as, dim=(-2, -1)) * dx * dy
 
     intensity_difference_fresnel = torch.abs(
         intensity_analytic - intensity_output_fresnel
     ) / (ox_nodes * oy_nodes)
 
-    intensity_difference_as = torch.abs(
-        intensity_analytic - intensity_output_as
-    ) / (ox_nodes * oy_nodes)
+    intensity_difference_as = torch.abs(intensity_analytic - intensity_output_as) / (
+        ox_nodes * oy_nodes
+    )
 
     error_fresnel, _ = intensity_difference_fresnel.view(
         intensity_difference_fresnel.size(0), -1
     ).max(dim=1)
 
-    error_as, _ = intensity_difference_as.view(
-        intensity_difference_as.size(0), -1
-    ).max(dim=1)
+    error_as, _ = intensity_difference_as.view(intensity_difference_as.size(0), -1).max(
+        dim=1
+    )
 
     energy_error_fresnel = torch.abs(
         (energy_analytic - energy_numeric_fresnel) / energy_analytic
     )
-    energy_error_as = torch.abs(
-        (energy_analytic - energy_numeric_as) / energy_analytic
-    )
+    energy_error_as = torch.abs((energy_analytic - energy_numeric_as) / energy_analytic)
 
     assert (error_fresnel < expected_error).all()
     assert (error_as < expected_error).all()

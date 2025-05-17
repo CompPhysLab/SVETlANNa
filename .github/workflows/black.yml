@@ -1,0 +1,17 @@
+name: Black Formatter
+'on':
+- push
+- pull_request
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout repo
+      uses: actions/checkout@v4
+    - name: Run Black
+      uses: psf/black@stable
+      with:
+        options: --check --diff
+        src: .
+        jupyter: 'false'

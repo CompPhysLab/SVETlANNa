@@ -4,24 +4,29 @@ import torch
 
 
 def test_queue():
+    """
+    Tests the functionality of the feedback queue in SimpleReservoir.
+
+        This tests appends to, pops from and drops the feedback queue within a
+        SimpleReservoir instance, verifying correct behavior with different queue lengths
+        relative to the specified delay.
+
+        Args:
+            None
+
+        Returns:
+            None
+    """
     sim_params = SimulationParameters(
-        {
-            'W': torch.tensor([0]),
-            'H': torch.tensor([0]),
-            'wavelength': 1.
-        }
+        {"W": torch.tensor([0]), "H": torch.tensor([0]), "wavelength": 1.0}
     )
     reservoir = SimpleReservoir(
         sim_params,
-        nonlinear_element=DiffractiveLayer(
-            sim_params, mask=torch.tensor([[0.]])
-        ),
-        delay_element=DiffractiveLayer(
-            sim_params, mask=torch.tensor([[0.]])
-        ),
+        nonlinear_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
+        delay_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
         delay=2,
         feedback_gain=1,
-        input_gain=1
+        input_gain=1,
     )
 
     # feedback queue is empty
@@ -54,20 +59,25 @@ def test_queue():
 
 
 def test_forward():
+    """
+    Tests the forward pass of the SimpleReservoir.
+
+        This test verifies that the reservoir correctly implements feedback and delay,
+        and that the output matches expectations for both initial iterations and after
+        the delay line is populated.
+
+        Args:
+            None
+
+        Returns:
+            None
+    """
     sim_params = SimulationParameters(
-        {
-            'W': torch.tensor([0]),
-            'H': torch.tensor([0]),
-            'wavelength': 1.
-        }
+        {"W": torch.tensor([0]), "H": torch.tensor([0]), "wavelength": 1.0}
     )
 
-    nonlinear_element = DiffractiveLayer(
-        sim_params, mask=torch.tensor([[0.]])
-    )
-    delay_element = DiffractiveLayer(
-        sim_params, mask=torch.tensor([[0.]])
-    )
+    nonlinear_element = DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]]))
+    delay_element = DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]]))
     feedback_gain = 0.8
     input_gain = 0.6
     delay = 5
@@ -78,7 +88,7 @@ def test_forward():
         delay_element=delay_element,
         delay=delay,
         feedback_gain=feedback_gain,
-        input_gain=input_gain
+        input_gain=input_gain,
     )
 
     wf = Wavefront.plane_wave(sim_params)
@@ -102,8 +112,6 @@ def test_forward():
 
     # hard coded very first delay line related contribution
     wf_out_expected = nonlinear_element(
-        input_gain * wf + feedback_gain * nonlinear_element(
-            input_gain * wf
-        )
+        input_gain * wf + feedback_gain * nonlinear_element(input_gain * wf)
     )
     assert torch.allclose(wf_out, wf_out_expected)

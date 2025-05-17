@@ -17,21 +17,33 @@ class SetupLike(Protocol):
     Protocol : _type_
         _description_
     """
-    def forward(self, input_field: torch.Tensor) -> torch.Tensor:
-        ...
 
-    def reverse(self, transmission_field: torch.Tensor) -> torch.Tensor:
-        ...
+    def forward(self, input_field: torch.Tensor) -> torch.Tensor: ...
+
+    def reverse(self, transmission_field: torch.Tensor) -> torch.Tensor: ...
 
 
 class AlgorithmOptions(TypedDict, total=False):
+    """
+    Options for controlling the behavior of an algorithm.
+
+        This class encapsulates various parameters that can be used to tune
+        the performance and accuracy of an optimization or iterative algorithm.
+
+        Attributes:
+            tol: Tolerance for convergence criteria.  Algorithm stops when change is less than this value.
+            maxiter: Maximum number of iterations allowed.
+            constant_factor: A constant factor used in calculations within the algorithm.
+            disp: Whether to display detailed information during execution.
+    """
+
     tol: float
     maxiter: int
     constant_factor: float
     disp: bool
 
 
-Method: TypeAlias = Literal['GS', 'HIO']
+Method: TypeAlias = Literal["GS", "HIO"]
 
 
 @overload
@@ -41,10 +53,9 @@ def retrieve_phase(
     target_intensity: torch.Tensor,
     *,
     initial_phase: torch.Tensor | None = None,
-    method: Method = 'GS',
+    method: Method = "GS",
     options: AlgorithmOptions | None = None
-) -> prr.PhaseRetrievalResult:
-    ...
+) -> prr.PhaseRetrievalResult: ...
 
 
 @overload
@@ -56,10 +67,9 @@ def retrieve_phase(
     target_region: torch.Tensor,
     *,
     initial_phase: torch.Tensor | None = None,
-    method: Method = 'GS',
+    method: Method = "GS",
     options: AlgorithmOptions | None = None
-) -> prr.PhaseRetrievalResult:
-    ...
+) -> prr.PhaseRetrievalResult: ...
 
 
 def retrieve_phase(
@@ -70,7 +80,7 @@ def retrieve_phase(
     target_region: torch.Tensor | None = None,
     *,
     initial_phase: torch.Tensor | None = None,
-    method: Method = 'GS',
+    method: Method = "GS",
     options: AlgorithmOptions | None = None
 ) -> prr.PhaseRetrievalResult:
     """Function for solving phase retrieval problem: generating target
@@ -123,12 +133,12 @@ def retrieve_phase(
     # read options
     if options is None:
         options = {}
-    tol = options.get('tol', 1e-16)
-    maxiter = options.get('maxiter', 100)
-    constant_factor = options.get('constant_factor', 0.9)
-    disp = options.get('disp', False)
+    tol = options.get("tol", 1e-16)
+    maxiter = options.get("maxiter", 100)
+    constant_factor = options.get("constant_factor", 0.9)
+    disp = options.get("disp", False)
 
-    if method == 'GS':
+    if method == "GS":
 
         result = algorithms.gerchberg_saxton_algorithm(
             target_intensity=target_intensity,
@@ -139,9 +149,9 @@ def retrieve_phase(
             tol=tol,
             maxiter=maxiter,
             target_phase=target_phase,
-            target_region=target_region
+            target_region=target_region,
         )
-    elif method == 'HIO':
+    elif method == "HIO":
         result = algorithms.hybrid_input_output(
             target_intensity=target_intensity,
             source_intensity=source_intensity,
@@ -152,18 +162,18 @@ def retrieve_phase(
             maxiter=maxiter,
             target_phase=target_phase,
             target_region=target_region,
-            constant_factor=constant_factor
+            constant_factor=constant_factor,
         )
     else:
-        raise ValueError('Unknown optimization method')
+        raise ValueError("Unknown optimization method")
 
     if disp:
         if (target_phase is not None) & (target_region is not None):
-            print('Type of problem: phase reconstruction')
+            print("Type of problem: phase reconstruction")
         else:
-            print('Type of problem: generate intensity profile')
-        print('Method:' + str(method))
-        print('Current cost function value:' + str(result.cost_func))
-        print('Number of iteration:' + str(result.number_of_iterations))
+            print("Type of problem: generate intensity profile")
+        print("Method:" + str(method))
+        print("Current cost function value:" + str(result.cost_func))
+        print("Number of iteration:" + str(result.number_of_iterations))
 
     return result

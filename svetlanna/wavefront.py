@@ -6,8 +6,21 @@ from .axes_math import tensor_dot, cast_tensor
 
 class Wavefront(torch.Tensor):
     """Class that represents wavefront"""
+
     @staticmethod
     def __new__(cls, data, *args, **kwargs):
+        """
+        Creates a new Wavefront object from the given data.
+
+            Args:
+                data: The input data to be converted into a tensor.
+                *args: Variable length argument list.
+                **kwargs: Arbitrary keyword arguments.
+
+            Returns:
+                Wavefront: A new instance of the Wavefront class with the data
+                    converted to a PyTorch tensor.
+        """
         # see https://github.com/albanD/subclass_zoo/blob/ec47458346c2a1cfcd5e676926a4bbc6709ff62e/base_tensor.py   # noqa: E501
         data = torch.as_tensor(data)
         return super(cls, Wavefront).__new__(cls, data)
@@ -47,10 +60,7 @@ class Wavefront(torch.Tensor):
         res = torch.angle(torch.Tensor(self) + 0.0)
         return res
 
-    def fwhm(
-        self,
-        simulation_parameters: SimulationParameters
-    ) -> tuple[float, float]:
+    def fwhm(self, simulation_parameters: SimulationParameters) -> tuple[float, float]:
         """Calculates full width at half maximum of the wavefront
 
         Returns
@@ -79,9 +89,9 @@ class Wavefront(torch.Tensor):
     def plane_wave(
         cls,
         simulation_parameters: SimulationParameters,
-        distance: float = 0.,
+        distance: float = 0.0,
         wave_direction: Any = None,
-        initial_phase: float = 0.
+        initial_phase: float = 0.0,
     ) -> Self:
         """Generate wavefront of the plane wave
 
@@ -105,25 +115,21 @@ class Wavefront(torch.Tensor):
         """
         # by default the wave propagates along z direction
         if wave_direction is None:
-            wave_direction = [0., 0., 1.]
+            wave_direction = [0.0, 0.0, 1.0]
 
         wave_direction = torch.tensor(
-            wave_direction,
-            dtype=torch.float32,
-            device=simulation_parameters.device
+            wave_direction, dtype=torch.float32, device=simulation_parameters.device
         )
         if wave_direction.shape != torch.Size([3]):
-            raise ValueError(
-                "wave_direction should contain exactly three components"
-            )
+            raise ValueError("wave_direction should contain exactly three components")
         wave_direction = wave_direction / torch.norm(wave_direction)
 
         wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
         x = simulation_parameters.axes.W[None, :]
         y = simulation_parameters.axes.H[:, None]
 
-        kxx, axes = tensor_dot(wave_number, x, 'wavelength', ('H', 'W'))
-        kyy, _ = tensor_dot(wave_number, y, 'wavelength', ('H', 'W'))
+        kxx, axes = tensor_dot(wave_number, x, "wavelength", ("H", "W"))
+        kyy, _ = tensor_dot(wave_number, y, "wavelength", ("H", "W"))
         kzz = wave_number[..., None, None] * distance
 
         field = torch.exp(1j * wave_direction[0] * kxx)
@@ -137,9 +143,9 @@ class Wavefront(torch.Tensor):
         cls,
         simulation_parameters: SimulationParameters,
         waist_radius: float,
-        distance: float = 0.,
-        dx: float = 0.,
-        dy: float = 0.,
+        distance: float = 0.0,
+        dx: float = 0.0,
+        dy: float = 0.0,
     ) -> Self:
         """Generates the Gaussian beam.
 
@@ -164,15 +170,21 @@ class Wavefront(torch.Tensor):
 
         wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
 
-        rayleigh_range = torch.pi * (waist_radius**2) / simulation_parameters.axes.wavelength    # noqa: E501
+        rayleigh_range = (
+            torch.pi * (waist_radius**2) / simulation_parameters.axes.wavelength
+        )  # noqa: E501
 
         x = simulation_parameters.axes.W[None, :] - dx
         y = simulation_parameters.axes.H[:, None] - dy
         radial_distance_squared = x**2 + y**2
 
-        hyperbolic_relation = waist_radius * (1 + (distance / rayleigh_range)**2)**(1/2)    # noqa: E501
+        hyperbolic_relation = waist_radius * (1 + (distance / rayleigh_range) ** 2) ** (
+            1 / 2
+        )  # noqa: E501
 
-        inverse_radius_of_curvature = distance / (distance**2 + rayleigh_range**2)  # noqa: E501
+        inverse_radius_of_curvature = distance / (
+            distance**2 + rayleigh_range**2
+        )  # noqa: E501
 
         # Gouy phase
         gouy_phase = torch.arctan(distance / rayleigh_range)
@@ -180,54 +192,56 @@ class Wavefront(torch.Tensor):
         phase1, axes1 = tensor_dot(
             a=1j * wave_number * inverse_radius_of_curvature / 2,
             b=radial_distance_squared,
-            a_axis='wavelength',
-            b_axis=('H', 'W')
+            a_axis="wavelength",
+            b_axis=("H", "W"),
         )
 
         field = torch.exp(phase1)
         field, _ = tensor_dot(
             a=field,
             b=torch.exp(1j * wave_number * distance),
-            a_axis=axes1, b_axis='wavelength', preserve_a_axis=True
+            a_axis=axes1,
+            b_axis="wavelength",
+            preserve_a_axis=True,
         )
         field, _ = tensor_dot(
             a=field,
             b=torch.exp(-1j * gouy_phase),
-            a_axis=axes1, b_axis='wavelength', preserve_a_axis=True
+            a_axis=axes1,
+            b_axis="wavelength",
+            preserve_a_axis=True,
         )
         phase2, axes2 = tensor_dot(
-            a=-1/(hyperbolic_relation)**2,
+            a=-1 / (hyperbolic_relation) ** 2,
             b=radial_distance_squared,
-            a_axis='wavelength',
-            b_axis=('H', 'W')
+            a_axis="wavelength",
+            b_axis=("H", "W"),
         )
         field, axes = tensor_dot(
             a=field,
             b=torch.exp(phase2),
             a_axis=axes1,
             b_axis=axes2,
-            preserve_a_axis=True
+            preserve_a_axis=True,
         )
         field, _ = tensor_dot(
             a=field,
             b=waist_radius / hyperbolic_relation,
             a_axis=axes,
-            b_axis='wavelength',
-            preserve_a_axis=True
+            b_axis="wavelength",
+            preserve_a_axis=True,
         )
 
-        return cls(
-            cast_tensor(field, axes, simulation_parameters.axes.names)
-        )
+        return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
 
     @classmethod
     def spherical_wave(
         cls,
         simulation_parameters: SimulationParameters,
         distance: float,
-        initial_phase: float = 0.,
-        dx: float = 0.,
-        dy: float = 0.,
+        initial_phase: float = 0.0,
+        dx: float = 0.0,
+        dy: float = 0.0,
     ) -> Self:
         """Generate wavefront of the spherical wave
 
@@ -254,22 +268,17 @@ class Wavefront(torch.Tensor):
         x = simulation_parameters.axes.W[None, :] - dx
         y = simulation_parameters.axes.H[:, None] - dy
 
-        radius = torch.sqrt(
-            (x**2 + y**2) + distance**2
-        )
+        radius = torch.sqrt((x**2 + y**2) + distance**2)
 
         phase, axes = tensor_dot(
-            a=wave_number,
-            b=radius,
-            a_axis='wavelength',
-            b_axis=('H', 'W')
+            a=wave_number, b=radius, a_axis="wavelength", b_axis=("H", "W")
         )
         field, _ = tensor_dot(
             a=torch.exp(1j * (phase + initial_phase)),
             b=1 / radius,
             a_axis=axes,
-            b_axis=('H', 'W'),
-            preserve_a_axis=True
+            b_axis=("H", "W"),
+            preserve_a_axis=True,
         )
 
         return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
@@ -277,30 +286,25 @@ class Wavefront(torch.Tensor):
     # === methods below are added for typing only ===
 
     if TYPE_CHECKING:
-        def __mul__(self, other: Any) -> Self:
-            ...
 
-        def __rmul__(self, other: Any) -> Self:
-            ...
+        def __mul__(self, other: Any) -> Self: ...
 
-        def __add__(self, other: Any) -> Self:
-            ...
+        def __rmul__(self, other: Any) -> Self: ...
 
-        def __radd__(self, other: Any) -> Self:
-            ...
+        def __add__(self, other: Any) -> Self: ...
 
-        def __truediv__(self, other: Any) -> Self:
-            ...
+        def __radd__(self, other: Any) -> Self: ...
 
-        def __rtruediv__(self, other: Any) -> Self:
-            ...
+        def __truediv__(self, other: Any) -> Self: ...
+
+        def __rtruediv__(self, other: Any) -> Self: ...
 
 
 DEFAULT_LAST_AXES_NAMES = (
     # 'pol',
     # 'wavelength',
-    'H',
-    'W'
+    "H",
+    "W",
 )
 
 
@@ -308,7 +312,7 @@ def mul(
     wf: Wavefront,
     b: Any,
     b_axis: str | Iterable[str],
-    sim_params: SimulationParameters | None = None
+    sim_params: SimulationParameters | None = None,
 ) -> Wavefront:
     """Multiplication of the wavefront and tensor.
 

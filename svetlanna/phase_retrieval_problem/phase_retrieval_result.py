@@ -5,8 +5,7 @@ import torch
 # TODO: ask for message and status code
 @dataclass(frozen=True, slots=True)
 class PhaseRetrievalResult:
-    """Represents the phase retrieval result
-    """
+    """Represents the phase retrieval result"""
 
     solution: torch.Tensor
     cost_func: float

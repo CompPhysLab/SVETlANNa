@@ -55,9 +55,7 @@ def gerchberg_saxton_algorithm(
     source_amplitude = torch.sqrt(source_intensity)
     target_amplitude = torch.sqrt(target_intensity)
 
-    input_field = source_amplitude * torch.exp(
-        1j * initial_approximation
-    )
+    input_field = source_amplitude * torch.exp(1j * initial_approximation)
 
     number_of_iterations = 0
 
@@ -65,13 +63,12 @@ def gerchberg_saxton_algorithm(
         # calculate the output field
         output_field = forward(input_field)
         output_field_phase = torch.angle(output_field)
-        output_intensity = output_field.abs()**2
+        output_intensity = output_field.abs() ** 2
 
         # calculate an error
         error = (
-            torch.mean(
-                torch.abs(output_intensity - target_intensity)
-            ) / torch.max(target_intensity)
+            torch.mean(torch.abs(output_intensity - target_intensity))
+            / torch.max(target_intensity)
         ).item()
         cost_func_evolution.append(error)
 
@@ -82,25 +79,20 @@ def gerchberg_saxton_algorithm(
 
         if (target_phase is not None) and (target_region is not None):
 
-            updated_phase = target_phase * target_region + (
-                1. - target_region
-            ) * output_field_phase
-
-            updated_output_field = target_amplitude * torch.exp(
-                1j * updated_phase
+            updated_phase = (
+                target_phase * target_region
+                + (1.0 - target_region) * output_field_phase
             )
+
+            updated_output_field = target_amplitude * torch.exp(1j * updated_phase)
 
         else:
-            updated_output_field = target_amplitude * torch.exp(
-                1j * output_field_phase
-            )
+            updated_output_field = target_amplitude * torch.exp(1j * output_field_phase)
 
         updated_input_field = reverse(updated_output_field)
         updated_input_field_phase = torch.angle(updated_input_field)
 
-        input_field = source_amplitude * torch.exp(
-            1j * updated_input_field_phase
-        )
+        input_field = source_amplitude * torch.exp(1j * updated_input_field_phase)
 
         number_of_iterations += 1
 
@@ -123,7 +115,7 @@ def hybrid_input_output(
     maxiter: int,
     target_phase: torch.Tensor | None = None,
     target_region: torch.Tensor | None = None,
-    constant_factor: float = 0.9
+    constant_factor: float = 0.9,
 ) -> prr.PhaseRetrievalResult:
     """Hybrid Input-Output(HIO) algorithm for for solving the phase retrieval
     problem
@@ -166,28 +158,23 @@ def hybrid_input_output(
     source_amplitude = torch.sqrt(source_intensity)
     target_amplitude = torch.sqrt(target_intensity)
 
-    input_field = source_amplitude * torch.exp(
-        1j * initial_approximation
-    )
+    input_field = source_amplitude * torch.exp(1j * initial_approximation)
 
     number_of_iterations = 0
 
-    support_constrain = (
-        target_amplitude > torch.max(target_amplitude) / 10
-    ).float()
+    support_constrain = (target_amplitude > torch.max(target_amplitude) / 10).float()
 
     while True:
 
         # calculate the output field
         output_field = forward(input_field)
         output_field_phase = torch.angle(output_field)
-        output_intensity = output_field.abs()**2
+        output_intensity = output_field.abs() ** 2
 
         # calculate an error
         error = (
-            torch.mean(
-                torch.abs(output_intensity - target_intensity)
-            ) / torch.max(target_intensity)
+            torch.mean(torch.abs(output_intensity - target_intensity))
+            / torch.max(target_intensity)
         ).item()
         cost_func_evolution.append(error)
 
@@ -198,26 +185,27 @@ def hybrid_input_output(
 
         if (target_phase is not None) and (target_region is not None):
 
-            updated_phase = target_phase * target_region + (
-                1. - target_region
-            ) * output_field_phase
+            updated_phase = (
+                target_phase * target_region
+                + (1.0 - target_region) * output_field_phase
+            )
 
-            updated_output_field = target_amplitude * torch.exp(
-                1j * updated_phase
-            ) - (1. - support_constrain) * constant_factor * output_field
+            updated_output_field = (
+                target_amplitude * torch.exp(1j * updated_phase)
+                - (1.0 - support_constrain) * constant_factor * output_field
+            )
 
         else:
 
-            updated_output_field = target_amplitude * torch.exp(
-                1j * output_field_phase
-            ) - (1. - support_constrain) * constant_factor * output_field
+            updated_output_field = (
+                target_amplitude * torch.exp(1j * output_field_phase)
+                - (1.0 - support_constrain) * constant_factor * output_field
+            )
 
         updated_input_field = reverse(updated_output_field)
         updated_input_field_phase = torch.angle(updated_input_field)
 
-        input_field = source_amplitude * torch.exp(
-            1j * updated_input_field_phase
-        )
+        input_field = source_amplitude * torch.exp(1j * updated_input_field_phase)
 
         number_of_iterations += 1
 

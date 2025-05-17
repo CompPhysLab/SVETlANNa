@@ -8,8 +8,9 @@ from tqdm import tqdm
 
 class RectangleFresnel:
     """A class describing the analytical solution for the problem of free
-      propagation after planar wave passes a rectangular aperture
+    propagation after planar wave passes a rectangular aperture
     """
+
     def __init__(
         self,
         distance: float,
@@ -19,7 +20,7 @@ class RectangleFresnel:
         y_nodes: int,
         width: float,
         height: float,
-        wavelength: torch.Tensor | float
+        wavelength: torch.Tensor | float,
     ):
         """Constructor method
 
@@ -71,24 +72,29 @@ class RectangleFresnel:
             x_grid = x_grid[None, :]
             y_grid = y_grid[None, :]
 
-        psi1 = -np.sqrt(wave_number/(np.pi*self.distance))*(self.width/2
-                                                            + x_grid)
-        psi2 = np.sqrt(wave_number/(np.pi*self.distance))*(self.width / 2
-                                                           - x_grid)
-        eta1 = -np.sqrt(wave_number/(np.pi*self.distance))*(self.height / 2
-                                                            + y_grid)
-        eta2 = np.sqrt(wave_number/(np.pi*self.distance))*(self.height / 2
-                                                           - y_grid)
+        psi1 = -np.sqrt(wave_number / (np.pi * self.distance)) * (
+            self.width / 2 + x_grid
+        )
+        psi2 = np.sqrt(wave_number / (np.pi * self.distance)) * (
+            self.width / 2 - x_grid
+        )
+        eta1 = -np.sqrt(wave_number / (np.pi * self.distance)) * (
+            self.height / 2 + y_grid
+        )
+        eta2 = np.sqrt(wave_number / (np.pi * self.distance)) * (
+            self.height / 2 - y_grid
+        )
 
         s_psi1, c_psi1 = sp.special.fresnel(psi1)
         s_psi2, c_psi2 = sp.special.fresnel(psi2)
         s_eta1, c_eta1 = sp.special.fresnel(eta1)
         s_eta2, c_eta2 = sp.special.fresnel(eta2)
 
-        field = np.exp(1j * wave_number * self.distance) * (1 / 2j) * (
-            (c_psi2 - c_psi1) + 1j * (s_psi2 - s_psi1)
-        ) * (
-            (c_eta2 - c_eta1) + 1j * (s_eta2 - s_eta1)
+        field = (
+            np.exp(1j * wave_number * self.distance)
+            * (1 / 2j)
+            * ((c_psi2 - c_psi1) + 1j * (s_psi2 - s_psi1))
+            * ((c_eta2 - c_eta1) + 1j * (s_eta2 - s_eta1))
         )
 
         # intensity = (1/4)*(np.power((c_psi2 - c_psi1), 2) +
@@ -99,13 +105,26 @@ class RectangleFresnel:
         return field
 
     def intensity(self) -> np.ndarray:
+        """
+        Calculates the intensity of the field.
+
+          Returns the squared magnitude of the electric or magnetic field.
+
+          Args:
+            None
+
+          Returns:
+            np.ndarray: The intensity, which is the absolute value of the field
+              squared.
+        """
         return np.abs(self.field()) ** 2
 
 
 class CircleFresnel:
     """A class describing the analytical solution for the problem of free
-      propagation after planar wave passes a circular aperture aperture
+    propagation after planar wave passes a circular aperture aperture
     """
+
     def __init__(
         self,
         distance: float,
@@ -115,8 +134,24 @@ class CircleFresnel:
         y_nodes: int,
         radius: float,
         wavelength: torch.Tensor | float,
-        summation_number: int = 50
+        summation_number: int = 50,
     ):
+        """
+        Initializes a new instance of the class.
+
+            Args:
+                distance: The distance parameter.
+                x_size: The x size parameter.
+                y_size: The y size parameter.
+                x_nodes: The number of nodes in the x dimension.
+                y_nodes: The number of nodes in the y dimension.
+                radius: The radius parameter.
+                wavelength: The wavelength parameter (can be a torch.Tensor or float).
+                summation_number: The number of summation terms to use, defaults to 50.
+
+            Returns:
+                None
+        """
 
         self.distance = distance
         self.x_size = x_size
@@ -128,6 +163,15 @@ class CircleFresnel:
         self.wavelength = wavelength
 
     def field(self) -> np.ndarray:
+        """
+        Calculates the complex-valued electromagnetic field distribution.
+
+            Args:
+                None
+
+            Returns:
+                np.ndarray: A 2D NumPy array representing the calculated field.
+        """
 
         x_linear = np.linspace(-self.x_size / 2, self.x_size / 2, self.x_nodes)
         y_linear = np.linspace(-self.y_size / 2, self.y_size / 2, self.y_nodes)
@@ -145,23 +189,34 @@ class CircleFresnel:
         series = np.zeros_like(x_grid, dtype=np.complex128)
 
         for n in tqdm(range(self.summation_number)):
-            series += ((
-                -1j * radius / (self.radius)
-            ) ** n) * jv(
-                n, 2 * np.pi * self.radius * radius / (self.wavelength * self.distance)  # noqa: E501
+            series += ((-1j * radius / (self.radius)) ** n) * jv(
+                n,
+                2
+                * np.pi
+                * self.radius
+                * radius
+                / (self.wavelength * self.distance),  # noqa: E501
             )
 
         self.field = np.exp(1j * wave_number * self.distance) * (
-            1 - np.exp(
-                1j * np.pi * radius**2 / (self.wavelength * self.distance)
-            ) * np.exp(
-                1j * np.pi * self.radius**2 / (self.wavelength * self.distance)
-            ) * series
+            1
+            - np.exp(1j * np.pi * radius**2 / (self.wavelength * self.distance))
+            * np.exp(1j * np.pi * self.radius**2 / (self.wavelength * self.distance))
+            * series
         )
 
         return self.field
 
     def intensity(self) -> np.ndarray:
+        """
+        Calculates the intensity pattern of a circular aperture.
+
+            Args:
+                None
+
+            Returns:
+                np.ndarray: A 2D NumPy array representing the calculated intensity pattern.
+        """
         x_linear = np.linspace(-self.x_size / 2, self.x_size / 2, self.x_nodes)
         y_linear = np.linspace(-self.y_size / 2, self.y_size / 2, self.y_nodes)
         x_grid, y_grid = np.meshgrid(x_linear, y_linear)
@@ -175,9 +230,33 @@ class CircleFresnel:
 
         radius = np.sqrt(x_grid**2 + y_grid**2)
 
-        intensity = 1 / (1 + np.exp((radius / self.radius)**2))**2 * (
-            1 + jv(0, 2 * np.pi * self.radius * radius / (self.wavelength * self.distance))**2 - 2*np.cos(
-                np.pi * self.radius**2/(self.wavelength * self.distance) + np.pi * radius**2 / (self.distance*self.wavelength)
-            ) * jv(0, 2 * np.pi * self.radius * radius / (self.wavelength * self.distance))
+        intensity = (
+            1
+            / (1 + np.exp((radius / self.radius) ** 2)) ** 2
+            * (
+                1
+                + jv(
+                    0,
+                    2
+                    * np.pi
+                    * self.radius
+                    * radius
+                    / (self.wavelength * self.distance),
+                )
+                ** 2
+                - 2
+                * np.cos(
+                    np.pi * self.radius**2 / (self.wavelength * self.distance)
+                    + np.pi * radius**2 / (self.distance * self.wavelength)
+                )
+                * jv(
+                    0,
+                    2
+                    * np.pi
+                    * self.radius
+                    * radius
+                    / (self.wavelength * self.distance),
+                )
+            )
         )
         return intensity

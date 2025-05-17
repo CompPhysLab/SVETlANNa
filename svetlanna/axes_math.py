@@ -4,10 +4,7 @@ from types import EllipsisType
 import torch
 
 
-def _append_slice_generator(
-    axes_number: int,
-    new_axes_number: int
-):
+def _append_slice_generator(axes_number: int, new_axes_number: int):
     """Yields Ellipsis, then `axes_number` of full slices (`::`), then
     `new_axes_number - axes_number` of None (new axis).
 
@@ -32,8 +29,7 @@ def _append_slice_generator(
 
 @cache
 def _append_slice(
-    axes: tuple[str, ...],
-    new_axes: tuple[str, ...]
+    axes: tuple[str, ...], new_axes: tuple[str, ...]
 ) -> tuple[EllipsisType | slice | None, ...]:
     """
     Slice tuple that can be used to add new axes to the end
@@ -46,8 +42,7 @@ def _append_slice(
 
 @cache
 def _axes_indices_to_sort(
-    axes: tuple[str, ...],
-    new_axes: tuple[str, ...]
+    axes: tuple[str, ...], new_axes: tuple[str, ...]
 ) -> tuple[int, ...]:
     """
     Indices of each axis of `axes` in `new_axes`.
@@ -77,7 +72,7 @@ def _axes_indices_to_sort(
 
 
 def _swaps_generator(
-    axes_indices: tuple[int, ...]
+    axes_indices: tuple[int, ...],
 ) -> Generator[tuple[int, int], None, None]:
     """
     Generates swaps to sort indices array.
@@ -89,19 +84,17 @@ def _swaps_generator(
     for i in range(L - 1):
         j_min = i
 
-        for j in range(i+1, L):
+        for j in range(i + 1, L):
             if indices[j] < indices[j_min]:
                 j_min = j
 
         if j_min != i:
             indices[i], indices[j_min] = indices[j_min], indices[i]
-            yield -L+i, -L+j_min
+            yield -L + i, -L + j_min
 
 
 @cache
-def _swaps(
-    axes_indices: tuple[int, ...]
-) -> tuple[tuple[int, int], ...]:
+def _swaps(axes_indices: tuple[int, ...]) -> tuple[tuple[int, int], ...]:
     """
     Swaps to sort indices array.
     """
@@ -109,21 +102,16 @@ def _swaps(
 
 
 @cache
-def _check_new_axes(
-    axes: tuple[str, ...],
-    new_axes: tuple[str, ...]
-) -> None:
+def _check_new_axes(axes: tuple[str, ...], new_axes: tuple[str, ...]) -> None:
     """
     Check whether `new_axes` contain all names presented in `axes`.
     """
     if not set(new_axes).issuperset(axes):
-        raise ValueError('new_axes should contain all names in axes')
+        raise ValueError("new_axes should contain all names in axes")
 
 
 def cast_tensor(
-    a: torch.Tensor,
-    axes: tuple[str, ...],
-    new_axes: tuple[str, ...]
+    a: torch.Tensor, axes: tuple[str, ...], new_axes: tuple[str, ...]
 ) -> torch.Tensor:
     """Cast tensor `a` with axes `(..., a, b, c)` to `(..., *new_axes)`.
     `new_axes` should contain all axes presented in `axes`.
@@ -157,20 +145,15 @@ def cast_tensor(
 
 
 @cache
-def _axis_to_tuple(
-    axis: str | Iterable[str]
-) -> tuple[str, ...]:
+def _axis_to_tuple(axis: str | Iterable[str]) -> tuple[str, ...]:
     """Creates tuple of `str` from `str` or `Iterable[str]`."""
     if isinstance(axis, str):
-        axis = (axis, )
+        axis = (axis,)
     return tuple(axis)
 
 
 @cache
-def _new_axes(
-    a_axis: tuple[str, ...],
-    b_axis: tuple[str, ...]
-) -> tuple[str, ...]:
+def _new_axes(a_axis: tuple[str, ...], b_axis: tuple[str, ...]) -> tuple[str, ...]:
     """
     Generates tuple with new axes.
     ```
@@ -208,10 +191,7 @@ def is_scalar(a: torch.Tensor | float) -> bool:
     return False
 
 
-def _check_axis(
-    a: torch.Tensor | float,
-    a_axis: tuple[str, ...]
-):
+def _check_axis(a: torch.Tensor | float, a_axis: tuple[str, ...]):
     """
     Check if each axis is unique.
     Check whether the number of axes not greater than the dimensionality
@@ -223,7 +203,9 @@ def _check_axis(
 
     if isinstance(a, torch.Tensor) and a.shape:  # if a not a scalar
         if len(a.shape) < len(a_axis):
-            raise ValueError(f"Number of axes in the tensor ({len(a.shape)}) should be larger than number of provided axes' names ({len(a_axis)})!")
+            raise ValueError(
+                f"Number of axes in the tensor ({len(a.shape)}) should be larger than number of provided axes' names ({len(a_axis)})!"
+            )
 
 
 def tensor_dot(
@@ -231,7 +213,7 @@ def tensor_dot(
     b: torch.Tensor | float,
     a_axis: str | Iterable[str],
     b_axis: str | Iterable[str],
-    preserve_a_axis: bool = False
+    preserve_a_axis: bool = False,
 ) -> tuple[torch.Tensor, tuple[str, ...]]:
     """Perform tensor dot product.
 

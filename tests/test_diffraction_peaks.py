@@ -29,48 +29,48 @@ parameters = [
         (
             500,  # ox_size
             500,  # oy_size
-            1000000,   # ox_nodes
-            10,   # oy_nodes
+            1000000,  # ox_nodes
+            10,  # oy_nodes
             1064 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            1500,    # distance, mm
-            0.1,    # width, mm
+            1500,  # distance, mm
+            0.1,  # width, mm
             5,  # max diffraction order to check
-            0.02  # expected_error
+            0.02,  # expected_error
         ),
         (
             500,  # ox_size
             500,  # oy_size
-            1000000,   # ox_nodes
-            10,   # oy_nodes
+            1000000,  # ox_nodes
+            10,  # oy_nodes
             660 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            1500,    # distance, mm
-            0.1,    # width, mm
+            1500,  # distance, mm
+            0.1,  # width, mm
             6,  # max diffraction order to check
-            0.02   # expected_error
+            0.02,  # expected_error
         ),
         (
             500,  # ox_size
             500,  # oy_size
-            1000000,   # ox_nodes
-            10,   # oy_nodes
+            1000000,  # ox_nodes
+            10,  # oy_nodes
             540 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            1500,    # distance, mm
-            0.1,    # width, mm
+            1500,  # distance, mm
+            0.1,  # width, mm
             4,  # max diffraction order to check
-            0.02   # expected_error
+            0.02,  # expected_error
         ),
         (
             500,  # ox_size
             500,  # oy_size
-            1000000,   # ox_nodes
-            10,   # oy_nodes
+            1000000,  # ox_nodes
+            10,  # oy_nodes
             990 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            1500,    # distance, mm
-            0.1,    # width, mm
+            1500,  # distance, mm
+            0.1,  # width, mm
             8,  # max diffraction order to check
-            0.02   # expected_error
+            0.02,  # expected_error
         ),
-    ]
+    ],
 )
 def test_diffraction_peaks(
     ox_size: float,
@@ -81,7 +81,7 @@ def test_diffraction_peaks(
     distance: float,
     width: float,
     diffraction_order: int,
-    expected_error: float
+    expected_error: float,
 ):
     """Test checking the coincidence of diffraction maxima at diffraction on a
     thin slit
@@ -114,46 +114,39 @@ def test_diffraction_peaks(
     y_length = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
 
     params = SimulationParameters(
-        axes={
-            'W': x_length,
-            'H': y_length,
-            'wavelength': wavelength_test
-            })
+        axes={"W": x_length, "H": y_length, "wavelength": wavelength_test}
+    )
 
     beam = Wavefront.gaussian_beam(
-        simulation_parameters=params,
-        waist_radius=2.,
-        distance=distance
+        simulation_parameters=params, waist_radius=2.0, distance=distance
     )
 
     # create rectangular aperture
     rectangular_aperture = elements.RectangularAperture(
-        simulation_parameters=params,
-        height=height,
-        width=width
+        simulation_parameters=params, height=height, width=width
     )
 
     field_after_aperture = rectangular_aperture(beam)
 
     fs = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method='AS'
+        simulation_parameters=params, distance=distance, method="AS"
     )
 
     output_field = fs.forward(field_after_aperture)
     intensity_output = output_field.intensity
 
-    amplitude_1d = np.sqrt(intensity_output.detach().numpy())[int(oy_nodes/2)]
+    amplitude_1d = np.sqrt(intensity_output.detach().numpy())[int(oy_nodes / 2)]
 
     def intensity_analytic(coordinates: torch.Tensor) -> np.ndarray:
         phi = np.arctan(coordinates / distance)
         u = np.pi / wavelength_test * width * np.sin(phi)
-        return (np.sin(u) / u)**2 * intensity_output[int(oy_nodes/2), int(ox_nodes/2)]   # noqa: E501
+        return (np.sin(u) / u) ** 2 * intensity_output[
+            int(oy_nodes / 2), int(ox_nodes / 2)
+        ]  # noqa: E501
 
     def find_maximum(start, end):
         result = minimize_scalar(
-            lambda x: -intensity_analytic(x),
-            bounds=(start, end),
-            method='bounded'
+            lambda x: -intensity_analytic(x), bounds=(start, end), method="bounded"
         )
         return result.x
 
@@ -168,7 +161,7 @@ def test_diffraction_peaks(
 
     # define Gaussian function
     def gaussian(x, amp, cen, wid):
-        return amp * np.exp(-(x-cen)**2 / (2*wid**2))
+        return amp * np.exp(-((x - cen) ** 2) / (2 * wid**2))
 
     x_max_averaged = np.array([])
 

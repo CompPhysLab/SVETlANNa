@@ -3,6 +3,7 @@ import torch
 from torch import nn
 from svetlanna import Wavefront, SimulationParameters
 from svetlanna.elements import Element
+
 # for visualisation:
 from svetlanna import LinearOpticalSetup
 from svetlanna.specs import ParameterSpecs, SubelementSpecs
@@ -19,12 +20,12 @@ class LinearAutoencoder(nn.Module):
     """
 
     def __init__(
-            self,
-            sim_params: SimulationParameters,
-            encoder_elements_list: list[Element] | Iterable[Element],
-            decoder_elements_list: list[Element] | Iterable[Element],
-            to_return: Literal['wf', 'amps'] = 'wf',
-            device: str | torch.device = torch.get_default_device(),
+        self,
+        sim_params: SimulationParameters,
+        encoder_elements_list: list[Element] | Iterable[Element],
+        decoder_elements_list: list[Element] | Iterable[Element],
+        to_return: Literal["wf", "amps"] = "wf",
+        device: str | torch.device = torch.get_default_device(),
     ):
         """
         Parameters
@@ -46,7 +47,7 @@ class LinearAutoencoder(nn.Module):
 
         self.sim_params = sim_params
         self.h, self.w = self.sim_params.axes_size(
-            axs=('H', 'W')
+            axs=("H", "W")
         )  # height and width for a Wavefronts
 
         self.__device = torch.device(device)
@@ -68,9 +69,9 @@ class LinearAutoencoder(nn.Module):
         wavefront_encoded : Wavefront
             An encoded input wavefront.
         """
-        if self.to_return == 'wf':
+        if self.to_return == "wf":
             return self.encoder(wavefront_in)
-        if self.to_return == 'amps':
+        if self.to_return == "amps":
             return self.encoder(wavefront_in).abs() + 0j
 
     def decode(self, wavefront_encoded):
@@ -82,9 +83,9 @@ class LinearAutoencoder(nn.Module):
         wavefront_decoded : Wavefront
             A decoded wavefront.
         """
-        if self.to_return == 'wf':
+        if self.to_return == "wf":
             return self.decoder(wavefront_encoded)
-        if self.to_return == 'amps':
+        if self.to_return == "amps":
             return self.decoder(wavefront_encoded).abs() + 0j
 
     def forward(self, wavefront_in):
@@ -106,18 +107,23 @@ class LinearAutoencoder(nn.Module):
         return wavefront_encoded, wavefront_decoded
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
+        """
+        Returns the encoder and decoder specifications.
+
+            Args:
+                None
+
+            Returns:
+                Iterable[ParameterSpecs | SubelementSpecs]: An iterable containing
+                SubelementSpecs for the encoder and decoder, each holding a
+                LinearOpticalSetup representing their respective elements.
+        """
         return (
-            SubelementSpecs(
-                'Encoder',
-                LinearOpticalSetup(self.encoder_elements)
-            ),
-            SubelementSpecs(
-                'Decoder',
-                LinearOpticalSetup(self.decoder_elements)
-            ),
+            SubelementSpecs("Encoder", LinearOpticalSetup(self.encoder_elements)),
+            SubelementSpecs("Decoder", LinearOpticalSetup(self.decoder_elements)),
         )
 
-    def to(self, device: str | torch.device | int) -> 'LinearAutoencoder':
+    def to(self, device: str | torch.device | int) -> "LinearAutoencoder":
         if self.__device == torch.device(device):
             return self
 
@@ -131,4 +137,13 @@ class LinearAutoencoder(nn.Module):
 
     @property
     def device(self) -> str | torch.device | int:
+        """
+        Returns the device on which the model is located.
+
+          Args:
+            None
+
+          Returns:
+            The device as a string, torch.device object, or integer.
+        """
         return self.__device

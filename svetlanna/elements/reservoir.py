@@ -13,14 +13,15 @@ if TYPE_CHECKING:
 
 class SimpleReservoir(Element):
     """Reservoir element."""
+
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        nonlinear_element: Union[Element, 'LinearOpticalSetup'],
-        delay_element: Union[Element, 'LinearOpticalSetup'],
+        nonlinear_element: Union[Element, "LinearOpticalSetup"],
+        delay_element: Union[Element, "LinearOpticalSetup"],
         feedback_gain: OptimizableFloat,
         input_gain: OptimizableFloat,
-        delay: int
+        delay: int,
     ) -> None:
         """Reservoir element.
         The main idea is explained in https://doi.org/10.1364/OE.20.022783.
@@ -55,15 +56,9 @@ class SimpleReservoir(Element):
         self.nonlinear_element = nonlinear_element
         self.delay_element = delay_element
 
-        self.feedback_gain = self.process_parameter(
-            'feedback_gain', feedback_gain
-        )
-        self.input_gain = self.process_parameter(
-            'input_gain', input_gain
-        )
-        self.delay = self.process_parameter(
-            'delay', delay
-        )
+        self.feedback_gain = self.process_parameter("feedback_gain", feedback_gain)
+        self.input_gain = self.process_parameter("input_gain", input_gain)
+        self.delay = self.process_parameter("delay", delay)
 
         # create FIFI queue for delay line
         self.feedback_queue: deque[Wavefront] = deque(maxlen=self.delay)
@@ -93,11 +88,25 @@ class SimpleReservoir(Element):
         return self.feedback_queue.popleft()
 
     def drop_feedback_queue(self) -> None:
-        """Clear all elements from the feedback queue.
-        """
+        """Clear all elements from the feedback queue."""
         self.feedback_queue.clear()
 
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
+        """
+        Processes an incoming wavefront through a feedback loop.
+
+            This method simulates the propagation of a wavefront through a system
+            with a delay line and nonlinear elements. It retrieves a delayed element
+            from a queue, combines it with the current input, processes the result
+            through a nonlinear function, and adds the output back to the delay line.
+
+            Args:
+                incident_wavefront: The incoming wavefront signal.
+
+            Returns:
+                Wavefront: The processed output wavefront after applying feedback and
+                           nonlinear transformations.
+        """
         # get an element from feedback line queue
         delayed = self.pop_feedback_queue()
 
@@ -108,36 +117,49 @@ class SimpleReservoir(Element):
             )
         else:
             # if the delay line is empty
-            output = self.nonlinear_element(
-                incident_wavefront * self.input_gain
-            )
+            output = self.nonlinear_element(incident_wavefront * self.input_gain)
 
         # add output to the delay line
         self.append_feedback_queue(output)
         return output
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
+        """
+        Returns an iterable of parameter and subelement specifications.
+
+            Args:
+                None
+
+            Returns:
+                Iterable[ParameterSpecs | SubelementSpecs]: An iterable containing
+                ParameterSpecs for 'feedback_gain', 'input_gain', and 'delay', as well
+                as SubelementSpecs for 'nonlinear_element' and 'delay_element'.
+        """
         return (
-            ParameterSpecs('feedback_gain', (
-                PrettyReprRepr(self.feedback_gain),
-            )),
-            ParameterSpecs('input_gain', (
-                PrettyReprRepr(self.input_gain),
-            )),
-            ParameterSpecs('delay', (
-                PrettyReprRepr(self.delay),
-            )),
-            SubelementSpecs('Nonlinear element', self.nonlinear_element),
-            SubelementSpecs('Delay element', self.delay_element)
+            ParameterSpecs("feedback_gain", (PrettyReprRepr(self.feedback_gain),)),
+            ParameterSpecs("input_gain", (PrettyReprRepr(self.input_gain),)),
+            ParameterSpecs("delay", (PrettyReprRepr(self.delay),)),
+            SubelementSpecs("Nonlinear element", self.nonlinear_element),
+            SubelementSpecs("Delay element", self.delay_element),
         )
 
     @staticmethod
     def _widget_html_(
-        index: int,
-        name: str,
-        element_type: str | None,
-        subelements: list[ElementHTML]
+        index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
     ) -> str:
-        return jinja_env.get_template('widget_reservoir.html.jinja').render(
+        """
+        Renders the HTML for a widget using a Jinja2 template.
+
+          Args:
+              index: The index of the widget.
+              name: The name of the widget.
+              element_type: The type of element (e.g., 'input', 'select'). Can be None.
+              subelements: A list of ElementHTML objects representing the sub-elements
+                  of the widget.
+
+          Returns:
+              str: The rendered HTML string for the widget.
+        """
+        return jinja_env.get_template("widget_reservoir.html.jinja").render(
             index=index, name=name, subelements=subelements
         )

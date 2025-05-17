@@ -3,6 +3,7 @@ from typing import Iterable
 import torch
 from torch import nn
 from svetlanna import Wavefront, SimulationParameters
+
 # for visualisation:
 from svetlanna import LinearOpticalSetup
 from svetlanna.specs import ParameterSpecs, SubelementSpecs
@@ -16,16 +17,16 @@ class DiffractiveRNN(nn.Module):
     """
 
     def __init__(
-            self,
-            sim_params: SimulationParameters,
-            sequence_len: int,
-            fusing_coeff: float,
-            read_in_layer: nn.Sequential,
-            memory_layer: nn.Sequential,
-            hidden_forward_layer: nn.Sequential,
-            read_out_layer: nn.Sequential,
-            detector_layer: nn.Sequential,
-            device: str | torch.device = torch.get_default_device(),
+        self,
+        sim_params: SimulationParameters,
+        sequence_len: int,
+        fusing_coeff: float,
+        read_in_layer: nn.Sequential,
+        memory_layer: nn.Sequential,
+        hidden_forward_layer: nn.Sequential,
+        read_out_layer: nn.Sequential,
+        detector_layer: nn.Sequential,
+        device: str | torch.device = torch.get_default_device(),
     ):
         """
         sim_params: SimulationParameters
@@ -53,7 +54,7 @@ class DiffractiveRNN(nn.Module):
         self.sim_params = sim_params
 
         self.h, self.w = self.sim_params.axes_size(
-            axs=('H', 'W')
+            axs=("H", "W")
         )  # height and width for a wavefronts
 
         self.__device = torch.device(device)
@@ -79,18 +80,14 @@ class DiffractiveRNN(nn.Module):
         if len(subsequence_wf.shape) > 3:  # if a batch is an input
             batch_flag = True
             bs = subsequence_wf.shape[0]
-            h_prev = Wavefront(
-                torch.zeros(
-                    size=(bs, self.h, self.w)
-                )
-            ).to(self.__device)  # h_{t - 1} - reset hidden for the first input
+            h_prev = Wavefront(torch.zeros(size=(bs, self.h, self.w))).to(
+                self.__device
+            )  # h_{t - 1} - reset hidden for the first input
         else:
             batch_flag = False
-            h_prev = Wavefront(
-                torch.zeros(
-                    size=(self.h, self.w)
-                )
-            ).to(self.__device)  # h_{t - 1} - reset hidden for the first input
+            h_prev = Wavefront(torch.zeros(size=(self.h, self.w))).to(
+                self.__device
+            )  # h_{t - 1} - reset hidden for the first input
 
         for frame_ind in range(self.sequence_len):
             if batch_flag:
@@ -110,44 +107,61 @@ class DiffractiveRNN(nn.Module):
         return out
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
+        """
+        Returns a collection of parameter and subelement specifications.
+
+            Args:
+                None
+
+            Returns:
+                Iterable[ParameterSpecs | SubelementSpecs]: An iterable yielding
+                ParameterSpecs for parameters like sequence length and fusing coefficient,
+                and SubelementSpecs for the different layers within the optical setup
+                (read-in, memory, hidden forward, and read-out).
+        """
         return (
-            ParameterSpecs('sequence_len', (
-                PrettyReprRepr(self.sequence_len),
-            )),
-            ParameterSpecs('fusing_coeff', (
-                PrettyReprRepr(self.fusing_coeff),
-            )),
+            ParameterSpecs("sequence_len", (PrettyReprRepr(self.sequence_len),)),
+            ParameterSpecs("fusing_coeff", (PrettyReprRepr(self.fusing_coeff),)),
             SubelementSpecs(
-                'Read-in Layer',
-                LinearOpticalSetup(list(self.read_in_layer))
+                "Read-in Layer", LinearOpticalSetup(list(self.read_in_layer))
             ),
             SubelementSpecs(
-                'Memory Layer',
-                LinearOpticalSetup(list(self.memory_layer))
+                "Memory Layer", LinearOpticalSetup(list(self.memory_layer))
             ),
             SubelementSpecs(
-                'Hidden Forward Layer',
-                LinearOpticalSetup(list(self.hidden_forward_layer))
+                "Hidden Forward Layer",
+                LinearOpticalSetup(list(self.hidden_forward_layer)),
             ),
             SubelementSpecs(
-                'Read-out Layer',
-                LinearOpticalSetup(list(self.read_out_layer))
+                "Read-out Layer", LinearOpticalSetup(list(self.read_out_layer))
             ),
         )
 
-    def to(self, device: str | torch.device | int) -> 'DiffractiveRNN':
+    def to(self, device: str | torch.device | int) -> "DiffractiveRNN":
         if self.__device == torch.device(device):
             return self
 
         return DiffractiveRNN(
             sim_params=self.sim_params,
-            sequence_len=self.sequence_len, fusing_coeff=self.fusing_coeff,
-            read_in_layer=self.read_in_layer, memory_layer=self.memory_layer,
+            sequence_len=self.sequence_len,
+            fusing_coeff=self.fusing_coeff,
+            read_in_layer=self.read_in_layer,
+            memory_layer=self.memory_layer,
             hidden_forward_layer=self.hidden_forward_layer,
-            read_out_layer=self.read_out_layer, detector_layer=self.detector_layer,
+            read_out_layer=self.read_out_layer,
+            detector_layer=self.detector_layer,
             device=device,
         )
 
     @property
     def device(self) -> str | torch.device | int:
+        """
+        Returns the device on which tensors are allocated.
+
+          Args:
+            None
+
+          Returns:
+            The device string, torch.device object or integer representing the device.
+        """
         return self.__device
