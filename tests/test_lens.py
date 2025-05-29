@@ -12,7 +12,7 @@ lens_parameters = [
     "wavelength_test",
     "focal_length_test",
     "radius_test",
-    "expected_std"
+    "expected_std",
 ]
 
 
@@ -20,26 +20,30 @@ lens_parameters = [
     lens_parameters,
     [
         (
-            8,      # ox_size, mm
-            12,     # oy_size, mm
-            1200,   # ox_nodes
-            1400,   # oy_nodes
-            torch.linspace(330 * 1e-6, 1064 * 1e-6, 20),    # wavelength_test, tensor   # noqa: E501
-            100,    # focal_length_test, mm
-            10,     # radius_test, mm
-            1e-5    # expected_std
+            8,  # ox_size, mm
+            12,  # oy_size, mm
+            1200,  # ox_nodes
+            1400,  # oy_nodes
+            torch.linspace(
+                330 * 1e-6, 1064 * 1e-6, 20
+            ),  # wavelength_test, tensor   # noqa: E501
+            100,  # focal_length_test, mm
+            10,  # radius_test, mm
+            1e-5,  # expected_std
         ),
         (
             8,  # ox_size, mm
             4,  # oy_size, mm
-            1100,   # ox_nodes
-            1000,   # oy_nodes
-            torch.linspace(660 * 1e-6, 1600 * 1e-6, 20),    # wavelength_test, tensor   # noqa: E501
-            200,    # focal_length_test, mm
-            15,     # radius_test, mm
-            1e-5    # expected_std
-        )
-    ]
+            1100,  # ox_nodes
+            1000,  # oy_nodes
+            torch.linspace(
+                660 * 1e-6, 1600 * 1e-6, 20
+            ),  # wavelength_test, tensor   # noqa: E501
+            200,  # focal_length_test, mm
+            15,  # radius_test, mm
+            1e-5,  # expected_std
+        ),
+    ],
 )
 def test_lens(
     ox_size: float,
@@ -75,17 +79,15 @@ def test_lens(
 
     params = SimulationParameters(
         {
-            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
-            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
-            'wavelength': wavelength_test
+            "W": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
+            "H": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
+            "wavelength": wavelength_test,
         }
     )
 
     # transmission function of the thin lens as a class method
     transmission_function = elements.ThinLens(
-        simulation_parameters=params,
-        focal_length=focal_length_test,
-        radius=radius_test
+        simulation_parameters=params, focal_length=focal_length_test, radius=radius_test
     ).get_transmission_function()
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
@@ -102,16 +104,21 @@ def test_lens(
     radius_squared = torch.pow(x_grid, 2) + torch.pow(y_grid, 2)
 
     transmission_function_analytic = torch.exp(
-        1j * (-wave_number / (2 * focal_length_test) * radius_squared * (
-            radius_squared <= radius_test**2
-        ))
+        1j
+        * (
+            -wave_number
+            / (2 * focal_length_test)
+            * radius_squared
+            * (radius_squared <= radius_test**2)
+        )
     )
 
     standard_deviation = torch.std(
-        torch.real((1 / 1j) * (
-            torch.log(transmission_function) - torch.log(
-                transmission_function_analytic
-                )
+        torch.real(
+            (1 / 1j)
+            * (
+                torch.log(transmission_function)
+                - torch.log(transmission_function_analytic)
             )
         )
     )
@@ -120,21 +127,29 @@ def test_lens(
 
 
 def test_reverse():
+    """
+    Tests the reversibility of the ThinLens forward and reverse propagation.
+
+        This test checks if applying the `forward` method followed by the `reverse`
+        method to a wavefront results in the original wavefront, confirming the
+        correctness of the inverse propagation implementation.
+
+        Args:
+            None
+
+        Returns:
+            None
+    """
     params = SimulationParameters(
         {
-            'W': torch.linspace(-10/2, 10/2, 10),
-            'H': torch.linspace(-10/2, 10/2, 10),
-            'wavelength': 1
+            "W": torch.linspace(-10 / 2, 10 / 2, 10),
+            "H": torch.linspace(-10 / 2, 10 / 2, 10),
+            "wavelength": 1,
         }
     )
 
-    lens = elements.ThinLens(
-        simulation_parameters=params,
-        focal_length=1
-    )
+    lens = elements.ThinLens(simulation_parameters=params, focal_length=1)
 
     # test is reverse(forward(x)) is x, where x is a wavefront
     wavefront = svetlanna.Wavefront.plane_wave(params)
-    assert torch.allclose(
-        lens.reverse(lens.forward(wavefront)), wavefront
-    )
+    assert torch.allclose(lens.reverse(lens.forward(wavefront)), wavefront)

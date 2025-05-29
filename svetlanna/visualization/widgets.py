@@ -15,52 +15,51 @@ from ..simulation_parameters import SimulationParameters
 import base64
 
 
-STATIC_FOLDER = pathlib.Path(__file__).parent / 'static'
-TEMPLATES_FOLDER = pathlib.Path(__file__).parent / 'templates'
+STATIC_FOLDER = pathlib.Path(__file__).parent / "static"
+TEMPLATES_FOLDER = pathlib.Path(__file__).parent / "templates"
 
 jinja_env = Environment(
-    loader=FileSystemLoader(TEMPLATES_FOLDER),
-    autoescape=select_autoescape()
+    loader=FileSystemLoader(TEMPLATES_FOLDER), autoescape=select_autoescape()
 )
 
 
 StepwisePlotTypes = Union[
-    Literal['A'],
-    Literal['I'],
-    Literal['phase'],
-    Literal['Re'],
-    Literal['Im']
+    Literal["A"], Literal["I"], Literal["phase"], Literal["Re"], Literal["Im"]
 ]
 
 
 class StepwiseForwardWidget(anywidget.AnyWidget):
-    _esm = STATIC_FOLDER / 'stepwise_forward_widget.js'
-    _css = STATIC_FOLDER / 'setup_widget.css'
+    """
+    A widget for stepwise forward selection visualization."""
+
+    _esm = STATIC_FOLDER / "stepwise_forward_widget.js"
+    _css = STATIC_FOLDER / "setup_widget.css"
 
     elements = traitlets.List([]).tag(sync=True)
-    structure_html = traitlets.Unicode('').tag(sync=True)
+    structure_html = traitlets.Unicode("").tag(sync=True)
 
 
 class SpecsWidget(anywidget.AnyWidget):
-    _esm = STATIC_FOLDER / 'specs_widget.js'
-    _css = STATIC_FOLDER / 'setup_widget.css'
+    """
+    A widget for displaying and interacting with specifications."""
+
+    _esm = STATIC_FOLDER / "specs_widget.js"
+    _css = STATIC_FOLDER / "setup_widget.css"
 
     elements = traitlets.List([]).tag(sync=True)
-    structure_html = traitlets.Unicode('').tag(sync=True)
+    structure_html = traitlets.Unicode("").tag(sync=True)
 
 
 @dataclass(frozen=True, slots=True)
 class ElementHTML:
     """Representation of an element in HTML format."""
+
     element_type: str | None
     html: str
 
 
 def default_widget_html_method(
-    index: int,
-    name: str,
-    element_type: str | None,
-    subelements: list[ElementHTML]
+    index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
 ) -> str:
     """Default `_widget_html_` method used for rendering `Specsable` elements.
 
@@ -81,14 +80,12 @@ def default_widget_html_method(
     str
         rendered HTML
     """
-    return jinja_env.get_template('widget_default.html.jinja').render(
+    return jinja_env.get_template("widget_default.html.jinja").render(
         index=index, name=name, subelements=subelements
     )
 
 
-def _get_widget_html_method(
-    element: Specsable
-) -> Callable[..., str]:
+def _get_widget_html_method(element: Specsable) -> Callable[..., str]:
     """Returns `_widget_html_` method based on type of element.
 
     Parameters
@@ -101,8 +98,8 @@ def _get_widget_html_method(
     Any
         `_widget_html_` method
     """
-    if hasattr(element, '_widget_html_'):
-        return getattr(element, '_widget_html_')
+    if hasattr(element, "_widget_html_"):
+        return getattr(element, "_widget_html_")
 
     return default_widget_html_method
 
@@ -129,15 +126,10 @@ def _subelements_html(subelements: list[_ElementInTree]) -> list[ElementHTML]:
             index=subelement.element_index,
             name=subelement.element.__class__.__name__,
             element_type=subelement.subelement_type,
-            subelements=_subelements_html(subelement.children)
+            subelements=_subelements_html(subelement.children),
         )
 
-        res.append(
-            ElementHTML(
-                subelement.subelement_type,
-                html=raw_subelement_html
-            )
-        )
+        res.append(ElementHTML(subelement.subelement_type, html=raw_subelement_html))
 
     return res
 
@@ -158,9 +150,9 @@ def generate_structure_html(subelements: list[_ElementInTree]) -> str:
 
     elements_html = _subelements_html(subelements)
 
-    return jinja_env.get_template(
-        'widget_structure_container.html.jinja'
-    ).render(elements_html=elements_html)
+    return jinja_env.get_template("widget_structure_container.html.jinja").render(
+        elements_html=elements_html
+    )
 
 
 def show_structure(*specsable: Specsable):
@@ -171,7 +163,7 @@ def show_structure(*specsable: Specsable):
         from IPython.display import HTML, display
 
         # Generate HTML
-        elements = _ElementsIterator(*specsable, directory='')
+        elements = _ElementsIterator(*specsable, directory="")
         structure_html = generate_structure_html(elements.tree)
 
         # Display HTML
@@ -190,22 +182,20 @@ def show_specs(*specsable: Specsable) -> SpecsWidget:
         The widget
     """
 
-    elements = _ElementsIterator(*specsable, directory='')
+    elements = _ElementsIterator(*specsable, directory="")
 
     # Prepare elements data for widget
     elements_json = []
     for element_index, element, writer_context_generator in elements:
-        stream = StringIO('')
+        stream = StringIO("")
         # Write element's parameter specs to the stream
-        write_specs_to_html(
-            element, element_index, writer_context_generator, stream
-        )
+        write_specs_to_html(element, element_index, writer_context_generator, stream)
 
         elements_json.append(
             {
-                'index': element_index,
-                'name': element.__class__.__name__,
-                'specs_html': stream.getvalue()
+                "index": element_index,
+                "name": element.__class__.__name__,
+                "specs_html": stream.getvalue(),
             }
         )
 
@@ -213,10 +203,7 @@ def show_specs(*specsable: Specsable) -> SpecsWidget:
     structure_html = generate_structure_html(elements.tree)
 
     # Create a widget
-    widget = SpecsWidget(
-        structure_html=structure_html,
-        elements=elements_json
-    )
+    widget = SpecsWidget(structure_html=structure_html, elements=elements_json)
 
     return widget
 
@@ -224,7 +211,7 @@ def show_specs(*specsable: Specsable) -> SpecsWidget:
 def draw_wavefront(
     wavefront: torch.Tensor,
     simulation_parameters: SimulationParameters,
-    types_to_plot: tuple[StepwisePlotTypes, ...] = ('I', 'phase')
+    types_to_plot: tuple[StepwisePlotTypes, ...] = ("I", "phase"),
 ) -> bytes:
     """Show field propagation in the setup via widget.
     Currently only wavefronts of shape `(W, H)` are supported.
@@ -253,16 +240,10 @@ def draw_wavefront(
 
     n_plots = len(types_to_plot)
 
-    width_to_height = (
-        width.max() - width.min()
-    ) / (
-        height.max() - height.min()
-    )
+    width_to_height = (width.max() - width.min()) / (height.max() - height.min())
 
     figure, ax = plt.subplots(
-        1, n_plots,
-        figsize=(2+3*n_plots*width_to_height, 3),
-        dpi=120
+        1, n_plots, figsize=(2 + 3 * n_plots * width_to_height, 3), dpi=120
     )
 
     for i, plot_type in enumerate(types_to_plot):
@@ -272,25 +253,17 @@ def draw_wavefront(
             axes = ax[i]
             axes = cast(Axes, axes)
 
-        if plot_type == 'A':
+        if plot_type == "A":
             # Plot the wavefront amplitude
-            axes.pcolorfast(
-                width,
-                height,
-                wavefront.abs().numpy(force=True)
-            )
-            axes.set_title('Amplitude')
+            axes.pcolorfast(width, height, wavefront.abs().numpy(force=True))
+            axes.set_title("Amplitude")
 
-        elif plot_type == 'I':
+        elif plot_type == "I":
             # Plot the wavefront intensity
-            axes.pcolorfast(
-                width,
-                height,
-                (wavefront.abs()**2).numpy(force=True)
-            )
-            axes.set_title('Intensity')
+            axes.pcolorfast(width, height, (wavefront.abs() ** 2).numpy(force=True))
+            axes.set_title("Intensity")
 
-        elif plot_type == 'phase':
+        elif plot_type == "phase":
             # Plot the wavefront phase
             axes.pcolorfast(
                 width,
@@ -299,27 +272,27 @@ def draw_wavefront(
                 vmin=-torch.pi,
                 vmax=torch.pi,
             )
-            axes.set_title('Phase')
+            axes.set_title("Phase")
 
-        elif plot_type == 'Re':
+        elif plot_type == "Re":
             # Plot the wavefront real part
             axes.pcolorfast(
                 width,
                 height,
                 wavefront.real.numpy(force=True),
             )
-            axes.set_title('Real part')
+            axes.set_title("Real part")
 
-        elif plot_type == 'Im':
+        elif plot_type == "Im":
             # Plot the wavefront imaginary part
             axes.pcolorfast(
                 width,
                 height,
                 wavefront.imag.numpy(force=True),
             )
-            axes.set_title('Imaginary part')
+            axes.set_title("Imaginary part")
 
-        axes.set_aspect('equal')
+        axes.set_aspect("equal")
 
     plt.tight_layout()
     figure.savefig(stream)
@@ -332,7 +305,7 @@ def show_stepwise_forward(
     *specsable: Specsable,
     input: torch.Tensor,
     simulation_parameters: SimulationParameters,
-    types_to_plot: tuple[StepwisePlotTypes, ...] = ('I', 'phase')
+    types_to_plot: tuple[StepwisePlotTypes, ...] = ("I", "phase"),
 ) -> StepwiseForwardWidget:
     """Display the wavefront propagation through a setup structure
     using a widget interface. Currently only wavefronts
@@ -354,7 +327,7 @@ def show_stepwise_forward(
     """
 
     elements_to_call = tuple(s for s in specsable)
-    elements = _ElementsIterator(*elements_to_call, directory='')
+    elements = _ElementsIterator(*elements_to_call, directory="")
 
     outputs = {}
 
@@ -397,19 +370,19 @@ def show_stepwise_forward(
                         draw_wavefront(
                             wavefront=outputs[element],
                             simulation_parameters=simulation_parameters,
-                            types_to_plot=types_to_plot
+                            types_to_plot=types_to_plot,
                         )
                     ).decode()
                 except Exception as e:
-                    output_image = f'\n{e}'
+                    output_image = f"\n{e}"
             else:
                 output_image = None
 
             elements_json.append(
                 {
-                    'index': element_index,
-                    'name': element.__class__.__name__,
-                    'output_image': output_image
+                    "index": element_index,
+                    "name": element.__class__.__name__,
+                    "output_image": output_image,
                 }
             )
 
@@ -418,8 +391,7 @@ def show_stepwise_forward(
 
         # Create a widget
         widget = StepwiseForwardWidget(
-            structure_html=structure_html,
-            elements=elements_json
+            structure_html=structure_html, elements=elements_json
         )
 
         return widget

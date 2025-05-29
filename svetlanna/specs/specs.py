@@ -16,11 +16,8 @@ class ParameterSaveContext:
     """Generates different context managers that can be used
     to write a parameter data to output stream or file.
     """
-    def __init__(
-        self,
-        parameter_name: str,
-        directory: Path
-    ):
+
+    def __init__(self, parameter_name: str, directory: Path):
         """
         Parameters
         ----------
@@ -50,23 +47,18 @@ class ParameterSaveContext:
         Path
             relative path to the file
         """
-        suffix = '.' + extension
+        suffix = "." + extension
 
         # calculate total number of created files with the same extension
         total_files = len(
-            list(
-                filter(
-                    lambda f: f.suffix == suffix,
-                    self._generated_files
-                    )
-                )
-            )
+            list(filter(lambda f: f.suffix == suffix, self._generated_files))
+        )
 
         # name of the new file ending with `_<n>.<extension>`
-        file_name = self.parameter_name + f'_{total_files}'
+        file_name = self.parameter_name + f"_{total_files}"
 
         # save filepath of the file
-        filepath = Path(self._directory,  file_name).with_suffix(suffix)
+        filepath = Path(self._directory, file_name).with_suffix(suffix)
         self._generated_files.append(filepath)
 
         # create a new folder for the file if there is none
@@ -103,26 +95,22 @@ class ParameterSaveContext:
         Generator[BufferedWriter, Any, None]
             Buffer
         """
-        with open(filepath, mode='wb') as file:
+        with open(filepath, mode="wb") as file:
             yield file
 
 
-ParameterSaveContext_ = TypeVar(
-    'ParameterSaveContext_',
-    bound=ParameterSaveContext
-)
+ParameterSaveContext_ = TypeVar("ParameterSaveContext_", bound=ParameterSaveContext)
 
 
 class Representation(Generic[ParameterSaveContext_]):
     """Base class for a parameter representation"""
+
     ...
 
 
-class MarkdownRepresentation(
-    Representation[ParameterSaveContext_],
-    metaclass=ABCMeta
-):
+class MarkdownRepresentation(Representation[ParameterSaveContext_], metaclass=ABCMeta):
     """Representation that can be exported to markdown file"""
+
     @abstractmethod
     def to_markdown(self, out: TextIO, context: ParameterSaveContext_) -> None:
         """Write the parameter related data to be shown in a markdown file.
@@ -137,11 +125,9 @@ class MarkdownRepresentation(
         """
 
 
-class StrRepresentation(
-    Representation[ParameterSaveContext_],
-    metaclass=ABCMeta
-):
+class StrRepresentation(Representation[ParameterSaveContext_], metaclass=ABCMeta):
     """Representation that can be exported in the text format"""
+
     @abstractmethod
     def to_str(self, out: TextIO, context: ParameterSaveContext_) -> None:
         """Write the parameter related data to be shown as a plain text.
@@ -156,11 +142,9 @@ class StrRepresentation(
         """
 
 
-class HTMLRepresentation(
-    Representation[ParameterSaveContext_],
-    metaclass=ABCMeta
-):
+class HTMLRepresentation(Representation[ParameterSaveContext_], metaclass=ABCMeta):
     """Representation that can be exported to the HTML"""
+
     @abstractmethod
     def to_html(self, out: TextIO, context: ParameterSaveContext_) -> None:
         """Write the parameter related data to be shown in a HTML file.
@@ -179,12 +163,13 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
     """Representation of the parameter as an image.
     Image generation is based on the `pillow` package.
     """
+
     def __init__(
         self,
         value: Any,
-        mode: Literal['1', 'L', 'LA', 'I', 'P', 'RGB', 'RGBA'] = 'L',
-        format: str = 'png',
-        show_image: bool = True
+        mode: Literal["1", "L", "LA", "I", "P", "RGB", "RGBA"] = "L",
+        format: str = "png",
+        show_image: bool = True,
     ):
         """
         Parameters
@@ -203,11 +188,7 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
         self.mode = mode
         self.show_image = show_image
 
-    def draw_image(
-        self,
-        context: ParameterSaveContext,
-        filepath: Path
-    ) -> Image.Image:
+    def draw_image(self, context: ParameterSaveContext, filepath: Path) -> Image.Image:
         """Draw image into the file, using `pillow` package.
 
         Parameters
@@ -225,23 +206,53 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
         return image
 
     def to_str(self, out: TextIO, context: ParameterSaveContext):
+        """
+        Saves the image to a file and writes a message to the output stream.
+
+            Args:
+                out: The output stream to write to.
+                context: The parameter save context containing filepath information.
+
+            Returns:
+                None
+        """
         filepath = context.get_new_filepath(extension=self.format)
 
         self.draw_image(context=context, filepath=filepath)
 
-        out.write(f'The image is saved to {context.rel_filepath(filepath)}\n')
+        out.write(f"The image is saved to {context.rel_filepath(filepath)}\n")
 
     def to_markdown(self, out: TextIO, context: ParameterSaveContext):
+        """
+        Saves the image and writes a Markdown string to the output.
+
+            Args:
+                out: The output stream to write to.
+                context: The parameter save context containing file path information.
+
+            Returns:
+                None
+        """
         filepath = context.get_new_filepath(extension=self.format)
         rel_filepath = context.rel_filepath(filepath)
 
         self.draw_image(context=context, filepath=filepath)
 
-        out.write(f'The image is saved to `{rel_filepath}`\n')
+        out.write(f"The image is saved to `{rel_filepath}`\n")
         if self.show_image:
-            out.write(f'\n![{context.parameter_name}]({rel_filepath})\n\n')
+            out.write(f"\n![{context.parameter_name}]({rel_filepath})\n\n")
 
     def to_html(self, out: TextIO, context: ParameterSaveContext):
+        """
+        Renders the image as an HTML <img> tag.
+
+            Args:
+                out: The output stream to write the HTML to.
+                context: The parameter save context.
+
+            Returns:
+                None
+        """
 
         image = Image.fromarray(self.value, mode=self.mode)
 
@@ -263,6 +274,7 @@ class ReprRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
     """Representation of the parameter as a plain text.
     The `__repr__` method is used to generate the text.
     """
+
     def __init__(self, value: Any):
         """
         Parameters
@@ -275,18 +287,51 @@ class ReprRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
         self.value = value
 
     def to_str(self, out: TextIO, context: ParameterSaveContext):
-        out.write(f'{repr(self.value)}\n')
+        """
+        Writes the string representation of the value to the output stream.
+
+            Args:
+                out: The output stream to write to.
+                context: The parameter save context.
+
+            Returns:
+                None
+        """
+        out.write(f"{repr(self.value)}\n")
 
     def to_markdown(self, out: TextIO, context: ParameterSaveContext):
-        out.write(f'```\n{repr(self.value)}\n```\n')
+        """
+        Writes the value as a code block in Markdown format.
+
+            Args:
+                out: The output stream to write to.
+                context: The parameter save context (unused).
+
+            Returns:
+                None
+        """
+        out.write(f"```\n{repr(self.value)}\n```\n")
 
     def to_html(self, out: TextIO, context: Any):
+        """
+        Renders the object to an HTML representation.
+
+            This method simply calls `to_str` to generate a string representation
+            and writes it to the provided output stream.
+
+            Args:
+                out: The output stream to write the HTML to.
+                context:  Additional context that might be needed during rendering.
+
+            Returns:
+                None
+        """
         self.to_str(out, context)
 
 
 class NpyFileRepr(StrRepresentation, MarkdownRepresentation):
-    """Representation of the parameter as a `.npy` file.
-    """
+    """Representation of the parameter as a `.npy` file."""
+
     def __init__(self, value: ArrayLike):
         """
         Parameters
@@ -311,30 +356,47 @@ class NpyFileRepr(StrRepresentation, MarkdownRepresentation):
             np.save(f, self.value)
 
     def to_str(self, out: TextIO, context: ParameterSaveContext):
-        filepath = context.get_new_filepath(extension='npy')
+        """
+        Saves the numpy array to a file and writes a message to the output stream.
+
+            Args:
+                out: The output stream to write to.
+                context: The parameter save context containing filepath information.
+
+            Returns:
+                None
+        """
+        filepath = context.get_new_filepath(extension="npy")
         rel_filepath = context.rel_filepath(filepath)
 
         self.save_to_file(context, filepath)
 
-        out.write(f'The numpy array is saved to {rel_filepath}\n')
+        out.write(f"The numpy array is saved to {rel_filepath}\n")
 
     def to_markdown(self, out: TextIO, context: ParameterSaveContext):
-        filepath = context.get_new_filepath(extension='npy')
+        """
+        Saves the numpy array to a file and writes a markdown message indicating the filepath.
+
+            Args:
+                out: The output stream to write the markdown message to.
+                context: The parameter save context providing filepath information.
+
+            Returns:
+                None
+        """
+        filepath = context.get_new_filepath(extension="npy")
         rel_filepath = context.rel_filepath(filepath)
 
         self.save_to_file(context, filepath)
 
-        out.write(f'The numpy array is saved to `{rel_filepath}`\n')
+        out.write(f"The numpy array is saved to `{rel_filepath}`\n")
 
 
 class PrettyReprRepr(ReprRepr, HTMLRepresentation):
     """Same as ReprRepr but with better handling of
     Parameters and BoundedParameter"""
-    def __init__(
-        self,
-        value: Any,
-        units: str | None = None
-    ):
+
+    def __init__(self, value: Any, units: str | None = None):
         """Representation of the parameter as a plain text.
         The `__repr__` method is used to generate the
         text if the `value` is not `torch.Tensor` or `Parameter`.
@@ -350,7 +412,18 @@ class PrettyReprRepr(ReprRepr, HTMLRepresentation):
         self.units = units
 
     def _repr(self) -> str:
-        units_suffix = '' if self.units is None else f' [{self.units}]'
+        """
+        Returns a string representation of the object.
+
+            Args:
+                None
+
+            Returns:
+                str: A string representing the object's value, including its class name,
+                     units (if any), and shape (for tensors).  For constrained parameters,
+                     it includes min/max values.
+        """
+        units_suffix = "" if self.units is None else f" [{self.units}]"
         class_name: str = self.value.__class__.__name__
 
         if isinstance(self.value, torch.Tensor):
@@ -368,43 +441,71 @@ class PrettyReprRepr(ReprRepr, HTMLRepresentation):
                         min_val = self.value.min_value.item()
                         max_val = self.value.max_value.item()
 
-                        s = f'{class_name}\n'
-                        s += f'  ┏ min value {min_val}{units_suffix}\n'
-                        s += f'  ┗ max value {max_val}{units_suffix}\n'
-                        return s + f'{self.value.item()}{units_suffix}'
+                        s = f"{class_name}\n"
+                        s += f"  ┏ min value {min_val}{units_suffix}\n"
+                        s += f"  ┗ max value {max_val}{units_suffix}\n"
+                        return s + f"{self.value.item()}{units_suffix}"
 
                 except ImportError:
                     pass
 
-                return f'{class_name}\n{self.value.item()}{units_suffix}'
+                return f"{class_name}\n{self.value.item()}{units_suffix}"
 
             # Print shape of the tensor
             shape_str = "x".join(map(str, shape))
-            return f'{class_name} of size ({shape_str}){units_suffix}'
+            return f"{class_name} of size ({shape_str}){units_suffix}"
 
         # If the value is number, it can be directly printed out
         if isinstance(self.value, numbers.Number):
-            return f'{self.value}{units_suffix}'
+            return f"{self.value}{units_suffix}"
 
         return repr(self.value)
 
     def to_str(self, out: TextIO, context: ParameterSaveContext):
-        out.write(f'{self._repr()}\n')
+        """
+        Writes the string representation of the object to the output stream.
+
+            Args:
+                out: The output stream to write to.
+                context: The parameter save context.
+
+            Returns:
+                None
+        """
+        out.write(f"{self._repr()}\n")
 
     def to_markdown(self, out: TextIO, context: ParameterSaveContext):
-        out.write(f'```\n{self._repr()}\n```\n')
+        """
+        Writes a markdown representation of the object to the output stream.
+
+            Args:
+                out: The output stream to write to.
+                context: The parameter save context (unused).
+
+            Returns:
+                None
+        """
+        out.write(f"```\n{self._repr()}\n```\n")
 
     def to_html(self, out: TextIO, context: ParameterSaveContext):
+        """
+        Writes the object to an HTML file.
+
+            Args:
+                out: The output stream to write to.
+                context: The parameter save context.
+
+            Returns:
+                None
+        """
         self.to_str(out, context)
 
 
 class ParameterSpecs:
-    """Container with all representations for the parameter.
-    """
+    """Container with all representations for the parameter."""
+
     def __init__(
-        self,
-        parameter_name: str,
-        representations: Iterable[Representation]
+        self, parameter_name: str, representations: Iterable[Representation]
     ) -> None:
         """
         Parameters
@@ -419,13 +520,9 @@ class ParameterSpecs:
 
 
 class SubelementSpecs:
-    """Container for named subelement
-    """
-    def __init__(
-        self,
-        subelement_type: str,
-        subelement: 'Specsable'
-    ):
+    """Container for named subelement"""
+
+    def __init__(self, subelement_type: str, subelement: "Specsable"):
         """
         Parameters
         ----------
@@ -440,5 +537,5 @@ class SubelementSpecs:
 
 class Specsable(Protocol):
     """Represents any specsable object"""
-    def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
-        ...
+
+    def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]: ...

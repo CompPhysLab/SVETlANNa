@@ -42,9 +42,7 @@ class ClerkMode(StrEnum):
 
 
 CHECKPOINT_FILENAME_SUFFIX = ".pt"
-CHECKPOINT_FILENAME_PATTERN = re.compile(
-    f"^\\d+\\{CHECKPOINT_FILENAME_SUFFIX}$"
-)
+CHECKPOINT_FILENAME_PATTERN = re.compile(f"^\\d+\\{CHECKPOINT_FILENAME_SUFFIX}$")
 CHECKPOINT_BACKUP_FILENAME_PATTERN = re.compile(
     f"^backup_\\d{{4}}-\\d{{2}}-\\d{{2}}_\\d{{2}}-\\d{{2}}-\\d{{2}}\\.\\d{{6}}\\{CHECKPOINT_FILENAME_SUFFIX}$"
 )
@@ -55,6 +53,14 @@ ConditionsType = TypeVar("ConditionsType")
 
 
 class Clerk(Generic[ConditionsType]):
+    """
+    A lightweight alternative to TensorBoard and other logging frameworks
+    for tracking the training process, storing experiment metadata,
+    and handling checkpoints.
+
+    The Clerk is not a new concept but a minimal implementation included
+    in the framework to start training models without any dependencies."""
+
     def __init__(
         self,
         experiment_directory: str,
@@ -358,7 +364,7 @@ class Clerk(Generic[ConditionsType]):
         self,
         index: str | int,
         targets: dict[str, StatefulTorchClass] | None = None,
-        weights_only: bool = True
+        weights_only: bool = True,
     ) -> object | None:
         """Load the checkpoint with a specific index and apply state dicts to
         checkpoint targets. If the targets are not provided, the checkpoint
@@ -471,14 +477,26 @@ class Clerk(Generic[ConditionsType]):
                     file.unlink()
 
     def clean_backup_checkpoints(self):
-        """Remove checkpoints that are matches backup checkpoints name pattern.
-        """
+        """Remove checkpoints that are matches backup checkpoints name pattern."""
         for file in self.experiment_directory.iterdir():
             filename = file.name
             if CHECKPOINT_BACKUP_FILENAME_PATTERN.match(filename):
                 file.unlink()
 
     def __enter__(self):
+        """
+        Enters the context and prepares the clerk for experiment execution.
+
+            This method checks if the clerk is already in use, creates the experiment
+            directory, and potentially resumes from a previous checkpoint based on the
+            configured mode.
+
+            Args:
+                None
+
+            Returns:
+                self: The Clerk instance itself, allowing usage with `with` statements.
+        """
         # Check if the clerk is not in use in other context
         if self._in_use:
             raise RuntimeError("The clerk is already is used in some other context!")
@@ -546,7 +564,7 @@ class Clerk(Generic[ConditionsType]):
                 "description": "Backup checkpoint",
                 "time": time,
             }
-            time_str = time.replace(' ', '_').replace(':', '-')
+            time_str = time.replace(" ", "_").replace(":", "-")
             index = f"backup_{time_str}{CHECKPOINT_FILENAME_SUFFIX}"
 
             try:

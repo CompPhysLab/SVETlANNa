@@ -17,22 +17,48 @@ import builtins
 
 
 def test_save_context_get_new_filepath(tmp_path):
+    """
+    Tests the get_new_filepath method of ParameterSaveContext.
+
+        This tests that subsequent calls to `get_new_filepath` with the same extension
+        return unique filenames within the specified directory, incrementing a counter.
+
+        Args:
+            tmp_path: A temporary path for testing purposes.
+
+        Returns:
+            None
+    """
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
     # test filename
     path = context.get_new_filepath("testext")
-    assert Path(tmp_path, 'test_0.testext') == path
+    assert Path(tmp_path, "test_0.testext") == path
 
     path = context.get_new_filepath("testext")
-    assert Path(tmp_path, 'test_1.testext') == path
+    assert Path(tmp_path, "test_1.testext") == path
 
 
 def test_save_context_file(tmp_path):
+    """
+    Tests saving a file within the parameter save context.
+
+        This test creates a ParameterSaveContext, writes data to a new file obtained
+        through the context, and verifies that the data was written correctly and
+        that subsequent calls for new files generate different filenames while
+        remaining in the same directory.
+
+        Args:
+            tmp_path: A temporary path where the test file will be created.
+
+        Returns:
+            None
+    """
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
@@ -43,7 +69,7 @@ def test_save_context_file(tmp_path):
         file.write(text.encode())
 
     # check if the test text is written into the file
-    with open(path, 'rb') as file:
+    with open(path, "rb") as file:
         assert file.readline() == text.encode()
 
     # check if the new file will have another name, but same folder
@@ -53,8 +79,17 @@ def test_save_context_file(tmp_path):
 
 
 def test_save_context_rel_filepath(tmp_path):
+    """
+    Tests that the relative filepath is correctly computed.
+
+        Args:
+            tmp_path: A temporary path to use for testing.
+
+        Returns:
+            None
+    """
     contexts = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
@@ -69,23 +104,28 @@ def test_save_context_rel_filepath(tmp_path):
 ###############################################################################
 
 
-@pytest.mark.usefixtures('tmp_path')
-@pytest.mark.parametrize(
-    'mode', ('1', 'L', 'LA', 'I', 'P', 'RGB', 'RGBA')
-)
+@pytest.mark.usefixtures("tmp_path")
+@pytest.mark.parametrize("mode", ("1", "L", "LA", "I", "P", "RGB", "RGBA"))
 def test_image_repr_draw_image(tmp_path, mode):
+    """
+    Tests that drawing an ImageRepr to a file produces the correct image.
+
+        Args:
+            tmp_path: A temporary path for saving the image.
+            mode: The color mode of the image (e.g., '1', 'L', 'RGB').
+
+        Returns:
+            None
+    """
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
     # TODO: mode-based test
     image_to_draw = np.array([[1]])
 
-    repr = ImageRepr(
-        value=image_to_draw,
-        mode=mode
-    )
+    repr = ImageRepr(value=image_to_draw, mode=mode)
 
     # draw image to the path
     path = context.get_new_filepath("png")
@@ -96,14 +136,21 @@ def test_image_repr_draw_image(tmp_path, mode):
 
 
 def test_image_repr_to(tmp_path):
+    """
+    Tests the to_str, to_markdown, and to_html methods of ImageRepr.
+
+        Args:
+            tmp_path: A temporary path for ParameterSaveContext.
+
+        Returns:
+            None
+    """
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = ImageRepr(
-        value=np.array([[0.5]])
-    )
+    repr = ImageRepr(value=np.array([[0.5]]))
 
     # test for all possible exports
     test_out = StringIO()
@@ -125,14 +172,21 @@ def test_image_repr_to(tmp_path):
 
 
 def test_repr_repr_to(tmp_path):
+    """
+    Tests the to_str, to_markdown, and to_html methods of ReprRepr.
+
+        Args:
+            tmp_path: A temporary path for ParameterSaveContext.
+
+        Returns:
+            None
+    """
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = ReprRepr(
-        value=np.array([[0.5]])
-    )
+    repr = ReprRepr(value=np.array([[0.5]]))
 
     # test for all possible exports
     test_out = StringIO()
@@ -153,26 +207,36 @@ def test_repr_repr_to(tmp_path):
 ###############################################################################
 
 
-@pytest.mark.usefixtures('tmp_path')
+@pytest.mark.usefixtures("tmp_path")
 @pytest.mark.parametrize(
-    'value', (
+    "value",
+    (
         np.random.rand(2, 2),
         torch.rand(2, 2),
         torch.tensor(random.random()),
         random.random(),
         random.randint(0, 10),
-        ConstrainedParameter(10, 0, 20)
-    )
+        ConstrainedParameter(10, 0, 20),
+    ),
 )
 def test_pretty_repr_repr_to(tmp_path, value, monkeypatch):
+    """
+    Tests the conversion of a value to string, markdown, and HTML representations.
+
+        Args:
+            tmp_path: A temporary path for testing file operations (pytest fixture).
+            value: The value to be converted.  Can be a numpy array, torch tensor, float, int or ConstrainedParameter object.
+            monkeypatch: A pytest monkeypatch fixture used for mocking imports.
+
+        Returns:
+            None
+    """
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = PrettyReprRepr(
-        value=value
-    )
+    repr = PrettyReprRepr(value=value)
 
     # test for all possible exports
     test_out = StringIO()
@@ -198,13 +262,13 @@ def test_pretty_repr_repr_to(tmp_path, value, monkeypatch):
                 raise ImportError
             return original_import(name, *args, **kwargs)
 
-        monkeypatch.setattr(builtins, '__import__', import_with_no_svetlanna)
+        monkeypatch.setattr(builtins, "__import__", import_with_no_svetlanna)
 
         # Test if default string is written to the buffer
         test_out = StringIO()
         repr.to_str(test_out, context)
         class_name = value.__class__.__name__
-        assert test_out.getvalue() == f'{class_name}\n{value.item()}\n'
+        assert test_out.getvalue() == f"{class_name}\n{value.item()}\n"
 
 
 ###############################################################################
@@ -212,23 +276,32 @@ def test_pretty_repr_repr_to(tmp_path, value, monkeypatch):
 ###############################################################################
 
 
-@pytest.mark.usefixtures('tmp_path')
+@pytest.mark.usefixtures("tmp_path")
 @pytest.mark.parametrize(
-    'value', (
+    "value",
+    (
         np.random.rand(10, 10),
         random.random(),
         random.randint(0, 10),
-    )
+    ),
 )
 def test_npy_file_repr_save_to_file(tmp_path, value):
+    """
+    Saves a value to a file using NpyFileRepr and verifies it can be loaded correctly.
+
+        Args:
+            tmp_path: A temporary path for saving the file.
+            value: The value to save (NumPy array or scalar).
+
+        Returns:
+            None
+    """
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = NpyFileRepr(
-        value=value
-    )
+    repr = NpyFileRepr(value=value)
 
     # save the value to a new file
     path = context.get_new_filepath("png")
@@ -239,14 +312,21 @@ def test_npy_file_repr_save_to_file(tmp_path, value):
 
 
 def test_npy_file_repr_to(tmp_path):
+    """
+    Tests the to_str and to_markdown methods of NpyFileRepr.
+
+        Args:
+            tmp_path: A temporary path for creating files.
+
+        Returns:
+            None
+    """
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = NpyFileRepr(
-        value=np.array([[0.5]])
-    )
+    repr = NpyFileRepr(value=np.array([[0.5]]))
 
     # test for all possible exports
     test_out = StringIO()
@@ -264,15 +344,21 @@ def test_npy_file_repr_to(tmp_path):
 
 
 def test_parameter_specs():
+    """
+    Tests the ParameterSpecs class with a simple example.
+
+        Args:
+            None
+
+        Returns:
+            None
+    """
     representations = (
         ReprRepr(123),
         ReprRepr(321),
     )
 
-    specs = ParameterSpecs(
-        parameter_name='test',
-        representations=representations
-    )
+    specs = ParameterSpecs(parameter_name="test", representations=representations)
 
     assert specs.representations == representations
 
@@ -283,18 +369,15 @@ def test_parameter_specs():
 
 
 def test_subelement_specs():
-    specs = [
-        ParameterSpecs('test', [])
-    ]
+    """
+    Tests that the SubelementSpecs class correctly stores its subelement."""
+    specs = [ParameterSpecs("test", [])]
 
     class Subelement:
         def to_specs(self):
             return specs
 
     subelement = Subelement()
-    subelement_specs = SubelementSpecs(
-        'test_type',
-        subelement
-    )
+    subelement_specs = SubelementSpecs("test_type", subelement)
 
     assert subelement_specs.subelement is subelement

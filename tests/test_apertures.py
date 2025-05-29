@@ -13,14 +13,16 @@ rectangle_parameters = [
     "wavelength_test",
     "height_test",
     "width_test",
-    "expected_std"
+    "expected_std",
 ]
 
 
 @pytest.mark.parametrize(
     rectangle_parameters,
-    [(10, 10, 1000, 1200, 1064 * 1e-6, 4, 10, 1e-5),
-     (4, 4, 1300, 1000, 1064 * 1e-6, 3, 1, 1e-5)]
+    [
+        (10, 10, 1000, 1200, 1064 * 1e-6, 4, 10, 1e-5),
+        (4, 4, 1300, 1000, 1064 * 1e-6, 3, 1, 1e-5),
+    ],
 )
 def test_rectangle_aperture(
     ox_size: float,
@@ -55,27 +57,27 @@ def test_rectangle_aperture(
     """
     params = SimulationParameters(
         {
-            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
-            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
-            'wavelength': wavelength_test
+            "W": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
+            "H": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
+            "wavelength": wavelength_test,
         }
     )
 
     # transmission function of the rectangular aperture as a class method
     aperture = elements.RectangularAperture(
-        simulation_parameters=params,
-        height=height_test,
-        width=width_test
+        simulation_parameters=params, height=height_test, width=width_test
     )
     transmission_function = aperture.get_transmission_function()
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
-    x_grid, y_grid = torch.meshgrid(x_linear, y_linear, indexing='xy')
+    x_grid, y_grid = torch.meshgrid(x_linear, y_linear, indexing="xy")
 
-    transmission_function_analytic = 1 * (
-        torch.abs(x_grid) <= width_test / 2
-    ) * (torch.abs(y_grid) <= height_test / 2)
+    transmission_function_analytic = (
+        1
+        * (torch.abs(x_grid) <= width_test / 2)
+        * (torch.abs(y_grid) <= height_test / 2)
+    )
 
     standard_deviation = torch.std(
         transmission_function - transmission_function_analytic
@@ -85,9 +87,7 @@ def test_rectangle_aperture(
 
     # test forward calculations
     wavefront = svetlanna.Wavefront.plane_wave(params)
-    torch.testing.assert_close(
-        aperture(wavefront), transmission_function * wavefront
-    )
+    torch.testing.assert_close(aperture(wavefront), transmission_function * wavefront)
 
 
 round_parameters = [
@@ -97,14 +97,16 @@ round_parameters = [
     "oy_nodes",
     "wavelength_test",
     "radius_test",
-    "expected_std"
+    "expected_std",
 ]
 
 
 @pytest.mark.parametrize(
     round_parameters,
-    [(10, 15, 1200, 1000, 1064 * 1e-6, 4, 1e-5),
-     (8, 4, 1000, 1300, 1064 * 1e-6, 2.5, 1e-5)]
+    [
+        (10, 15, 1200, 1000, 1064 * 1e-6, 4, 1e-5),
+        (8, 4, 1000, 1300, 1064 * 1e-6, 2.5, 1e-5),
+    ],
 )
 def test_round_aperture(
     ox_size: float,
@@ -137,22 +139,19 @@ def test_round_aperture(
 
     params = SimulationParameters(
         {
-            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
-            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
-            'wavelength': wavelength_test
+            "W": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
+            "H": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
+            "wavelength": wavelength_test,
         }
     )
 
     # transmission function of the round aperture as a class method
-    aperture = elements.RoundAperture(
-        simulation_parameters=params,
-        radius=radius_test
-    )
+    aperture = elements.RoundAperture(simulation_parameters=params, radius=radius_test)
     transmission_function = aperture.get_transmission_function()
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
-    x_grid, y_grid = torch.meshgrid(x_linear, y_linear, indexing='xy')
+    x_grid, y_grid = torch.meshgrid(x_linear, y_linear, indexing="xy")
 
     transmission_function_analytic = 1 * (
         torch.pow(x_grid, 2) + torch.pow(y_grid, 2) <= radius_test**2
@@ -166,9 +165,7 @@ def test_round_aperture(
 
     # test forward calculations
     wavefront = svetlanna.Wavefront.plane_wave(params)
-    torch.testing.assert_close(
-        aperture(wavefront), transmission_function * wavefront
-    )
+    torch.testing.assert_close(aperture(wavefront), transmission_function * wavefront)
 
 
 arbitrary_parameters = [
@@ -178,14 +175,16 @@ arbitrary_parameters = [
     "oy_nodes",
     "wavelength_test",
     "mask_test",
-    "expected_std"
+    "expected_std",
 ]
 
 
 @pytest.mark.parametrize(
     arbitrary_parameters,
-    [(10, 15, 1200, 1000, 1064 * 1e-6, torch.rand(1000, 1200), 1e-5),
-     (8, 4, 1100, 1000, 1064 * 1e-6, torch.rand(1000, 1100), 1e-5)]
+    [
+        (10, 15, 1200, 1000, 1064 * 1e-6, torch.rand(1000, 1200), 1e-5),
+        (8, 4, 1100, 1000, 1064 * 1e-6, torch.rand(1000, 1100), 1e-5),
+    ],
 )
 def test_aperture(
     ox_size: float,
@@ -218,17 +217,14 @@ def test_aperture(
 
     params = SimulationParameters(
         {
-            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
-            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
-            'wavelength': wavelength_test
+            "W": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
+            "H": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
+            "wavelength": wavelength_test,
         }
     )
     # transmission function for the aperture with arbitrary shape as a
     # class method
-    aperture = elements.Aperture(
-        simulation_parameters=params,
-        mask=mask_test
-    )
+    aperture = elements.Aperture(simulation_parameters=params, mask=mask_test)
     transmission_function = aperture.get_transmission_function()
 
     transmission_function_analytic = mask_test
@@ -241,6 +237,4 @@ def test_aperture(
 
     # test forward calculations
     wavefront = svetlanna.Wavefront.plane_wave(params)
-    torch.testing.assert_close(
-        aperture(wavefront), transmission_function * wavefront
-    )
+    torch.testing.assert_close(aperture(wavefront), transmission_function * wavefront)

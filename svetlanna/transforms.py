@@ -17,6 +17,7 @@ class ToWavefront(nn.Module):
         (3) modulation_type='amp&phase' (any other str)
             tensor values transforms to amplitude and phase simultaneously
     """
+
     def __init__(self, modulation_type=None):
         """
         Parameters
@@ -47,26 +48,32 @@ class ToWavefront(nn.Module):
         # creation of a wavefront based on an image
         if img_tensor.size()[0] == 1:  # only one channel
             # squeeze 0th channel dimension of image tensor
-            normalized_tensor = torch.squeeze(img_tensor, 0)  # values from 0 to 1, shape=[H, W]
+            normalized_tensor = torch.squeeze(
+                img_tensor, 0
+            )  # values from 0 to 1, shape=[H, W]
         else:  # more than 1 color channels
             normalized_tensor = img_tensor  # values from 0 to 1, shape=[C, H, W]
             # TODO: check that in simulation parameters we have the same number of wavelengths?
 
-        if self.modulation_type == 'amp':  # amplitude modulation
+        if self.modulation_type == "amp":  # amplitude modulation
             amplitudes = normalized_tensor
             phases = torch.zeros(size=normalized_tensor.size())
         else:
             # image -> phases from -pi + eps to pi - eps
             normalized_tensor_fix = normalized_tensor
-            normalized_tensor_fix[normalized_tensor_fix == 1.] -= self.eps  # maximal values - eps
-            normalized_tensor_fix[normalized_tensor_fix == 0.] += self.eps  # 0 + eps
+            normalized_tensor_fix[
+                normalized_tensor_fix == 1.0
+            ] -= self.eps  # maximal values - eps
+            normalized_tensor_fix[normalized_tensor_fix == 0.0] += self.eps  # 0 + eps
 
             # [0, 1] --> [-pi + eps, pi - eps]
             phases = normalized_tensor_fix * 2 * torch.pi - torch.pi
 
-            if self.modulation_type == 'phase':  # phase modulation
+            if self.modulation_type == "phase":  # phase modulation
                 # TODO: What is with an amplitude?
-                amplitudes = torch.ones(size=normalized_tensor.size())  # constant amplitude
+                amplitudes = torch.ones(
+                    size=normalized_tensor.size()
+                )  # constant amplitude
             else:  # phase AND amplitude modulation 'amp&phase'
                 amplitudes = normalized_tensor
 
@@ -80,11 +87,9 @@ class GaussModulation(nn.Module):
     """
     Multiplies an amplitude of a Wavefront on a gaussian.
     """
+
     def __init__(
-            self,
-            sim_params: SimulationParameters,
-            fwhm_x, fwhm_y,
-            peak_x=0., peak_y=0.
+        self, sim_params: SimulationParameters, fwhm_x, fwhm_y, peak_x=0.0, peak_y=0.0
     ):
         """
         Parameters
@@ -113,12 +118,13 @@ class GaussModulation(nn.Module):
         gauss_2d : torch.Tensor
             A gaussian distribution in a 2D plane.
         """
-        x_grid, y_grid = self.sim_params.meshgrid(x_axis='W', y_axis='H')
+        x_grid, y_grid = self.sim_params.meshgrid(x_axis="W", y_axis="H")
 
         gauss_2d = 1 * torch.exp(
-            -1 * (
-                    (x_grid - self.peak_x) ** 2 / 2 / self.sigma_x ** 2 +
-                    (y_grid - self.peak_y) ** 2 / 2 / self.sigma_y ** 2
+            -1
+            * (
+                (x_grid - self.peak_x) ** 2 / 2 / self.sigma_x**2
+                + (y_grid - self.peak_y) ** 2 / 2 / self.sigma_y**2
             )
         )
         return gauss_2d
@@ -138,11 +144,11 @@ class GaussModulation(nn.Module):
         wf_gauss : Wavefront
             A gaussian distribution in a 2D plane.
         """
-        sim_nodes_shape = self.sim_params.axes_size(axs=('H', 'W'))  # [H, W]
+        sim_nodes_shape = self.sim_params.axes_size(axs=("H", "W"))  # [H, W]
 
         if not wf.size()[-2:] == sim_nodes_shape:
             warnings.warn(
-                message='A shape of an input Wavefront does not match with SimulationParameters! Gauss was not applied!'
+                message="A shape of an input Wavefront does not match with SimulationParameters! Gauss was not applied!"
             )
             wf_gauss = wf
         else:

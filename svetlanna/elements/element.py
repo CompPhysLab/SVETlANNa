@@ -11,10 +11,10 @@ from ..wavefront import Wavefront
 from warnings import warn
 
 
-INNER_PARAMETER_SUFFIX = '_svtlnn_inner_parameter'
+INNER_PARAMETER_SUFFIX = "_svtlnn_inner_parameter"
 
-_T = TypeVar('_T', Tensor, None)
-_V = TypeVar('_V')
+_T = TypeVar("_T", Tensor, None)
+_V = TypeVar("_V")
 
 
 class _BufferedValueContainer(tuple):
@@ -25,9 +25,20 @@ class _BufferedValueContainer(tuple):
     Inheriting from tuple is used for performance reasons, so the `__slots__`.
     This approach was identified by GPT as the fastest one.
     """
+
     __slots__ = ()
 
     def __new__(cls, obj: Tensor | None):
+        """
+        Creates a new instance of the class.
+
+          Args:
+            obj: The object to be wrapped. Can be None.
+
+          Returns:
+            A new instance of the class initialized with the given object as its
+            single element tuple.
+        """
         return super().__new__(cls, (obj,))
 
 
@@ -35,10 +46,7 @@ class _BufferedValueContainer(tuple):
 class Element(nn.Module, metaclass=ABCMeta):
     """A class that describes each element of the system"""
 
-    def __init__(
-        self,
-        simulation_parameters: SimulationParameters
-    ) -> None:
+    def __init__(self, simulation_parameters: SimulationParameters) -> None:
         """A class that describes each element of the system
 
         Parameters
@@ -54,25 +62,34 @@ class Element(nn.Module, metaclass=ABCMeta):
     # TODO: check doctrings
     @abstractmethod
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
-
         """Forward propagation through the optical element"""
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
-
         """Create specs"""
 
-        for (name, parameter) in self.named_parameters():
+        for name, parameter in self.named_parameters():
 
             yield ParameterSpecs(
-                parameter_name=name,
-                representations=(PrettyReprRepr(value=parameter),)
+                parameter_name=name, representations=(PrettyReprRepr(value=parameter),)
             )
 
     def __setattr__(
-        self,
-        name: str,
-        value: Tensor | nn.Module | _BufferedValueContainer
+        self, name: str, value: Tensor | nn.Module | _BufferedValueContainer
     ) -> None:
+        """
+        Sets an attribute on the module.
+
+            Handles special cases for BufferedValueContainers and Parameters to ensure
+            correct storage and behavior within the module's state.
+
+            Args:
+                name: The name of the attribute to set.
+                value: The value to assign to the attribute.  Can be a Tensor, nn.Module,
+                    or an instance of _BufferedValueContainer.
+
+            Returns:
+                None
+        """
 
         if isinstance(value, _BufferedValueContainer):
             # In the case of pattern `self.x = self.make_buffer('x', x_value)`
@@ -91,22 +108,29 @@ class Element(nn.Module, metaclass=ABCMeta):
         # BoundedParameter and Parameter are handled by pointing
         # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
         if isinstance(value, (ConstrainedParameter, Parameter)):
-            super().__setattr__(
-                name + INNER_PARAMETER_SUFFIX, value.inner_storage
-            )
+            super().__setattr__(name + INNER_PARAMETER_SUFFIX, value.inner_storage)
 
         return super().__setattr__(name, value)
 
     def _repr_html_(self) -> str:
-        stream = StringIO('')
+        """
+        Generates an HTML representation of the object's specifications.
+
+            This method recursively writes the details of the element and its subelements
+            to a string stream, formatting them as collapsible HTML details tags.
+
+            Args:
+                None
+
+            Returns:
+                str: An HTML string representing the object's specifications.
+        """
+        stream = StringIO("")
 
         def write_element_details(element: Specsable):
             subelements: list[SubelementSpecs] = []
             writer_context_generator = context_generator(
-                element=element,
-                element_index=0,
-                directory='',
-                subelements=subelements
+                element=element, element_index=0, directory="", subelements=subelements
             )
             # Write element's parameter specs to the stream
             write_specs_to_html(element, 0, writer_context_generator, stream)
@@ -121,32 +145,21 @@ class Element(nn.Module, metaclass=ABCMeta):
                 )
                 element_name = subelement.subelement.__class__.__name__
                 # Write the element's name to the summary tag
-                stream.write(
-                    f'[{subelement.subelement_type}] <b>{element_name}</b>'
-                )
+                stream.write(f"[{subelement.subelement_type}] <b>{element_name}</b>")
 
                 # Close summary tag and open a new div for the subelement
                 stream.write(
-                    '</summary>'
-                    '<div style="margin-left:2rem;margin-right: 0.3rem">'
+                    "</summary>" '<div style="margin-left:2rem;margin-right: 0.3rem">'
                 )
                 # Repeat the process for the subelement
                 write_element_details(subelement.subelement)
                 # Close the div and the details tags
-                stream.write(
-                    '</div>'
-                    '</details>'
-                )
+                stream.write("</div>" "</details>")
 
         write_element_details(self)
         return stream.getvalue()
 
-    def make_buffer(
-        self,
-        name: str,
-        value: _T,
-        persistent: bool = False
-    ) -> _T:
+    def make_buffer(self, name: str, value: _T, persistent: bool = False) -> _T:
         """Make buffer for internal use.
 
         Use case:
@@ -179,19 +192,13 @@ class Element(nn.Module, metaclass=ABCMeta):
                     "the simulation parameters device."
                 )
 
-        self.register_buffer(
-            name, value, persistent=persistent
-        )
+        self.register_buffer(name, value, persistent=persistent)
 
         # The instance of _BufferedValueContainer is returned
         # to support `self.x = self.make_buffer('x', x_value)` pattern
         return _BufferedValueContainer(self.__getattr__(name))  # type: ignore
 
-    def process_parameter(
-        self,
-        name: str,
-        value: _V
-    ) -> _V:
+    def process_parameter(self, name: str, value: _V) -> _V:
         """Process element parameter passed by user.
         Automatically registers buffer for non-parametric tensors.
 
@@ -216,8 +223,7 @@ class Element(nn.Module, metaclass=ABCMeta):
         if isinstance(value, Tensor):
             if value.device != self.simulation_parameters.device:
                 raise ValueError(
-                    f"Parameter {name} must be on "
-                    "the simulation parameters device."
+                    f"Parameter {name} must be on " "the simulation parameters device."
                 )
         if isinstance(value, (nn.Parameter, Parameter)):
             return value
@@ -228,5 +234,5 @@ class Element(nn.Module, metaclass=ABCMeta):
     # === methods below are added for typing only ===
 
     if TYPE_CHECKING:
-        def __call__(self, incident_wavefront: Wavefront) -> Wavefront:
-            ...
+
+        def __call__(self, incident_wavefront: Wavefront) -> Wavefront: ...

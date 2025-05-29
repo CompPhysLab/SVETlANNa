@@ -1,0 +1,52 @@
+name: Requirements File
+on:
+  - push
+  - pull_request
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      - name: Install pipreqs
+        run: |
+          pip install pipreqs
+
+      - name: Generate new requirements.txt
+        run: |
+          pipreqs $GITHUB_WORKSPACE --force --savepath requirements_new.txt
+
+      - name: Update requirements.txt if necessary
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+
+          # Check if requirements.txt exists and compare with the new file
+          if [ -f requirements.txt ]; then
+            echo "requirements.txt already exists."
+            # Compare the existing and new requirements.txt
+            if ! cmp -s requirements.txt requirements_new.txt; then
+              echo "Updating requirements.txt."
+              mv requirements_new.txt requirements.txt
+              git add requirements.txt
+              git commit -m "Update requirements.txt"
+              git push
+            else
+              echo "No changes to requirements.txt."
+              rm requirements_new.txt  # Удаляем временный файл, если изменений нет
+            fi
+          else
+            echo "requirements.txt does not exist. Creating it."
+            mv requirements_new.txt requirements.txt
+            git add requirements.txt
+            git commit -m "Add requirements.txt"
+            git push
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

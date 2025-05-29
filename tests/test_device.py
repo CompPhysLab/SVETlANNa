@@ -11,10 +11,10 @@ from svetlanna import detector
 parameters = "device_type"
 
 
-@pytest.mark.parametrize(parameters, [
-    torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-    torch.device("cpu")
-])
+@pytest.mark.parametrize(
+    parameters,
+    [torch.device("cuda" if torch.cuda.is_available() else "cpu"), torch.device("cpu")],
+)
 def test_devices(device_type: torch.device):
     """A test that checks that all elements belong to the same device
 
@@ -24,26 +24,30 @@ def test_devices(device_type: torch.device):
         device for objects
     """
 
-    ox_size = 15.
-    oy_size = 8.
+    ox_size = 15.0
+    oy_size = 8.0
     ox_nodes = 1200
     oy_nodes = 1100
-    wavelength = torch.linspace(330*1e-6, 660*1e-6, 5)
-    waist_radius = 2.
-    distance = 100.
-    focal_length = 100.
-    radius = 10.
-    height = 4.
-    width = 3.
+    wavelength = torch.linspace(330 * 1e-6, 660 * 1e-6, 5)
+    waist_radius = 2.0
+    distance = 100.0
+    focal_length = 100.0
+    radius = 10.0
+    height = 4.0
+    width = 3.0
 
     tensors = []
 
     params = SimulationParameters(
         axes={
-            'W': torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes).to(device_type),   # noqa: E501
-            'H': torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes).to(device_type),   # noqa: E501
-            'wavelength': wavelength.to(device_type)
-            }
+            "W": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes).to(
+                device_type
+            ),  # noqa: E501
+            "H": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes).to(
+                device_type
+            ),  # noqa: E501
+            "wavelength": wavelength.to(device_type),
+        }
     ).to(device=device_type)
 
     x_linear = params.axes.W
@@ -53,34 +57,24 @@ def test_devices(device_type: torch.device):
     wavelength = params.axes.wavelength
     tensors.append(wavelength)
 
-    x_grid, y_grid = params.meshgrid(x_axis='W', y_axis='H')
+    x_grid, y_grid = params.meshgrid(x_axis="W", y_axis="H")
     tensors.extend([x_grid, y_grid])
 
     gaussian_beam = w.gaussian_beam(
-        simulation_parameters=params,
-        waist_radius=waist_radius,
-        distance=distance
+        simulation_parameters=params, waist_radius=waist_radius, distance=distance
     )
     tensors.append(gaussian_beam)
 
-    plane_wave = w.plane_wave(
-        simulation_parameters=params,
-        distance=distance
-    )
+    plane_wave = w.plane_wave(simulation_parameters=params, distance=distance)
 
     tensors.append(plane_wave)
 
-    spherical_wave = w.spherical_wave(
-        simulation_parameters=params,
-        distance=distance
-    )
+    spherical_wave = w.spherical_wave(simulation_parameters=params, distance=distance)
 
     tensors.append(spherical_wave)
 
     lens = elements.ThinLens(
-        simulation_parameters=params,
-        focal_length=focal_length,
-        radius=radius
+        simulation_parameters=params, focal_length=focal_length, radius=radius
     )
 
     tensors.append(lens.get_transmission_function())
@@ -88,26 +82,20 @@ def test_devices(device_type: torch.device):
     tensors.append(lens.reverse(gaussian_beam))
 
     aperture = elements.Aperture(
-        simulation_parameters=params,
-        mask=torch.zeros(x_grid.shape).to(device_type)
+        simulation_parameters=params, mask=torch.zeros(x_grid.shape).to(device_type)
     )
 
     tensors.append(aperture.get_transmission_function())
     tensors.append(aperture.forward(gaussian_beam))
 
     rectangular_aperture = elements.RectangularAperture(
-        simulation_parameters=params,
-        height=height,
-        width=width
+        simulation_parameters=params, height=height, width=width
     )
 
     tensors.append(rectangular_aperture.get_transmission_function())
     tensors.append(rectangular_aperture.forward(gaussian_beam))
 
-    round_aperture = elements.RoundAperture(
-        simulation_parameters=params,
-        radius=radius
-    )
+    round_aperture = elements.RoundAperture(simulation_parameters=params, radius=radius)
 
     tensors.append(round_aperture.get_transmission_function())
     tensors.append(round_aperture.forward(gaussian_beam))
@@ -116,7 +104,7 @@ def test_devices(device_type: torch.device):
         simulation_parameters=params,
         height=height,
         width=width,
-        mask=torch.ones_like(x_grid)
+        mask=torch.ones_like(x_grid),
     )
 
     tensors.append(slm.transmission_function)
@@ -124,8 +112,7 @@ def test_devices(device_type: torch.device):
     tensors.append(slm.reverse(gaussian_beam))
 
     layer = elements.DiffractiveLayer(
-        simulation_parameters=params,
-        mask=torch.zeros_like(x_grid)
+        simulation_parameters=params, mask=torch.zeros_like(x_grid)
     )
 
     tensors.append(layer.transmission_function)
@@ -133,29 +120,25 @@ def test_devices(device_type: torch.device):
     tensors.append(layer.reverse(gaussian_beam))
 
     free_space_as = elements.FreeSpace(
-        simulation_parameters=params,
-        distance=distance, method='AS'
+        simulation_parameters=params, distance=distance, method="AS"
     )
 
     tensors.append(free_space_as.forward(gaussian_beam))
 
     free_space_fresnel = elements.FreeSpace(
-        simulation_parameters=params,
-        distance=distance, method='fresnel'
+        simulation_parameters=params, distance=distance, method="fresnel"
     )
 
     tensors.append(free_space_fresnel.forward(gaussian_beam))
 
     free_space_reverse = elements.FreeSpace(
-        simulation_parameters=params,
-        distance=distance, method='fresnel'
+        simulation_parameters=params, distance=distance, method="fresnel"
     )
 
     tensors.append(free_space_reverse.reverse(gaussian_beam))
 
     nl = elements.NonlinearElement(
-        simulation_parameters=params,
-        response_function=lambda x: x**2
+        simulation_parameters=params, response_function=lambda x: x**2
     )
 
     tensors.append(nl.forward(gaussian_beam))
@@ -163,33 +146,42 @@ def test_devices(device_type: torch.device):
     assert all(tensor.device.type == device_type.type for tensor in tensors)
 
 
-@pytest.mark.parametrize(parameters, [
-    torch.device("cuda" if torch.cuda.is_available() else "cpu"),
-    torch.device("cpu")
-])
+@pytest.mark.parametrize(
+    parameters,
+    [torch.device("cuda" if torch.cuda.is_available() else "cpu"), torch.device("cpu")],
+)
 def test_device_setup(device_type: torch.device):
+    """
+    Tests that the optical setup and parameters are correctly moved to the specified device.
 
-    ox_size = 15.
-    oy_size = 8.
+        Args:
+            device_type: The torch.device to move the setup and parameters to (CPU or CUDA).
+
+        Returns:
+            None
+    """
+
+    ox_size = 15.0
+    oy_size = 8.0
     ox_nodes = 1200
     oy_nodes = 1100
-    wavelength = torch.linspace(330*1e-6, 660*1e-6, 5)
+    wavelength = torch.linspace(330 * 1e-6, 660 * 1e-6, 5)
     # waist_radius = 2.
-    distance = 50.
-    focal_length = 100.
-    radius = 10.
-    height = 4.
-    width = 3.
+    distance = 50.0
+    focal_length = 100.0
+    radius = 10.0
+    height = 4.0
+    width = 3.0
 
     params = SimulationParameters(
         axes={
-            'W': torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
-            'H': torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
-            'wavelength': wavelength
-            }
+            "W": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
+            "H": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
+            "wavelength": wavelength,
+        }
     )
 
-    x_grid, _ = params.meshgrid(x_axis='W', y_axis='H')
+    x_grid, _ = params.meshgrid(x_axis="W", y_axis="H")
 
     # gaussian_beam = w.gaussian_beam(
     #     simulation_parameters=params,
@@ -198,48 +190,36 @@ def test_device_setup(device_type: torch.device):
     # )
 
     free_space = elements.FreeSpace(
-        simulation_parameters=params,
-        distance=distance,
-        method="AS"
+        simulation_parameters=params, distance=distance, method="AS"
     )
 
-    circle = elements.RoundAperture(
-        simulation_parameters=params,
-        radius=radius
-    )
+    circle = elements.RoundAperture(simulation_parameters=params, radius=radius)
 
     rectangle = elements.RectangularAperture(
-        simulation_parameters=params,
-        height=height,
-        width=width
+        simulation_parameters=params, height=height, width=width
     )
 
     aperture = elements.Aperture(
-        simulation_parameters=params,
-        mask=torch.ones_like(x_grid)
+        simulation_parameters=params, mask=torch.ones_like(x_grid)
     )
 
     lens = elements.ThinLens(
-        simulation_parameters=params,
-        focal_length=distance,
-        radius=focal_length
+        simulation_parameters=params, focal_length=distance, radius=focal_length
     )
 
     slm = elements.SpatialLightModulator(
         simulation_parameters=params,
-        mask=torch.tensor([[1., 1.], [1., 1.]]),
+        mask=torch.tensor([[1.0, 1.0], [1.0, 1.0]]),
         height=height,
-        width=width
+        width=width,
     )
 
     nl = elements.NonlinearElement(
-        simulation_parameters=params,
-        response_function=lambda x: x**2
+        simulation_parameters=params, response_function=lambda x: x**2
     )
 
     dl = elements.DiffractiveLayer(
-        simulation_parameters=params,
-        mask=torch.zeros_like(x_grid)
+        simulation_parameters=params, mask=torch.zeros_like(x_grid)
     )
 
     det = detector.Detector(simulation_parameters=params)
@@ -260,8 +240,7 @@ def test_device_setup(device_type: torch.device):
             free_space,
             dl,
             free_space,
-            det
-
+            det,
         ]
     )
 
