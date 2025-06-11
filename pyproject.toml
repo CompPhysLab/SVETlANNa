@@ -1,6 +1,6 @@
 [project]
 name = "svetlanna"
-version = "0.1.0"
+version = "1.0.0"
 description = "Open source library for simulation and engineering of optical setups and diffractive neural networks"
 authors = [
     {name="Alexey A. Shcherbakov", email="alexey.shcherbakov@metalab.ifmo.ru"},
