@@ -1,17 +1,28 @@
 [project]
 name = "svetlanna"
 version = "1.0.2"
-description = "Open source library for simulation and engineering of optical setups and diffractive neural networks"
+description = "SVETlANNa is an open-source Python library for simulation of free-space optical set-ups and neuromorphic systems such as Diffractive Neural Networks."
 authors = [
-    {name="Alexey A. Shcherbakov", email="alexey.shcherbakov@metalab.ifmo.ru"},
-    {name="Alexey Y. Kokhanovskiy", email="a.kokhanovskiy@metalab.ifmo.ru"},
-    {name="Vladimir D. Igoshin", email="vladimir.igoshin@metalab.ifmo.ru"},
-    {name="Denis I. Sakhno", email="denis.sakhno@metalab.ifmo.ru"},
-    {name="Semen S. Chugunov", email="semen.chugunov@metalab.ifmo.ru"}
+    {name="Alexey A. Shcherbakov", email="cplab@metalab.ifmo.ru"},
+    {name="Alexey Y. Kokhanovskiy", email="cplab@metalab.ifmo.ru"},
+    {name="Vladimir D. Igoshin", email="cplab@metalab.ifmo.ru"},
+    {name="Denis I. Sakhno", email="cplab@metalab.ifmo.ru"},
+    {name="Semen S. Chugunov", email="cplab@metalab.ifmo.ru"}
 ]
 license = { file = "LICENSE" }
 readme = "README.md"
-keywords = [ "optics", "photonics", "Fourier optics", "diffractive deep neural networks", "optical neural networks" ]
+keywords = ["optical neural network", "diffractive neural network", "pytorch", "optical beam", "optical setup", "diffractive element", "spatial light modulator"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Science/Research",
+    "Intended Audience :: Education",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Physics",
+    "License :: OSI Approved :: Mozilla Public License 2.0 (MPL 2.0)",
+    "Programming Language :: Python :: 3.11",
+]
 requires-python = ">=3.11.0,<3.12"
 dependencies = [
     "numpy<2.0",
@@ -19,6 +30,10 @@ dependencies = [
     "anywidget (>=0.9.13,<0.10.0)",
     "jinja2 (>=3.1.6,<4.0.0)"
 ]
+
+[project.urls]
+repository = "https://github.com/CompPhysLab/SVETlANNa"
+documentation = "https://compphyslab.github.io/SVETlANNa/"
 
 [project.optional-dependencies]
 pandas = ["pandas (>=2.2.3,<3.0.0)"]
