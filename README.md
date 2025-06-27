@@ -127,7 +127,7 @@ To run the example locally follow the instructions:
 and open the page in your browser (see “Or copy and paste one of these URLs:” in a terminal window)
 9. Go to the folder SVETlANNa.docs. Examples are grouped into subject subfolders in form of .ipynb files. To run them you need to open a file in the Jupyter notebook and run all code cells (key Shift+Enter).
 
-## Запуск примеров с установленной из исходников библиотекой SVETlANNa
+## Running exaples with SVETlANNa installed from source
 
 1. Clone the repository (you should have an installed [git](https://git-scm.com)):
 ```bash
