@@ -1,7 +1,21 @@
 import torch
+from enum import Enum
 from .simulation_parameters import SimulationParameters
-from typing import Any, Self, Iterable, cast, TYPE_CHECKING
+from typing import Any, Self, Iterable, Tuple, cast, TYPE_CHECKING, overload, Union, Sequence, Literal  # noqa: E501
 from .axes_math import tensor_dot, cast_tensor
+
+
+class PolarizationComponent(Enum):
+    """Represents the polarization components of a wavefront
+
+    Parameters
+    ----------
+    Enum : _type_
+        _description_
+    """
+    X = "x"
+    Y = "y"
+    ALL = "all"
 
 
 class Wavefront(torch.Tensor):
@@ -47,6 +61,89 @@ class Wavefront(torch.Tensor):
         res = torch.angle(torch.Tensor(self) + 0.0)
         return res
 
+    @property
+    def axes_names(self) -> tuple[str, ...]:
+        """Returns the names of the axes of the wavefront
+
+        Returns
+        -------
+        tuple[str, ...]
+            Names of the axes
+        """
+        if hasattr(self, 'axes'):
+            return self.axes.names
+        else:
+            return DEFAULT_LAST_AXES_NAMES
+
+    @overload
+    def get_polarization_components(self, component: int) -> torch.Tensor:
+        """Returns the polarization component of the wavefront
+
+        Parameters
+        ----------
+        component : int
+            Index of the polarization component
+
+        Returns
+        -------
+        torch.Tensor
+            Polarization component
+        """
+        ...
+
+    @overload
+    def get_polarization_components(
+        self,
+        component: Literal['x', 'y', 'all'] = None
+    ) -> Union[torch.Tensor, Tuple[torch.Tensor, ...]]:
+        """Returns the polarization component of the wavefront
+
+        Parameters
+        ----------
+        component : Literal['x', 'y', 'all'], optional
+            The polarization component to retrieve
+
+        Returns
+        -------
+        Union[torch.Tensor, Tuple[torch.Tensor, ...]]
+            The requested polarization component(s)
+        """
+        ...
+
+    def get_polarization_components(self, component=None):
+        """Returns the polarization component of the wavefront
+
+        Parameters
+        ----------
+        component : Literal['x', 'y', 'all'], optional
+            The polarization component to retrieve, by default None
+
+        Returns
+        -------
+        Union[torch.Tensor, Tuple[torch.Tensor, ...]]
+            The requested polarization component(s)
+        """
+
+        if not hasattr(self, 'axes'):
+            raise ValueError("Axes are not defined")
+
+        if "pol" not in self.axes_names:
+            raise ValueError("Polarization axes is not defined")
+
+        pol_index = self.axes_names.index("pol")
+        all_components = torch.unbind(self, dim=pol_index)
+
+        if component is None or component == "all":
+            return all_components
+        elif isinstance(component, int):
+            return all_components[component]
+        elif component == "x":
+            return all_components[0]
+        elif component == "y":
+            return all_components[1]
+        else:
+            raise ValueError(f"Unknown component: {component}")
+
     def fwhm(
         self,
         simulation_parameters: SimulationParameters
@@ -75,13 +172,38 @@ class Wavefront(torch.Tensor):
 
         return fwhm_x.item(), fwhm_y.item()
 
+    @overload
     @classmethod
     def plane_wave(
         cls,
         simulation_parameters: SimulationParameters,
         distance: float = 0.,
-        wave_direction: Any = None,
+        wave_direction: Union[Sequence[float], torch.Tensor, None] = None,
         initial_phase: float = 0.
+    ) -> Self:
+        """Generate linear polarized plane wave"""
+        ...
+
+    @overload
+    @classmethod
+    def plane_wave(
+        cls,
+        simulation_parameters: SimulationParameters,
+        distance: float = 0.,
+        wave_direction: Union[Sequence[float], torch.Tensor, None] = None,
+        stokes_vector: Union[Sequence[float], torch.Tensor] = ...
+    ) -> Self:
+        """Generate polarized plane wave defined by Stokes vector"""
+        ...
+
+    @classmethod
+    def plane_wave(
+        cls,
+        simulation_parameters: SimulationParameters,
+        distance: float = 0.,
+        wave_direction: Union[Sequence[float], torch.Tensor, None] = None,
+        initial_phase: float = 0.,
+        stokes_vector: Union[Sequence[float], torch.Tensor, None] = None
     ) -> Self:
         """Generate wavefront of the plane wave
 
@@ -91,32 +213,26 @@ class Wavefront(torch.Tensor):
             simulation parameters
         distance : float, optional
             free wave propagation distance, by default 0.
-        wave_direction : Any, optional
-            three component tensor-like vector with x,y,z coordinates.
-            The resulting field propagates along the vector, by default
-            the wave propagates along z direction.
+        wave_direction : Union[Sequence[float], torch.Tensor, None], optional
+            direction of wave propagation, by default None
         initial_phase : float, optional
-            additional phase to the resulting field, by default 0.
+            initial phase of the wave, by default 0.
+        stokes_vector : Union[Sequence[float], torch.Tensor, None], optional
+            Stokes vector defining the polarization state, by default None
 
         Returns
         -------
-        Wavefront
-            plane wave field.
+        Self
+            Wavefront of the generated plane wave
         """
+
         # by default the wave propagates along z direction
         if wave_direction is None:
             wave_direction = [0., 0., 1.]
 
-        wave_direction = torch.tensor(
-            wave_direction,
-            dtype=torch.float32,
-            device=simulation_parameters.device
+        _wave_direction = cls._validate_and_normalize_wave_direction(
+            wave_direction, simulation_parameters
         )
-        if wave_direction.shape != torch.Size([3]):
-            raise ValueError(
-                "wave_direction should contain exactly three components"
-            )
-        wave_direction = wave_direction / torch.norm(wave_direction)
 
         wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
         x = simulation_parameters.axes.W[None, :]
@@ -126,17 +242,47 @@ class Wavefront(torch.Tensor):
         kyy, _ = tensor_dot(wave_number, y, 'wavelength', ('H', 'W'))
         kzz = wave_number[..., None, None] * distance
 
-        field = torch.exp(1j * wave_direction[0] * kxx)
-        field = field * torch.exp(1j * wave_direction[1] * kyy)
-        field = field * torch.exp(1j * wave_direction[2] * kzz + initial_phase)
+        field = torch.exp(1j * _wave_direction[0] * kxx)
+        field = field * torch.exp(1j * _wave_direction[1] * kyy)
+        field = field * torch.exp(1j * _wave_direction[2] * kzz + initial_phase)    # noqa: E501
 
-        return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
+        return cls._define_polarization(
+            field, axes, stokes_vector, simulation_parameters
+        )
+
+    @overload
+    @classmethod
+    def gaussian_beam(
+        cls,
+        simulation_parameters: SimulationParameters,
+        waist_radius: float,
+        distance: float = 0.,
+        dx: float = 0.,
+        dy: float = 0.,
+    ) -> Self:
+        "Generate linear polarized Gaussian beam"
+        ...
+
+    @overload
+    @classmethod
+    def gaussian_beam(
+        cls,
+        simulation_parameters: SimulationParameters,
+        waist_radius: float,
+        stokes_vector: Union[Sequence[float], torch.Tensor] = None,
+        distance: float = 0.,
+        dx: float = 0.,
+        dy: float = 0.,
+    ) -> Self:
+        "Generate polarized Gaussian beam defined by Stokes vector"
+        ...
 
     @classmethod
     def gaussian_beam(
         cls,
         simulation_parameters: SimulationParameters,
         waist_radius: float,
+        stokes_vector: Union[Sequence[float], torch.Tensor] = None,
         distance: float = 0.,
         dx: float = 0.,
         dy: float = 0.,
@@ -148,18 +294,20 @@ class Wavefront(torch.Tensor):
         simulation_parameters : SimulationParameters
             simulation parameters
         waist_radius : float
-            Waist radius of the beam
+            waist radius of the beam
+        stokes_vector : Union[Sequence[float], torch.Tensor], optional
+            Stokes vector defining the polarization state, by default None
         distance : float, optional
             free wave propagation distance, by default 0.
         dx : float, optional
-            Horizontal position of the beam center, by default 0.
+            horizontal position of the beam center, by default 0.
         dy : float, optional
-            Horizontal position of the beam center, by default 0.
+            vertical position of the beam center, by default 0.
 
         Returns
         -------
         Wavefront
-            Beam field in the plane oXY propagated over the distance
+            Gaussian beam field in the plane oXY propagated over the distance
         """
 
         wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
@@ -216,15 +364,40 @@ class Wavefront(torch.Tensor):
             preserve_a_axis=True
         )
 
-        return cls(
-            cast_tensor(field, axes, simulation_parameters.axes.names)
+        return cls._define_polarization(
+            field, axes, stokes_vector, simulation_parameters
         )
+
+    @overload
+    @classmethod
+    def spherical_wave(
+        cls,
+        simulation_parameters: SimulationParameters,
+        distance: float = 0.,
+        initial_phase: float = 0.,
+        dx: float = 0.,
+        dy: float = 0.,
+    ) -> Self:
+        """Generate linear polarized spherical wave"""
+
+    @overload
+    @classmethod
+    def spherical_wave(
+        cls,
+        simulation_parameters: SimulationParameters,
+        stokes_vector: Union[Sequence[float], torch.Tensor] = None,
+        distance: float = 0.,
+        dx: float = 0.,
+        dy: float = 0.,
+    ) -> Self:
+        """Generate polarized spherical wave defined by Stokes vector"""
 
     @classmethod
     def spherical_wave(
         cls,
         simulation_parameters: SimulationParameters,
-        distance: float,
+        stokes_vector: Union[Sequence[float], torch.Tensor] = None,
+        distance: float = 0.,
         initial_phase: float = 0.,
         dx: float = 0.,
         dy: float = 0.,
@@ -235,19 +408,21 @@ class Wavefront(torch.Tensor):
         ----------
         simulation_parameters : SimulationParameters
             simulation parameters
-        distance : float
-            distance between the source and the oXY plane.
+        stokes_vector: Union[Sequence[float], torch.Tensor], optional
+            Stokes vector defining the polarization state, by default None
+        distance : float, optional
+            distance between the source and the oXY plane, by default 0.
         initial_phase : float, optional
             additional phase to the resulting field, by default 0.
         dx : float, optional
-            Horizontal position of the spherical wave center, by default 0.
+            horizontal position of the spherical wave center, by default 0.
         dy : float, optional
-            Horizontal position of the spherical wave center, by default 0.
+            vertical position of the spherical wave center, by default 0.
 
         Returns
         -------
         Wavefront
-            Beam field
+            Gaussian beam field in the plane oXY propagated over the distance
         """
         wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
 
@@ -272,7 +447,210 @@ class Wavefront(torch.Tensor):
             preserve_a_axis=True
         )
 
-        return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
+        return cls._define_polarization(
+            field, axes, stokes_vector, simulation_parameters
+        )
+
+    @classmethod
+    def _validate_and_normalize_wave_direction(
+        cls,
+        wave_direction: Union[Sequence[float], torch.Tensor, None],
+        simulation_parameters: SimulationParameters
+    ) -> torch.Tensor:
+        """
+        Validates and normalizes wave_direction parameter.
+
+        Parameters
+        ----------
+        wave_direction : Union[Sequence[float], torch.Tensor, None]
+            Wave direction vector
+        simulation_parameters : SimulationParameters
+            Simulation parameters for device information
+
+        Returns
+        -------
+        torch.Tensor
+            Normalized wave direction tensor
+
+        Raises
+        ------
+        ValueError
+            If wave_direction doesn't have exactly 3 components
+        TypeError
+            If wave_direction is not a supported type
+        """
+        if isinstance(wave_direction, (list, tuple)):
+            if len(wave_direction) != 3:
+                raise ValueError(
+                    "wave_direction must have 3 components," +
+                    f" got {len(wave_direction)}"
+                )
+            wave_direction = torch.tensor(
+                wave_direction,
+                dtype=torch.float32,
+                device=simulation_parameters.device
+            )
+        elif isinstance(wave_direction, torch.Tensor):
+            if wave_direction.numel() != 3:
+                raise ValueError(
+                    "wave_direction tensor must have 3 elements," +
+                    f" got {wave_direction.numel()}"
+                )
+            wave_direction = wave_direction.to(
+                dtype=torch.float32,
+                device=simulation_parameters.device
+            ).flatten()
+        else:
+            try:
+                wave_direction = torch.tensor(
+                    wave_direction,
+                    dtype=torch.float32,
+                    device=simulation_parameters.device
+                ).flatten()
+                if wave_direction.numel() != 3:
+                    raise ValueError(
+                        "wave_direction must have 3 components," +
+                        f" got {wave_direction.numel()}"
+                    )
+            except Exception as e:
+                raise TypeError(
+                    "wave_direction must be list, tuple, or tensor" +
+                    " with 3 elements"
+                ) from e
+
+        # Normalize the direction vector
+        wave_direction = wave_direction / torch.norm(wave_direction)
+        return wave_direction
+
+    @classmethod
+    def _validate_and_normalize_stokes_vector(
+        cls,
+        stokes_vector: Union[Sequence[float], torch.Tensor, None],
+        simulation_parameters: SimulationParameters
+    ) -> torch.Tensor:
+        """
+        Validates and normalizes stokes_vector parameter.
+
+        Parameters
+        ----------
+        stokes_vector : Union[Sequence[float], torch.Tensor, None]
+            Stokes vector for polarization
+        simulation_parameters : SimulationParameters
+            Simulation parameters for device information
+
+        Returns
+        -------
+        torch.Tensor
+            Normalized stokes vector tensor
+
+        Raises
+        ------
+        ValueError
+            If stokes_vector doesn't have exactly 4 components or is
+            physically invalid
+        TypeError
+            If stokes_vector is not a supported type
+        """
+        if isinstance(stokes_vector, (list, tuple)):
+            if len(stokes_vector) != 4:
+                raise ValueError(
+                    "stokes_vector must have 4 components," +
+                    f" got {len(stokes_vector)}"
+                )
+            stokes_vector = torch.tensor(
+                stokes_vector,
+                dtype=torch.float32,
+                device=simulation_parameters.device
+            )
+        elif isinstance(stokes_vector, torch.Tensor):
+            if stokes_vector.numel() != 4:
+                raise ValueError(
+                    "stokes_vector tensor must have 4 elements," +
+                    f" got {stokes_vector.numel()}"
+                )
+            stokes_vector = stokes_vector.to(
+                dtype=torch.float32,
+                device=simulation_parameters.device
+            ).flatten()
+        else:
+            try:
+                stokes_vector = torch.tensor(
+                    stokes_vector,
+                    dtype=torch.float32,
+                    device=simulation_parameters.device
+                ).flatten()
+                if stokes_vector.numel() != 4:
+                    raise ValueError(
+                        "stokes_vector must have 4 components," +
+                        f" got {stokes_vector.numel()}"
+                    )
+            except Exception as e:
+                raise TypeError(
+                    "stokes_vector must be list, tuple, or tensor" +
+                    " with 4 elements"
+                ) from e
+
+        if (stokes_vector[0] > 0.0):
+            normalized_stokes_vector = stokes_vector / stokes_vector[0]
+        else:
+            raise ValueError("Invalid first component of the Stokes vector")
+
+        return normalized_stokes_vector
+
+    @classmethod
+    def _define_polarization(
+        cls,
+        field: torch.Tensor,
+        axes: tuple[str, ...],
+        stokes_vector: Union[Sequence[float], torch.Tensor] | None,
+        simulation_parameters: SimulationParameters
+    ) -> Self:
+        """Defines the polarization state of the wavefront.
+
+        Parameters
+        ----------
+        field : torch.Tensor
+            The electric field tensor of the wavefront
+        axes : tuple[str, ...]
+            The axes of the wavefront tensor
+        stokes_vector : Union[Sequence[float], torch.Tensor] | None
+            The Stokes vector defining the polarization state, by default None.
+        simulation_parameters : SimulationParameters
+            The simulation parameters for the wavefront.
+
+        Returns
+        -------
+        Self
+            The wavefront with the defined polarization state.
+        """
+
+        if stokes_vector is None:
+
+            wavefront = cls(
+                cast_tensor(field, axes, simulation_parameters.axes.names)
+            )
+
+        else:
+            _stokes_vector = cls._validate_and_normalize_stokes_vector(
+                stokes_vector, simulation_parameters
+            )
+            s0, s1, s2, s3 = _stokes_vector
+
+            ex_amplitude = torch.sqrt((s0 + s1) / 2)
+            ey_amplitude = torch.sqrt((s0 - s1) / 2)
+            phase_diff = torch.atan2(s3, s2)
+
+            amplitude_vec = torch.tensor([
+                ex_amplitude * torch.exp(1j * phase_diff), ey_amplitude
+            ])
+
+            field, axes = tensor_dot(amplitude_vec, field, "pol", axes)
+            wavefront = cls(
+                cast_tensor(field, axes, simulation_parameters.axes.names)
+            )
+
+        wavefront.axes = simulation_parameters.axes
+        return wavefront
 
     # === methods below are added for typing only ===
 
