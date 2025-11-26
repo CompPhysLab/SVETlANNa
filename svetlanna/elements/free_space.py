@@ -644,6 +644,122 @@ class FreeSpace(Element):
 
         return output_wavefront
 
+    def _propagate_wavefront_inverse(
+        self,
+        wavefront: Wavefront,
+        method: str
+    ) -> Wavefront:
+        if method == 'zpASM':
+            # calculate paddings for zero-padding AS method
+            x_paddings = self._calculate_paddings(
+                sampling_interval=self._sampling_interval_x
+            )
+            y_paddings = self._calculate_paddings(
+                sampling_interval=self._sampling_interval_y
+            )
+
+            if x_paddings > self._x_nodes / 2:
+                warn(
+                    (
+                        'In zpASM number of paddings in x direction '
+                        + f'({str(x_paddings)})'
+                        + ' exceeds the number of nodes. It is preferable to use the RSC method'    # noqa: E501
+                    )
+                )
+
+            if y_paddings > self._y_nodes / 2:
+                warn(
+                    (
+                        'In zpASM number of paddings in y direction '
+                        + f'({str(y_paddings)})'
+                        + ' exceeds the number of nodes. It is preferable to use the RSC method'    # noqa: E501
+                    )
+                )
+
+            padding_order = [0] * (2 * wavefront.ndim)
+
+            padding_order[-(2 * self._w_index + 1)] = x_paddings
+            padding_order[-(2 * self._w_index + 2)] = x_paddings
+            padding_order[-(2 * self._h_index + 1)] = y_paddings
+            padding_order[-(2 * self._h_index + 2)] = y_paddings
+
+            # add paddings
+            wavefront_padded = F.pad(
+                wavefront, padding_order, mode='constant', value=0
+            )    # noqa: E501
+
+            # spectrum with zero frequency components in the center
+            wavefront_padded_fft = torch.fft.fftshift(
+                torch.fft.fft2(
+                    wavefront_padded,
+                    dim=(self._h_index, self._w_index)
+                )
+            )
+
+            # Calculate (kx^2+ky^2) tensor
+            kx2ky2, _, _ = self._calculate_kx2ky2(
+                sampling_interval=(self._sampling_interval_x, self._sampling_interval_y),   # noqa: E501
+                nodes=(self._x_nodes + 2 * x_paddings, self._y_nodes + 2 * y_paddings),    # noqa: E501
+                device=self._device
+            )   # shape: ('H', 'W')
+
+            # Calculate (kx^2+ky^2) / k^2 relation
+            _, relation_axes = tensor_dot(
+                a=1 / (self._k ** 2),
+                b=kx2ky2,
+                a_axis='wavelength',
+                b_axis=('H', 'W')
+            )  # shape: ('wavelength', 'H', 'W') or ('H', 'W') depending on k shape # noqa: E501
+
+            kx2ky2_cond = self._wave_number ** 2 - kx2ky2 >= 0
+            # Calculate kz
+            wave_number_z_non_negative = torch.sqrt(
+                self._wave_number ** 2 - kx2ky2 * kx2ky2_cond + 0j
+            )  # 0j is required to convert argument to complex
+
+            # take into account evanescent waves
+            wave_number_z_negative = 1j * torch.sqrt(
+                kx2ky2 * ~kx2ky2_cond + 0j - self._wave_number ** 2
+            )
+
+            wave_number_z = wave_number_z_non_negative + wave_number_z_negative
+            # Registering Buffer for _wave_number_z
+            self._wave_number_z = self.make_buffer(
+                '_wave_number_z', wave_number_z
+            )
+
+            self.impulse_response_fft_inverse = self.impulse_response_fft.conj()
+            self.transfer_function = torch.fft.ifft2(self.impulse_response_fft_inverse)
+
+            output_wavefront_padded_fft, _ = tensor_dot(
+                a=wavefront_padded_fft,  # example shape: (5, 'wavelength', 1, 'H', 'W')    # noqa: E501
+                b=self.impulse_response_fft_inverse,  # example shape: ('wavelength', 'H', 'W')  # noqa: E501
+                a_axis=self.simulation_parameters.axes.names,
+                b_axis=relation_axes,
+                preserve_a_axis=True  # check that the output has the input shape   # noqa: E501
+            )  # example output shape: (5, 'wavelength', 1, 'H', 'W')
+
+            output_wavefront_padded = torch.fft.ifft2(
+                output_wavefront_padded_fft,
+                dim=(self._h_index, self._w_index)
+            )
+
+            # remove added paddings
+            h_start = y_paddings
+            h_end = output_wavefront_padded.shape[self._h_index] - y_paddings
+            w_start = x_paddings
+            w_end = output_wavefront_padded.shape[self._w_index] - x_paddings
+
+            slices = [slice(None)] * output_wavefront_padded.ndim
+            slices[self._h_index] = slice(h_start, h_end)
+            slices[self._w_index] = slice(w_start, w_end)
+
+            # Apply slices to remove paddings
+            output_wavefront = output_wavefront_padded[tuple(slices)]
+
+        return output_wavefront
+
+
     def forward(
         self,
         incident_wavefront: Wavefront
@@ -673,44 +789,28 @@ class FreeSpace(Element):
 
         return output_wavefront
 
-    # def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
-    #     # TODO: Check the description...
-    #     """Calculate the field after it propagates in the free space
-    #     in the backward direction.
+    def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
+        # TODO: Check the description...
+        """Calculate the field after it propagates in the free space
+        in the backward direction.
 
-    #     Parameters
-    #     ----------
-    #     transmission_field : Wavefront
-    #         Field to be propagated in the backward direction
+        Parameters
+        ----------
+        transmission_field : Wavefront
+            Field to be propagated in the backward direction
 
-    #     Returns
-    #     -------
-    #     Wavefront
-    #         Propagated in the backward direction field
-    #     """
+        Returns
+        -------
+        Wavefront
+            Propagated in the backward direction field
+        """
 
-    #     transmission_field_fft = torch.fft.fft2(
-    #         transmission_wavefront,
-    #         dim=(self._h_index, self._w_index)
-    #     )
+        output_wavefront = self._propagate_wavefront_inverse(
+            wavefront=transmission_wavefront,
+            method=self.method
+        )
 
-    #     impulse_response_fft = self._impulse_response().conj()
-
-    #     # Fourier image of output field
-    #     incident_field_fft, _ = tensor_dot(
-    #         a=transmission_field_fft,  # example shape: (5, 'wavelength', 1, 'H', 'W')  # noqa
-    #         b=impulse_response_fft,  # example shape: ('wavelength', 'H', 'W')    # noqa: E501
-    #         a_axis=self.simulation_parameters.axes.names,
-    #         b_axis=self._calc_axes,
-    #         preserve_a_axis=True  # check that the output has the first input shape  # noqa
-    #     )  # example output shape: (5, 'wavelength', 1, 'H', 'W')
-
-    #     incident_field = torch.fft.ifft2(
-    #         incident_field_fft,
-    #         dim=(self._h_index, self._w_index)
-    #     )
-
-    #     return incident_field
+        return output_wavefront
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         return [
