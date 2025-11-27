@@ -1,0 +1,12 @@
+{
+    "editor.formatOnSave": true,
+    "notebook.formatOnSave.enabled": true,
+    "python.analysis.typeCheckingMode": "standard",
+    "python.languageServer": "Pylance",
+    "autoDocstring.docstringFormat": "numpy",
+    "python.testing.pytestArgs": [
+        "tests"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+}
