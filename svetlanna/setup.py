@@ -11,6 +11,7 @@ class LinearOpticalSetup(nn.Module):
     """
     A linear optical network composed of Element's
     """
+
     def __init__(self, elements: Iterable[Element]) -> None:
         """
         Parameters
@@ -37,7 +38,7 @@ class LinearOpticalSetup(nn.Module):
                     "the same SimulationParameters instance."
                 )
 
-        if all((hasattr(el, 'reverse') for el in self.elements)):
+        if all((hasattr(el, "reverse") for el in self.elements)):
 
             class ReverseNet(nn.Module):
                 def forward(self, Ein: Tensor) -> Tensor:
@@ -88,16 +89,16 @@ class LinearOpticalSetup(nn.Module):
         # list of wavefronts while propagation of an initial wavefront through the system
         steps_wavefront = [this_wavefront]  # input wavefront is a zeroth step
 
-        optical_scheme = ''  # string that represents a linear optical setup (schematic)
+        optical_scheme = ""  # string that represents a linear optical setup (schematic)
 
         self.net.eval()
         for ind_element, element in enumerate(self.net):
             # for visualization in a console
             element_name = type(element).__name__
-            optical_scheme += f'-({ind_element})-> [{ind_element + 1}. {element_name}] '
+            optical_scheme += f"-({ind_element})-> [{ind_element + 1}. {element_name}] "
             # TODO: Replace len(...) with something for Iterable?
             if ind_element == len(self.net) - 1:
-                optical_scheme += f'-({ind_element + 1})->'
+                optical_scheme += f"-({ind_element + 1})->"
             # element forward
             this_wavefront = element.forward(this_wavefront)
             steps_wavefront.append(this_wavefront)  # add a wavefront to list of steps
@@ -108,8 +109,8 @@ class LinearOpticalSetup(nn.Module):
         if self._reverse_net is not None:
             return self._reverse_net(Ein)
         raise TypeError(
-            'Reverse propagation is impossible. '
-            'All elements should have reverse method.'
+            "Reverse propagation is impossible. "
+            "All elements should have reverse method."
         )
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
@@ -119,11 +120,8 @@ class LinearOpticalSetup(nn.Module):
 
     @staticmethod
     def _widget_html_(
-        index: int,
-        name: str,
-        element_type: str | None,
-        subelements: list[ElementHTML]
+        index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
     ) -> str:
-        return jinja_env.get_template('widget_linear_setup.html.jinja').render(
+        return jinja_env.get_template("widget_linear_setup.html.jinja").render(
             index=index, name=name, subelements=subelements
         )

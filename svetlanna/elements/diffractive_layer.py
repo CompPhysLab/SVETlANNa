@@ -17,7 +17,7 @@ class DiffractiveLayer(Element):
         self,
         simulation_parameters: SimulationParameters,
         mask: OptimizableTensor,
-        mask_norm: float = 2 * torch.pi
+        mask_norm: float = 2 * torch.pi,
     ):
         """Constructor method
 
@@ -35,14 +35,12 @@ class DiffractiveLayer(Element):
 
         super().__init__(simulation_parameters)
 
-        self.mask = self.process_parameter('mask', mask)
-        self.mask_norm = self.process_parameter('mask_norm', mask_norm)
+        self.mask = self.process_parameter("mask", mask)
+        self.mask_norm = self.process_parameter("mask_norm", mask_norm)
 
     @property
     def transmission_function(self) -> torch.Tensor:
-        return torch.exp(
-            (2j * torch.pi / self.mask_norm) * self.mask
-        )
+        return torch.exp((2j * torch.pi / self.mask_norm) * self.mask)
 
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the SLM
@@ -60,8 +58,8 @@ class DiffractiveLayer(Element):
         return mul(
             incident_wavefront,
             self.transmission_function,
-            ('H', 'W'),
-            self.simulation_parameters
+            ("H", "W"),
+            self.simulation_parameters,
         )
 
     def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
@@ -83,8 +81,8 @@ class DiffractiveLayer(Element):
         return mul(
             transmission_wavefront,
             torch.conj(self.transmission_function),
-            ('H', 'W'),
-            self.simulation_parameters
+            ("H", "W"),
+            self.simulation_parameters,
         )
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
@@ -94,25 +92,23 @@ class DiffractiveLayer(Element):
 
         return [
             ParameterSpecs(
-                'mask', [
+                "mask",
+                [
                     PrettyReprRepr(self.mask),
-                    ImageRepr((255 * (mask - mask_min) / (mask_max - mask_min)).astype('uint8')),
-                ]
+                    ImageRepr(
+                        (255 * (mask - mask_min) / (mask_max - mask_min)).astype(
+                            "uint8"
+                        )
+                    ),
+                ],
             ),
-            ParameterSpecs(
-                'mask_norm', [
-                    PrettyReprRepr(self.mask_norm)
-                ]
-            )
+            ParameterSpecs("mask_norm", [PrettyReprRepr(self.mask_norm)]),
         ]
 
     @staticmethod
     def _widget_html_(
-        index: int,
-        name: str,
-        element_type: str | None,
-        subelements: list[ElementHTML]
+        index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
     ) -> str:
-        return jinja_env.get_template('widget_diffractive_layer.html.jinja').render(
+        return jinja_env.get_template("widget_diffractive_layer.html.jinja").render(
             index=index, name=name, subelements=subelements
         )

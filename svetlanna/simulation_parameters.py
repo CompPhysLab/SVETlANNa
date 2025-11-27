@@ -8,26 +8,25 @@ class AxisNotFound(Exception):
 
 
 _AXES_INNER_ATTRS = tuple(
-    f'_Axes{i}' for i in ('__axes_dict', '__names', '__names_inversed')
+    f"_Axes{i}" for i in ("__axes_dict", "__names", "__names_inversed")
 )
 
 
 class Axes:
     """Axes storage"""
+
     def __init__(self, axes: dict[str, torch.Tensor]) -> None:
         # TODO: set default values for the new axis if needed (ex. pol = 0)
 
         # check if required axes are presented
-        required_axes = (
-            'W', 'H', 'wavelength'
-        )
+        required_axes = ("W", "H", "wavelength")
         if not all(name in axes.keys() for name in required_axes):
             raise ValueError("Axes 'W', 'H', and 'wavelength' are required!")
 
         # check if W and H axes are 1-d
-        if not len(axes['W'].shape) == 1:
+        if not len(axes["W"].shape) == 1:
             raise ValueError("'W' axis should be 1-dimensional")
-        if not len(axes['H'].shape) == 1:
+        if not len(axes["H"].shape) == 1:
             raise ValueError("'H' axis should be 1-dimensional")
 
         # check if axes are 0- or 1-dimensional
@@ -74,7 +73,7 @@ class Axes:
         """
         if name in self.__names:
             return -self.__names_inversed.index(name) - 1
-        raise AxisNotFound(f'Axis with name {name} does not exist.')
+        raise AxisNotFound(f"Axis with name {name} does not exist.")
 
     def __getattribute__(self, name: str) -> Any:
 
@@ -94,7 +93,7 @@ class Axes:
             return super().__setattr__(name, value)
 
         if name in self.__axes_dict:
-            warnings.warn(f'Axis {name} has not been changed')
+            warnings.warn(f"Axis {name} has not been changed")
 
         return super().__setattr__(name, value)
 
@@ -103,10 +102,10 @@ class Axes:
         if name in axes:
             return axes[name]
 
-        raise AxisNotFound(f'Axis with name {name} does not exist.')
+        raise AxisNotFound(f"Axis with name {name} does not exist.")
 
     def __setitem__(self, name: str, value: Any) -> None:
-        raise RuntimeError('Axis can not be changed')
+        raise RuntimeError("Axis can not be changed")
 
     def __dir__(self) -> Iterable[str]:
         return self.__axes_dict.keys()
@@ -116,10 +115,8 @@ class SimulationParameters:
     """
     A class which describes characteristic parameters of the system
     """
-    def __init__(
-        self,
-        axes: dict[str, torch.Tensor | float]
-    ) -> None:
+
+    def __init__(self, axes: dict[str, torch.Tensor | float]) -> None:
         device = None
 
         def value_to_tensor(x):
@@ -128,7 +125,7 @@ class SimulationParameters:
                 if device is None:
                     device = x.device
                 if x.device != device:
-                    raise ValueError('All axes should be on the same device')
+                    raise ValueError("All axes should be on the same device")
                 return x
             return torch.tensor(x)
 
@@ -167,10 +164,7 @@ class SimulationParameters:
                 of the second axis (`y_axis`) and the second dimension
                 corresponds to the cardinality of the first axis (`x_axis`).
         """
-        a, b = torch.meshgrid(
-            self.axes[x_axis], self.axes[y_axis],
-            indexing='xy'
-        )
+        a, b = torch.meshgrid(self.axes[x_axis], self.axes[y_axis], indexing="xy")
         return a.to(self.__device), b.to(self.__device)
 
     def axes_size(self, axs: Iterable[str]) -> torch.Size:
@@ -205,7 +199,7 @@ class SimulationParameters:
 
         return torch.Size(sizes)
 
-    def to(self, device: str | torch.device | int) -> 'SimulationParameters':
+    def to(self, device: str | torch.device | int) -> "SimulationParameters":
         if self.__device == torch.device(device):
             return self
 
