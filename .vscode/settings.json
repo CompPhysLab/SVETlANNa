@@ -1,6 +1,9 @@
 {
     "editor.formatOnSave": true,
     "notebook.formatOnSave.enabled": true,
+    "[python]": {
+        "editor.defaultFormatter": "ms-python.black-formatter",
+    },
     "python.analysis.typeCheckingMode": "standard",
     "python.languageServer": "Pylance",
     "autoDocstring.docstringFormat": "numpy",
