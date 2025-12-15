@@ -58,6 +58,21 @@ class Axes:
         """Non-scalar axes' names"""
         return self.__names
 
+    @property
+    def scalar_names(self) -> tuple[str, ...]:
+        """Names of scalar (0-dimensional) axes"""
+        return tuple(
+            name for name, value in self.__axes_dict.items()
+            if value.ndim == 0
+        )
+
+    @property
+    def shapes(self) -> tuple[int, ...]:
+        """Shapes of non-scalar axes in physical (tensor) order"""
+        return tuple(
+            len(self.__axes_dict[name]) for name in self.__names_inversed
+        )
+
     def index(self, name: str) -> int:
         """Index of specific axis in the tensor.
         The index is negative.
@@ -75,6 +90,52 @@ class Axes:
         if name in self.__names:
             return -self.__names_inversed.index(name) - 1
         raise AxisNotFound(f'Axis with name {name} does not exist.')
+
+    def ensure_order(
+        self, tensor: torch.Tensor, *trailing_axes: str
+    ) -> torch.Tensor:
+        """
+        Permute tensor so that specified axes are last, in the given order.
+
+        Parameters
+        ----------
+        tensor : torch.Tensor
+            Input tensor whose trailing dimensions correspond to self.names.
+        *trailing_axes : str
+            Axis names that should become the last dimensions (in order).
+
+        Returns
+        -------
+        torch.Tensor
+            Permuted tensor with trailing_axes as the last dimensions.
+
+        Examples
+        --------
+        If axes are (wavelength, H, W) and tensor has shape (batch, wavelength, H, W):
+
+        >>> axes.ensure_order(tensor, 'H', 'W')      # no change, already (..., H, W)
+        >>> axes.ensure_order(tensor, 'W', 'H')      # -> (batch, wavelength, W, H)
+        >>> axes.ensure_order(tensor, 'wavelength')  # -> (batch, H, W, wavelength)
+        """
+        current = self.__names_inversed  # physical order in tensor
+        n_batch = tensor.ndim - len(current)
+
+        trailing_set = set(trailing_axes)
+        missing = trailing_set - set(current)
+        if missing:
+            raise AxisNotFound(f"Axes not found: {missing}")
+
+        other = tuple(n for n in current if n not in trailing_set)
+        target = other + trailing_axes
+
+        if current == target:
+            return tensor
+
+        perm = [
+            *range(n_batch),
+            *(n_batch + current.index(n) for n in target)
+        ]
+        return tensor.permute(perm)
 
     def __getattribute__(self, name: str) -> Any:
 
@@ -204,6 +265,103 @@ class SimulationParameters:
             sizes.append(axis_len)
 
         return torch.Size(sizes)
+
+    def cast(
+        self,
+        tensor: torch.Tensor,
+        *axes: str
+    ) -> torch.Tensor:
+        """
+        Cast tensor to match simulation parameters axes for broadcasting.
+
+        Reshapes tensor so it can be broadcast with wavefront tensors.
+        Scalar axes are skipped (they don't affect tensor shape).
+
+        Parameters
+        ----------
+        tensor : torch.Tensor
+            Input tensor whose trailing dimensions correspond to `axes`.
+        *axes : str
+            Axes names corresponding to tensor's trailing dimensions.
+
+        Returns
+        -------
+        torch.Tensor
+            Tensor reshaped for broadcasting with wavefront.
+
+        Examples
+        --------
+        >>> # axes: (wavelength, H, W), shapes: (5, 2, 3)
+        >>> a = torch.rand(2, 3)  # H, W
+        >>> a = sim_params.cast(a, "H", "W")
+        >>> a.shape
+        torch.Size([1, 2, 3])  # ready to broadcast with (5, 2, 3)
+        """
+        # avoid circular import
+        from svetlanna.axes_math import cast_tensor
+
+        sim_axes = self.axes
+
+        # Filter out scalar axes and validate shapes
+        tensor_axes: list[str] = []
+        skipped_scalar_axes: list[str] = []
+
+        for i, axis_name in enumerate(axes):
+            # Skip scalar axes - they don't correspond to tensor dimensions
+            if axis_name in sim_axes.scalar_names:
+                skipped_scalar_axes.append(axis_name)
+                continue
+
+            # Check axis exists
+            if axis_name not in sim_axes.names:
+                raise ValueError(
+                    f"Axis '{axis_name}' not found in simulation parameters"
+                )
+
+            tensor_axes.append(axis_name)
+
+            # Validate shape matches
+            axis_idx = sim_axes.index(axis_name)  # negative index
+            expected_shape = sim_axes.shapes[axis_idx]
+            actual_shape = tensor.shape[i - len(axes)]
+
+            if expected_shape != actual_shape:
+                raise ValueError(
+                    f"Axis '{axis_name}' has shape {actual_shape}, "
+                    f"expected {expected_shape}. "
+                    f"(Skipped scalar axes: {skipped_scalar_axes})"
+                )
+
+        return cast_tensor(tensor, tuple(tensor_axes), sim_axes.names)
+
+    def reorder(
+        self,
+        tensor: torch.Tensor,
+        *trailing_axes: str
+    ) -> torch.Tensor:
+        """
+        Permute tensor so that specified axes are last, in the given order.
+
+        Parameters
+        ----------
+        tensor : torch.Tensor
+            Input tensor whose trailing dimensions correspond to axes.names.
+        *trailing_axes : str
+            Axis names that should become the last dimensions (in order).
+
+        Returns
+        -------
+        torch.Tensor
+            Permuted tensor with trailing_axes as the last dimensions.
+
+        Examples
+        --------
+        >>> # axes: (wavelength, H, W), tensor shape: (batch, wavelength, H, W)
+        >>> t = sim_params.reorder(tensor, "H", "W")      # no change
+        >>> t = sim_params.reorder(tensor, "W", "H")      # -> (batch, wavelength, W, H)
+        >>> t = sim_params.reorder(tensor, "wavelength")  # -> (batch, H, W, wavelength)
+        """
+        return self.axes.ensure_order(tensor, *trailing_axes)
 
     def to(self, device: str | torch.device | int) -> 'SimulationParameters':
         if self.__device == torch.device(device):
