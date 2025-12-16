@@ -12,7 +12,7 @@ class AxisNotFound(Exception):
 
 
 _AXES_INNER_ATTRS = tuple(
-    f'_Axes{i}' for i in ('__axes_dict', '__names', '__names_inversed')
+    f"_Axes{i}" for i in ("__axes_dict", "__names", "__names_inversed")
 )
 
 

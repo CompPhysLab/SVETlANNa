@@ -165,4 +165,6 @@ cython_debug/
 # MacOS
 .DS_Store
 
+# dev folders
 examples/
+experiments/
