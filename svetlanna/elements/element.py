@@ -57,6 +57,22 @@ class Element(nn.Module, metaclass=ABCMeta):
 
         """Forward propagation through the optical element"""
 
+    def to(self, *args, **kwargs) -> 'Element':
+        """
+        Move element to a different device/dtype.
+
+        Overrides nn.Module.to() to also transfer simulation_parameters.
+        Since SimulationParameters.to() is inplace and idempotent,
+        multiple Elements sharing the same instance will work correctly.
+
+        Returns
+        -------
+        Element
+            Self (for chaining).
+        """
+        self.simulation_parameters.to(*args, **kwargs)
+        return super().to(*args, **kwargs)
+
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
 
         """Create specs"""

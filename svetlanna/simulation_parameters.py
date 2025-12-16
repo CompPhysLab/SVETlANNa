@@ -295,6 +295,7 @@ class SimulationParameters:
 
         self.__axes_dict = converted_axes
         self.__device = device
+        self._frozen = False
 
         # Lazy initialization and caching
         self._axes = None
@@ -319,6 +320,41 @@ class SimulationParameters:
             self.axes_size.cache_clear()
         # Reset lazy axes
         self._axes = None
+
+    def freeze(self) -> Self:
+        """
+        Freeze the simulation parameters to prevent modification.
+
+        After freezing, add_axis(), remove_axis(), and attribute assignment
+        for new axes will raise RuntimeError. This is useful after creating
+        Elements that cache tensors based on current axes.
+
+        Returns
+        -------
+        Self
+            The same instance (for chaining).
+
+        Examples
+        --------
+        >>> params = SimulationParameters(W=..., H=..., wavelength=...)
+        >>> params.freeze()
+        >>> params.pol = torch.tensor([1, 0])  # raises RuntimeError
+        """
+        self._frozen = True
+        return self
+
+    @property
+    def frozen(self) -> bool:
+        """Check if the simulation parameters are frozen."""
+        return self._frozen
+
+    def _check_frozen(self, operation: str) -> None:
+        """Raise if frozen."""
+        if self._frozen:
+            raise RuntimeError(
+                f"Cannot {operation}: SimulationParameters is frozen. "
+                "Create a new instance or call copy() first."
+            )
 
     @classmethod
     def from_ranges(
@@ -390,9 +426,13 @@ class SimulationParameters:
 
         Raises
         ------
+        RuntimeError
+            If the instance is frozen.
         ValueError
             If the tensor has more than 1 dimension.
         """
+        self._check_frozen(f"add axis '{name}'")
+
         if not isinstance(name, str) or not name:
             raise ValueError("Axis name must be a non-empty string")
 
@@ -427,11 +467,15 @@ class SimulationParameters:
 
         Raises
         ------
+        RuntimeError
+            If the instance is frozen.
         ValueError
             If trying to remove a required axis.
         AxisNotFound
             If the axis doesn't exist.
         """
+        self._check_frozen(f"remove axis '{name}'")
+
         required_axes = {'W', 'H', 'wavelength'}
         if name in required_axes:
             raise ValueError(f"Cannot remove required axis '{name}'. "
@@ -694,18 +738,34 @@ class SimulationParameters:
         return self.axes.ensure_order(tensor, *trailing_axes)
 
     def to(self, device: str | torch.device | int) -> Self:
-        """Move all axes to a different device."""
+        """
+        Move all axes to a different device (inplace).
+
+        Unlike tensor.to() which returns a new tensor, this method
+        mutates the instance inplace (like nn.Module.to()) to ensure
+        all Elements sharing this SimulationParameters stay in sync.
+
+        Parameters
+        ----------
+        device : str | torch.device | int
+            Target device.
+
+        Returns
+        -------
+        Self
+            The same instance (for chaining).
+        """
         target_device = torch.device(device)
         if self.__device == target_device:
             return self
 
-        # Efficiently move all axes
-        new_axes_dict = {
-            axis_name: axis.to(device=target_device)
-            for axis_name, axis in self.__axes_dict.items()
-        }
+        # Mutate inplace — all references stay valid
+        for name in self.__axes_dict:
+            self.__axes_dict[name] = self.__axes_dict[name].to(target_device)
 
-        return SimulationParameters(axes=new_axes_dict)
+        self.__device = target_device
+        self._clear_caches()
+        return self
 
     @property
     def device(self) -> torch.device:
