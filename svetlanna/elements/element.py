@@ -54,7 +54,7 @@ class Element(nn.Module, metaclass=ABCMeta):
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Forward propagation through the optical element"""
 
-    def to(self, *args, **kwargs) -> 'Element':
+    def to(self, *args, **kwargs) -> "Element":
         """
         Move element to a different device/dtype.
 
