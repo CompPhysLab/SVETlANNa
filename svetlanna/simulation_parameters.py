@@ -13,7 +13,8 @@ class AxisNotFound(Exception):
 
 
 _AXES_INNER_ATTRS = tuple(
-    f"_Axes{i}" for i in ("__axes_dict", "__names", "__names_inversed")
+    f"_Axes{i}"
+    for i in ("__axes_dict", "__names", "__names_inversed", "__scalar_names")
 )
 
 
@@ -56,6 +57,7 @@ class Axes:
 
         # Validate all axes are 0- or 1-dimensional
         non_scalar_names = []
+        scalar_names = []
         for axis_name, value in axes.items():
             dim = value.dim()
             if dim not in (0, 1):
@@ -65,10 +67,13 @@ class Axes:
                 )
             if dim == 1:
                 non_scalar_names.append(axis_name)
+            else:
+                scalar_names.append(axis_name)
 
         self.__axes_dict = axes
         self.__names_inversed = tuple(non_scalar_names)
         self.__names = tuple(reversed(non_scalar_names))
+        self.__scalar_names = tuple(scalar_names)
 
         if TYPE_CHECKING:
             self.W: torch.Tensor
@@ -83,9 +88,7 @@ class Axes:
     @property
     def scalar_names(self) -> tuple[str, ...]:
         """Get names of scalar (0-dimensional) axes."""
-        return tuple(
-            name for name, value in self.__axes_dict.items() if value.dim() == 0
-        )
+        return self.__scalar_names
 
     @property
     def shapes(self) -> tuple[int, ...]:
@@ -301,7 +304,7 @@ class SimulationParameters:
 
         self.__axes_dict = converted_axes
         self.__device = device
-        self._frozen = False
+        self.__frozen = True
 
         # Lazy initialization and caching
         self._axes = None
@@ -321,19 +324,20 @@ class SimulationParameters:
 
     def _clear_caches(self) -> None:
         """Clear all cached method results when axes change."""
-        # Clear LRU cache
+        # Clear LRU caches
         if hasattr(self.axes_size, "cache_clear"):
             self.axes_size.cache_clear()
+        if hasattr(self._cast_info, "cache_clear"):
+            self._cast_info.cache_clear()
         # Reset lazy axes
         self._axes = None
 
-    def freeze(self) -> Self:
+    def unfreeze(self) -> Self:
         """
-        Freeze the simulation parameters to prevent modification.
+        Unfreeze simulation parameters to allow modification.
 
-        After freezing, add_axis(), remove_axis(), and attribute assignment
-        for new axes will raise RuntimeError. This is useful after creating
-        Elements that cache tensors based on current axes.
+        By default, SimulationParameters is frozen after creation.
+        Call this method to allow adding/removing axes.
 
         Returns
         -------
@@ -343,23 +347,23 @@ class SimulationParameters:
         Examples
         --------
         >>> params = SimulationParameters(W=..., H=..., wavelength=...)
-        >>> params.freeze()
-        >>> params.pol = torch.tensor([1, 0])  # raises RuntimeError
+        >>> params.unfreeze()
+        >>> params.pol = torch.tensor([1, 0])  # now allowed
         """
-        self._frozen = True
+        self.__frozen = False
         return self
 
     @property
     def frozen(self) -> bool:
         """Check if the simulation parameters are frozen."""
-        return self._frozen
+        return self.__frozen
 
     def _check_frozen(self, operation: str) -> None:
         """Raise if frozen."""
-        if self._frozen:
+        if self.__frozen:
             raise RuntimeError(
                 f"Cannot {operation}: SimulationParameters is frozen. "
-                "Create a new instance or call copy() first."
+                "Call unfreeze() first or create a copy()."
             )
 
     @classmethod
@@ -656,6 +660,39 @@ class SimulationParameters:
 
         return torch.Size(sizes)
 
+    @functools.lru_cache(maxsize=64)
+    def _cast_info(
+        self, axes: tuple[str, ...]
+    ) -> tuple[tuple[str, ...], tuple[tuple[int, int, str], ...]]:
+        """
+        Cached helper for cast(). Returns (tensor_axes, validations).
+
+        validations is tuple of (input_offset, expected_shape, axis_name).
+        """
+        sim_axes = self.axes
+        tensor_axes: list[str] = []
+        validations: list[tuple[int, int, str]] = []
+
+        for i, axis_name in enumerate(axes):
+            # Skip scalar axes - they don't correspond to tensor dimensions
+            if axis_name in sim_axes.scalar_names:
+                continue
+
+            # Check axis exists
+            if axis_name not in sim_axes.names:
+                raise ValueError(
+                    f"Axis '{axis_name}' not found in simulation parameters"
+                )
+
+            tensor_axes.append(axis_name)
+
+            # Store validation info: offset from end, expected shape, name
+            axis_idx = sim_axes.index(axis_name)  # negative index
+            expected_shape = sim_axes.shapes[axis_idx]
+            validations.append((i - len(axes), expected_shape, axis_name))
+
+        return tuple(tensor_axes), tuple(validations)
+
     def cast(self, tensor: torch.Tensor, *axes: str) -> torch.Tensor:
         """
         Cast tensor to match simulation parameters axes for broadcasting.
@@ -686,39 +723,19 @@ class SimulationParameters:
         # avoid circular import
         from svetlanna.axes_math import cast_tensor
 
-        sim_axes = self.axes
+        # Get cached preprocessing
+        tensor_axes, validations = self._cast_info(axes)
 
-        # Filter out scalar axes and validate shapes
-        tensor_axes: list[str] = []
-        skipped_scalar_axes: list[str] = []
-
-        for i, axis_name in enumerate(axes):
-            # Skip scalar axes - they don't correspond to tensor dimensions
-            if axis_name in sim_axes.scalar_names:
-                skipped_scalar_axes.append(axis_name)
-                continue
-
-            # Check axis exists
-            if axis_name not in sim_axes.names:
-                raise ValueError(
-                    f"Axis '{axis_name}' not found in simulation parameters"
-                )
-
-            tensor_axes.append(axis_name)
-
-            # Validate shape matches
-            axis_idx = sim_axes.index(axis_name)  # negative index
-            expected_shape = sim_axes.shapes[axis_idx]
-            actual_shape = tensor.shape[i - len(axes)]
-
+        # Validate shapes
+        for offset, expected_shape, axis_name in validations:
+            actual_shape = tensor.shape[offset]
             if expected_shape != actual_shape:
                 raise ValueError(
                     f"Axis '{axis_name}' has shape {actual_shape}, "
-                    f"expected {expected_shape}. "
-                    f"(Skipped scalar axes: {skipped_scalar_axes})"
+                    f"expected {expected_shape}"
                 )
 
-        return cast_tensor(tensor, tuple(tensor_axes), sim_axes.names)
+        return cast_tensor(tensor, tensor_axes, self.axes.names)
 
     def reorder(self, tensor: torch.Tensor, *trailing_axes: str) -> torch.Tensor:
         """
