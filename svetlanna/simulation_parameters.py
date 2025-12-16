@@ -92,8 +92,8 @@ class Axes:
 
     @property
     def shapes(self) -> tuple[int, ...]:
-        """Get shapes of non-scalar axes in physical (tensor) order."""
-        return tuple(len(self.__axes_dict[name]) for name in self.__names_inversed)
+        """Get shapes of non-scalar axes matching negative index order."""
+        return tuple(len(self.__axes_dict[name]) for name in self.__names)
 
     def index(self, name: str) -> int:
         """
@@ -142,7 +142,7 @@ class Axes:
         >>> axes.ensure_order(tensor, 'W', 'H')      # -> (batch, wavelength, W, H)
         >>> axes.ensure_order(tensor, 'wavelength')  # -> (batch, H, W, wavelength)
         """
-        current = self.__names_inversed  # physical order in tensor
+        current = self.__names  # physical order in tensor (left to right)
         n_batch = tensor.ndim - len(current)
 
         trailing_set = set(trailing_axes)
@@ -288,8 +288,8 @@ class SimulationParameters:
                     )
                 converted_axes[name] = value
             else:
-                # Convert scalar to tensor
-                tensor_value = torch.tensor(float(value))
+                # Convert scalar/list to tensor
+                tensor_value = torch.tensor(value)
                 if device is not None:
                     tensor_value = tensor_value.to(device)
                 converted_axes[name] = tensor_value
@@ -602,10 +602,16 @@ class SimulationParameters:
         x_data = self.axes[x_axis]
         y_data = self.axes[y_axis]
 
+        # Handle scalar axes by unsqueezing to 1D
+        if x_data.dim() == 0:
+            x_data = x_data.unsqueeze(0)
+        if y_data.dim() == 0:
+            y_data = y_data.unsqueeze(0)
+
         # Validate axes are 1D
         if x_data.dim() != 1 or y_data.dim() != 1:
             raise ValueError(
-                f"Both axes must be 1-dimensional. "
+                f"Both axes must be 0- or 1-dimensional. "
                 f"Got {x_axis}: {x_data.dim()}D, {y_axis}: {y_data.dim()}D"
             )
 
@@ -788,7 +794,9 @@ class SimulationParameters:
         for name in self.__axes_dict:
             self.__axes_dict[name] = self.__axes_dict[name].to(target_device)
 
-        self.__device = target_device
+        # Use actual device from tensor (e.g., 'cuda' → 'cuda:0')
+        first_tensor = next(iter(self.__axes_dict.values()))
+        self.__device = first_tensor.device
         self._clear_caches()
         return self
 
