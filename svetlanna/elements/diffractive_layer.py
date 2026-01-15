@@ -58,7 +58,7 @@ class DiffractiveLayer(Element):
         return mul(
             incident_wavefront,
             self.transmission_function,
-            ("H", "W"),
+            ("y", "x"),
             self.simulation_parameters,
         )
 
@@ -81,7 +81,7 @@ class DiffractiveLayer(Element):
         return mul(
             transmission_wavefront,
             torch.conj(self.transmission_function),
-            ("H", "W"),
+            ("y", "x"),
             self.simulation_parameters,
         )
 

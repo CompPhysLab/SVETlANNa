@@ -22,7 +22,7 @@ class SpecsTestElement(Element):
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
-        test_specs: Iterable[ParameterSpecs | SubelementSpecs]
+        test_specs: Iterable[ParameterSpecs | SubelementSpecs],
     ) -> None:
         super().__init__(simulation_parameters)
         self.test_specs = test_specs
@@ -36,42 +36,37 @@ class SpecsTestElement(Element):
 
 def test_context_generator(tmp_path):
     simulation_parameters = SimulationParameters(
-        axes={'W': torch.tensor([0]), 'H': torch.tensor([0]), 'wavelength': 1}
+        axes={
+            "x": torch.tensor([0]),
+            "y": torch.tensor([0]),
+            "wavelength": 1,
+        }
     )
 
-    repr1 = ReprRepr(1.)
-    repr2 = ReprRepr(2.)
-    repr3 = ReprRepr(3.)
-    repr4 = ReprRepr(4.)
+    repr1 = ReprRepr(1.0)
+    repr2 = ReprRepr(2.0)
+    repr3 = ReprRepr(3.0)
+    repr4 = ReprRepr(4.0)
     subelement = SpecsTestElement(simulation_parameters, [])
 
     element = SpecsTestElement(
         simulation_parameters=simulation_parameters,
         test_specs=[
+            ParameterSpecs("test1", [repr1, repr2]),
             ParameterSpecs(
-                'test1',
-                [
-                    repr1,
-                    repr2
-                ]
-            ),
-            ParameterSpecs(
-                'test2',
+                "test2",
                 [
                     repr3,
-                ]
+                ],
             ),
             ParameterSpecs(
-                'test2',  # test for the parameter spec with the same name
+                "test2",  # test for the parameter spec with the same name
                 [
                     repr4,
-                ]
+                ],
             ),
-            SubelementSpecs(
-                'test_type',
-                subelement
-            )
-        ]
+            SubelementSpecs("test_type", subelement),
+        ],
     )
 
     subelements: list[SubelementSpecs] = []
@@ -83,10 +78,10 @@ def test_context_generator(tmp_path):
     assert subelements[0].subelement is subelement
 
     # test parameter_name attribute
-    assert contexts[0].parameter_name.value == 'test1'
-    assert contexts[1].parameter_name.value == 'test1'
-    assert contexts[2].parameter_name.value == 'test2'
-    assert contexts[3].parameter_name.value == 'test2'
+    assert contexts[0].parameter_name.value == "test1"
+    assert contexts[1].parameter_name.value == "test1"
+    assert contexts[2].parameter_name.value == "test2"
+    assert contexts[3].parameter_name.value == "test2"
 
     assert contexts[0].parameter_name.index == 0
     assert contexts[1].parameter_name.index == 0
@@ -126,51 +121,61 @@ def test_context_generator(tmp_path):
 
 def test_ElementInTree():
     simulation_parameters = SimulationParameters(
-        axes={'W': torch.tensor([0]), 'H': torch.tensor([0]), 'wavelength': 1}
+        axes={
+            "x": torch.tensor([0]),
+            "y": torch.tensor([0]),
+            "wavelength": 1,
+        }
     )
     element = SpecsTestElement(
-        simulation_parameters=simulation_parameters,
-        test_specs=[]
+        simulation_parameters=simulation_parameters, test_specs=[]
     )
 
-    tree_element = _ElementInTree(element, 123, [], 'test_1')
-    tree_element_copy = tree_element.create_copy('test_2')
+    tree_element = _ElementInTree(element, 123, [], "test_1")
+    tree_element_copy = tree_element.create_copy("test_2")
 
     assert tree_element_copy.element is tree_element.element
     assert tree_element_copy.element_index is tree_element.element_index
     assert tree_element_copy.children is tree_element.children
     assert tree_element_copy.subelement_type != tree_element.subelement_type
-    assert tree_element_copy.subelement_type == 'test_2'
+    assert tree_element_copy.subelement_type == "test_2"
 
 
 def test_ElementsIterator():
     simulation_parameters = SimulationParameters(
-        axes={'W': torch.tensor([0]), 'H': torch.tensor([0]), 'wavelength': 1}
+        axes={
+            "x": torch.tensor([0]),
+            "y": torch.tensor([0]),
+            "wavelength": 1,
+        }
     )
 
-    repr1 = ReprRepr(1.)
+    repr1 = ReprRepr(1.0)
     subelement1 = SpecsTestElement(simulation_parameters, [])
     subelement2 = SpecsTestElement(simulation_parameters, [])
-    subelement3 = SpecsTestElement(simulation_parameters, [
-        SubelementSpecs('subelement1', subelement1),
-        SubelementSpecs('subelement2', subelement2)
-    ])
+    subelement3 = SpecsTestElement(
+        simulation_parameters,
+        [
+            SubelementSpecs("subelement1", subelement1),
+            SubelementSpecs("subelement2", subelement2),
+        ],
+    )
 
     element = SpecsTestElement(
         simulation_parameters=simulation_parameters,
         test_specs=[
             ParameterSpecs(
-                'test1',
+                "test1",
                 [
                     repr1,
-                ]
+                ],
             ),
-            SubelementSpecs('subelement1_copy', subelement1),
-            SubelementSpecs('subelement3', subelement3),
-        ]
+            SubelementSpecs("subelement1_copy", subelement1),
+            SubelementSpecs("subelement3", subelement3),
+        ],
     )
 
-    elements = _ElementsIterator(element, directory='')
+    elements = _ElementsIterator(element, directory="")
 
     # Test iterator output
     iterated_indices = []
@@ -185,9 +190,7 @@ def test_ElementsIterator():
         iterated_elements.append(el)
 
     assert iterated_indices == list(range(4))
-    assert iterated_elements == [
-        element, subelement1, subelement3, subelement2
-    ]
+    assert iterated_elements == [element, subelement1, subelement3, subelement2]
 
     # Test if the tree is saved in the iterator
     tree = elements.tree
@@ -212,7 +215,7 @@ def test_ElementsIterator():
     assert elements.tree == tree
 
     # Test if the tree can be generated automatically
-    new_elements = _ElementsIterator(element, directory='')
+    new_elements = _ElementsIterator(element, directory="")
     assert new_elements.tree is not tree
     assert new_elements.tree == tree
     assert new_elements.tree is new_elements.tree
@@ -220,79 +223,93 @@ def test_ElementsIterator():
 
 def test_write_tree(tmp_path):
     simulation_parameters = SimulationParameters(
-        axes={'W': torch.tensor([0]), 'H': torch.tensor([0]), 'wavelength': 1}
+        axes={
+            "x": torch.tensor([0]),
+            "y": torch.tensor([0]),
+            "wavelength": 1,
+        }
     )
 
-    repr1 = ReprRepr(1.)
+    repr1 = ReprRepr(1.0)
     subelement1 = SpecsTestElement(simulation_parameters, [])
     subelement2 = SpecsTestElement(simulation_parameters, [])
-    subelement3 = SpecsTestElement(simulation_parameters, [
-        SubelementSpecs('subelement1', subelement1),
-        SubelementSpecs('subelement2', subelement2)
-    ])
+    subelement3 = SpecsTestElement(
+        simulation_parameters,
+        [
+            SubelementSpecs("subelement1", subelement1),
+            SubelementSpecs("subelement2", subelement2),
+        ],
+    )
 
     element = SpecsTestElement(
         simulation_parameters=simulation_parameters,
         test_specs=[
             ParameterSpecs(
-                'test1',
+                "test1",
                 [
                     repr1,
-                ]
+                ],
             ),
-            SubelementSpecs('subelement1_copy', subelement1),
-            SubelementSpecs('subelement3', subelement3),
-        ]
+            SubelementSpecs("subelement1_copy", subelement1),
+            SubelementSpecs("subelement3", subelement3),
+        ],
     )
 
-    elements = _ElementsIterator(element, directory='')
+    elements = _ElementsIterator(element, directory="")
 
     # === test str ===
-    stream = StringIO('')
+    stream = StringIO("")
     write_elements_tree_to_str(elements.tree, stream)
     assert stream.getvalue()
 
     # === test md ===
-    stream = StringIO('')
+    stream = StringIO("")
     write_elements_tree_to_markdown(elements.tree, stream)
     assert stream.getvalue()
 
 
 def test_write_specs(tmp_path):
     simulation_parameters = SimulationParameters(
-        axes={'W': torch.tensor([0]), 'H': torch.tensor([0]), 'wavelength': 1}
+        axes={
+            "x": torch.tensor([0]),
+            "y": torch.tensor([0]),
+            "wavelength": 1,
+        }
     )
 
-    repr1 = ReprRepr(1.)
+    repr1 = ReprRepr(1.0)
     subelement1 = SpecsTestElement(simulation_parameters, [])
     subelement2 = SpecsTestElement(simulation_parameters, [])
-    subelement3 = SpecsTestElement(simulation_parameters, [
-        SubelementSpecs('subelement1', subelement1),
-        SubelementSpecs('subelement2', subelement2)
-    ])
+    subelement3 = SpecsTestElement(
+        simulation_parameters,
+        [
+            SubelementSpecs("subelement1", subelement1),
+            SubelementSpecs("subelement2", subelement2),
+        ],
+    )
 
     element = SpecsTestElement(
         simulation_parameters=simulation_parameters,
         test_specs=[
             ParameterSpecs(
-                'test1',
+                "test1",
                 [
                     repr1,
-                ]
+                ],
             ),
-            SubelementSpecs('subelement1_copy', subelement1),
-            SubelementSpecs('subelement3', subelement3),
-        ]
+            SubelementSpecs("subelement1_copy", subelement1),
+            SubelementSpecs("subelement3", subelement3),
+        ],
     )
 
     # === test txt ===
-    write_specs(element, filename='test_specs.txt', directory=tmp_path)
-    assert Path.exists(tmp_path / 'test_specs.txt')
+    write_specs(element, filename="test_specs.txt", directory=tmp_path)
+    assert Path.exists(tmp_path / "test_specs.txt")
 
     # === test md ===
-    write_specs(element, filename='test_specs.md', directory=tmp_path)
-    assert Path.exists(tmp_path / 'test_specs.md')
+    write_specs(element, filename="test_specs.md", directory=tmp_path)
+    assert Path.exists(tmp_path / "test_specs.md")
 
     # === test unknown format ===
     with pytest.raises(ValueError):
-        write_specs(element, filename='test_specs.test', directory=tmp_path)
+        write_specs(element, filename="test_specs.test", directory=tmp_path)

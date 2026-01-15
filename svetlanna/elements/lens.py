@@ -44,7 +44,7 @@ class ThinLens(Element):
             2 * torch.pi / self.simulation_parameters.axes.wavelength,
             torch.tensor([[1]], device=self.simulation_parameters.device),
             "wavelength",
-            ("H", "W"),
+            ("y", "x"),
         )  # shape: ('wavelength', 1, 1) or (1, 1)
 
         # Registering Buffer for _wave_number
@@ -52,11 +52,11 @@ class ThinLens(Element):
 
         self._calc_axes = axes  # axes tuple used during calculations
 
-        x_linear = self.simulation_parameters.axes.W
-        y_linear = self.simulation_parameters.axes.H
+        x_linear = self.simulation_parameters.axes.x
+        y_linear = self.simulation_parameters.axes.y
 
-        x_grid = x_linear[None, :]  # shape: (1, 'W')
-        y_grid = y_linear[:, None]  # shape: ('H', 1)
+        x_grid = x_linear[None, :]  # shape: (1, 'x')
+        y_grid = y_linear[:, None]  # shape: ('y', 1)
 
         # Registering Buffer for _radius_squared
         self._radius_squared = self.make_buffer(

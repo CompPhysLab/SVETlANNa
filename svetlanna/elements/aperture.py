@@ -30,7 +30,7 @@ class MulElement(Element, ABC):
     @abstractmethod
     def transmission_function_axes(self) -> tuple[str, ...]:
         """Axes of the transmission function.
-        For example, `('H', 'W')`
+        For example, `('y', 'x')`
 
         Returns
         -------
@@ -92,7 +92,7 @@ class Aperture(MulElement):
         super().__init__(simulation_parameters=simulation_parameters)
 
         self.mask = self.process_parameter("mask", mask)
-        self._calc_axes = ("H", "W")
+        self._calc_axes = ("y", "x")
 
     @property
     def transmission_function_axes(self) -> tuple[str, ...]:
@@ -138,9 +138,9 @@ class RectangularAperture(MulElement):
         self.height = self.process_parameter("height", height)
         self.width = self.process_parameter("width", width)
 
-        _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="W", y_axis="H")
+        _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="x", y_axis="y")
 
-        self._calc_axes = ("H", "W")
+        self._calc_axes = ("y", "x")
         self._mask = self.make_buffer(
             "_mask",
             (
@@ -183,9 +183,9 @@ class RoundAperture(MulElement):
 
         self.radius = self.process_parameter("radius", radius)
 
-        _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="W", y_axis="H")
+        _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="x", y_axis="y")
 
-        self._calc_axes = ("H", "W")
+        self._calc_axes = ("y", "x")
         self._mask = self.make_buffer(
             "_mask",
             (_x_grid**2 + _y_grid**2 <= self.radius**2).to(

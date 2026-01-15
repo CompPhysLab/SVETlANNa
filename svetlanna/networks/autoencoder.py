@@ -16,7 +16,7 @@ class LinearAutoencoder(nn.Module):
         .encode() - forward propagation through encoder elements
         .decode() - forward propagation through decoder elements
 
-    Comment: Works only for a single wavelength, input wavefront ['h', 'w']
+    Comment: Works only for a single wavelength, input wavefront ['y', 'x']
     """
 
     def __init__(
@@ -47,7 +47,7 @@ class LinearAutoencoder(nn.Module):
 
         self.sim_params = sim_params
         self.h, self.w = self.sim_params.axes_size(
-            axs=("H", "W")
+            axs=("y", "x")
         )  # height and width for a Wavefronts
 
         self.__device = torch.device(device)
@@ -92,7 +92,7 @@ class LinearAutoencoder(nn.Module):
         """
         Parameters
         ----------
-        wavefront_in: Wavefront('bs', 'H', 'W')
+        wavefront_in: Wavefront('bs', 'y', 'x')
 
         Returns
         -------

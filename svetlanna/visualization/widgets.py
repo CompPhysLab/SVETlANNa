@@ -208,7 +208,7 @@ def draw_wavefront(
     types_to_plot: tuple[StepwisePlotTypes, ...] = ("I", "phase"),
 ) -> bytes:
     """Show field propagation in the setup via widget.
-    Currently only wavefronts of shape `(W, H)` are supported.
+    Currently only wavefronts of shape `(x, y)` are supported.
 
     Parameters
     ----------
@@ -229,8 +229,8 @@ def draw_wavefront(
 
     stream = BytesIO()
 
-    width = simulation_parameters.axes.W.cpu()
-    height = simulation_parameters.axes.H.cpu()
+    width = simulation_parameters.axes.x.cpu()
+    height = simulation_parameters.axes.y.cpu()
 
     n_plots = len(types_to_plot)
 
@@ -303,7 +303,7 @@ def show_stepwise_forward(
 ) -> StepwiseForwardWidget:
     """Display the wavefront propagation through a setup structure
     using a widget interface. Currently only wavefronts
-    of shape `(W, H)` are supported.
+    of shape `(x, y)` are supported.
 
     Parameters
     ----------

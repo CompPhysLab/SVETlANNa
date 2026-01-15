@@ -57,8 +57,8 @@ class Wavefront(torch.Tensor):
             full width at half maximum along x and y axes
         """
 
-        x_step = torch.diff(simulation_parameters.axes.W)[0].item()
-        y_step = torch.diff(simulation_parameters.axes.H)[0].item()
+        x_step = torch.diff(simulation_parameters.axes.x)[0].item()
+        y_step = torch.diff(simulation_parameters.axes.y)[0].item()
 
         max_intensity = self.max_intensity
         half_max_intensity = max_intensity / 2
@@ -113,11 +113,11 @@ class Wavefront(torch.Tensor):
         wave_direction = wave_direction / torch.norm(wave_direction)
 
         wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
-        x = simulation_parameters.axes.W[None, :]
-        y = simulation_parameters.axes.H[:, None]
+        x = simulation_parameters.axes.x[None, :]
+        y = simulation_parameters.axes.y[:, None]
 
-        kxx, axes = tensor_dot(wave_number, x, "wavelength", ("H", "W"))
-        kyy, _ = tensor_dot(wave_number, y, "wavelength", ("H", "W"))
+        kxx, axes = tensor_dot(wave_number, x, "wavelength", ("y", "x"))
+        kyy, _ = tensor_dot(wave_number, y, "wavelength", ("y", "x"))
         kzz = wave_number[..., None, None] * distance
 
         field = torch.exp(1j * wave_direction[0] * kxx)
@@ -162,8 +162,8 @@ class Wavefront(torch.Tensor):
             torch.pi * (waist_radius**2) / simulation_parameters.axes.wavelength
         )  # noqa: E501
 
-        x = simulation_parameters.axes.W[None, :] - dx
-        y = simulation_parameters.axes.H[:, None] - dy
+        x = simulation_parameters.axes.x[None, :] - dx
+        y = simulation_parameters.axes.y[:, None] - dy
         radial_distance_squared = x**2 + y**2
 
         hyperbolic_relation = waist_radius * (1 + (distance / rayleigh_range) ** 2) ** (
@@ -181,7 +181,7 @@ class Wavefront(torch.Tensor):
             a=1j * wave_number * inverse_radius_of_curvature / 2,
             b=radial_distance_squared,
             a_axis="wavelength",
-            b_axis=("H", "W"),
+            b_axis=("y", "x"),
         )
 
         field = torch.exp(phase1)
@@ -203,7 +203,7 @@ class Wavefront(torch.Tensor):
             a=-1 / (hyperbolic_relation) ** 2,
             b=radial_distance_squared,
             a_axis="wavelength",
-            b_axis=("H", "W"),
+            b_axis=("y", "x"),
         )
         field, axes = tensor_dot(
             a=field,
@@ -253,19 +253,19 @@ class Wavefront(torch.Tensor):
         """
         wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
 
-        x = simulation_parameters.axes.W[None, :] - dx
-        y = simulation_parameters.axes.H[:, None] - dy
+        x = simulation_parameters.axes.x[None, :] - dx
+        y = simulation_parameters.axes.y[:, None] - dy
 
         radius = torch.sqrt((x**2 + y**2) + distance**2)
 
         phase, axes = tensor_dot(
-            a=wave_number, b=radius, a_axis="wavelength", b_axis=("H", "W")
+            a=wave_number, b=radius, a_axis="wavelength", b_axis=("y", "x")
         )
         field, _ = tensor_dot(
             a=torch.exp(1j * (phase + initial_phase)),
             b=1 / radius,
             a_axis=axes,
-            b_axis=("H", "W"),
+            b_axis=("y", "x"),
             preserve_a_axis=True,
         )
 
@@ -291,8 +291,8 @@ class Wavefront(torch.Tensor):
 DEFAULT_LAST_AXES_NAMES = (
     # 'pol',
     # 'wavelength',
-    "H",
-    "W",
+    "y",
+    "x",
 )
 
 

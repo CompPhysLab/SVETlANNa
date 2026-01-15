@@ -9,11 +9,7 @@ import pytest
 
 
 class SimpleElement(Element):
-    def __init__(
-        self,
-        a: Any,
-        simulation_parameters: SimulationParameters
-    ) -> None:
+    def __init__(self, a: Any, simulation_parameters: SimulationParameters) -> None:
         super().__init__(simulation_parameters)
 
         self.a = a
@@ -30,9 +26,9 @@ class ReversableSimpleElement(SimpleElement):
 def test_init():
     sim_params = SimulationParameters(
         {
-            'W': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'H': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'wavelength': 1
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
         }
     )
 
@@ -41,9 +37,7 @@ def test_init():
     el2 = SimpleElement(a=a, simulation_parameters=sim_params)
     el3 = SimpleElement(a=a, simulation_parameters=sim_params)
 
-    setup = LinearOpticalSetup(elements=[
-        el1, el2, el3
-    ])
+    setup = LinearOpticalSetup(elements=[el1, el2, el3])
 
     assert isinstance(setup.net, torch.nn.Module)
 
@@ -55,16 +49,16 @@ def test_init():
 def test_init_warning():
     sim_params1 = SimulationParameters(
         {
-            'W': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'H': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'wavelength': 1
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
         }
     )
     sim_params2 = SimulationParameters(
         {
-            'W': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'H': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'wavelength': 1
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
         }
     )
 
@@ -73,50 +67,39 @@ def test_init_warning():
     el2 = SimpleElement(a=a, simulation_parameters=sim_params2)
 
     with pytest.warns(UserWarning):
-        LinearOpticalSetup(elements=[
-            el1, el2
-        ])
+        LinearOpticalSetup(elements=[el1, el2])
 
 
 @pytest.mark.parametrize(
     ("device",),
     [
         pytest.param(
-            'cuda',
+            "cuda",
             marks=pytest.mark.skipif(
-                not torch.cuda.is_available(),
-                reason="cuda is not available"
-            )
+                not torch.cuda.is_available(), reason="cuda is not available"
+            ),
         ),
         pytest.param(
-            'mps',
+            "mps",
             marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(),
-                reason="mps is not available"
-            )
-        )
-    ]
+                not torch.backends.mps.is_available(), reason="mps is not available"
+            ),
+        ),
+    ],
 )
 def test_to_device(device):
     sim_params = SimulationParameters(
         {
-            'W': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'H': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'wavelength': 1
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
         }
     )
 
-    el1 = SimpleElement(
-        a=Parameter(2.),
-        simulation_parameters=sim_params
-    )
+    el1 = SimpleElement(a=Parameter(2.0), simulation_parameters=sim_params)
     el2 = SimpleElement(
-        a=ConstrainedParameter(
-            data=0.5,
-            min_value=0,
-            max_value=1
-        ),
-        simulation_parameters=sim_params
+        a=ConstrainedParameter(data=0.5, min_value=0, max_value=1),
+        simulation_parameters=sim_params,
     )
 
     setup = LinearOpticalSetup([el1, el2])
@@ -134,30 +117,26 @@ def test_reverse():
     # test empty setup
     setup = LinearOpticalSetup(elements=[])
 
-    wf = torch.Tensor([2., 3.])
+    wf = torch.Tensor([2.0, 3.0])
     assert setup.reverse(wf) is wf
 
     # test setup
     sim_params = SimulationParameters(
         {
-            'W': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'H': torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            'wavelength': 1
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
         }
     )
     a = torch.tensor(2)
 
     # test unreversable element
     el = SimpleElement(a=a, simulation_parameters=sim_params)
-    setup = LinearOpticalSetup(elements=[
-        el
-    ])
+    setup = LinearOpticalSetup(elements=[el])
     with pytest.raises(TypeError):
         setup.reverse(wf)
 
     # test reversable element
     el = ReversableSimpleElement(a=a, simulation_parameters=sim_params)
-    setup = LinearOpticalSetup(elements=[
-        el
-    ])
+    setup = LinearOpticalSetup(elements=[el])
     torch.testing.assert_close(setup.reverse(wf), wf * a)

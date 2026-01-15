@@ -51,14 +51,14 @@ class SpatialLightModulator(Element):
 
         self._device = self.simulation_parameters.device
 
-        self._w_index = self.simulation_parameters.axes.index("W")
-        self._h_index = self.simulation_parameters.axes.index("H")
+        self._w_index = self.simulation_parameters.axes.index("x")
+        self._h_index = self.simulation_parameters.axes.index("y")
 
         self._x_linear = self.make_buffer(
-            "_x_linear", self.simulation_parameters.axes.W
+            "_x_linear", self.simulation_parameters.axes.x
         )
         self._y_linear = self.make_buffer(
-            "_y_linear", self.simulation_parameters.axes.H
+            "_y_linear", self.simulation_parameters.axes.y
         )
 
         self._x_grid = self._x_linear[None, :]
@@ -168,7 +168,7 @@ class SpatialLightModulator(Element):
         return mul(
             incident_wavefront,
             self.transmission_function,
-            ("H", "W"),
+            ("y", "x"),
             self.simulation_parameters,
         )
 
@@ -177,6 +177,6 @@ class SpatialLightModulator(Element):
         return mul(
             transmission_wavefront,
             torch.conj(self.transmission_function),
-            ("H", "W"),
+            ("y", "x"),
             self.simulation_parameters,
         )

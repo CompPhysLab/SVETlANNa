@@ -115,7 +115,7 @@ class ConvLayer4F(nn.Module):
 
         Parameters
         ----------
-        input_wf: Wavefront('batch_size', 'H', 'W')
+        input_wf: Wavefront('batch_size', 'y', 'x')
             An input wavefront(s).
 
         Returns
@@ -197,7 +197,7 @@ class ConvDiffNetwork4F(nn.Module):
         """
         Parameters
         ----------
-        wavefront_in: Wavefront('bs', 'H', 'W')
+        wavefront_in: Wavefront('bs', 'y', 'x')
             Input wavefront or a batch of Wavefronts.
 
         Returns

@@ -114,8 +114,8 @@ class DetectorProcessorClf(nn.Module):
             self.segmentation_type = segmentation_type
             if segments_zone_size is None:
                 sim_params_size = self.simulation_parameters.axes_size(
-                    axs=("H", "W")
-                )  # [H, W]
+                    axs=("y", "x")
+                )  # [y, x]
                 # make a detector segmentation according to self.segmentation_type
                 self.segmented_detector = self.detector_segmentation(sim_params_size)
             else:
@@ -245,7 +245,7 @@ class DetectorProcessorClf(nn.Module):
                 detector_markup[:, ind_left_border:ind_right_border] = ind_class
 
         # add padding to match simulation parameters Wavefront shape
-        sim_params_size = self.simulation_parameters.axes_size(axs=("H", "W"))
+        sim_params_size = self.simulation_parameters.axes_size(axs=("y", "x"))
         if not sim_params_size == detector_shape:
             y_nodes, x_nodes = sim_params_size  # goal size
             y_mask, x_mask = detector_shape  # current size
@@ -340,7 +340,7 @@ class DetectorProcessorClf(nn.Module):
         mask_class = torch.where(ind_class == self.segmented_detector, 1, 0)
         # sum by two last dimensions!
         class_integral = (batch_detector_data * mask_class).sum(dim=(-2, -1))
-        # Comment: class_integral.size() = [batch_size, dim_0, dim_1...] (all dimensions except 'W' and 'H')
+        # Comment: class_integral.size() = [batch_size, dim_0, dim_1...] (all dimensions except 'x' and 'y')
 
         if len(class_integral.size()) > 1:
             # TODO: how to process other dimensions? user must define by himself?
@@ -351,7 +351,7 @@ class DetectorProcessorClf(nn.Module):
                     )  # all dimensions except batch_size dimension
                 )
             )  # return.size() = [batch_size]
-        else:  # no other dimensions except ['W', 'H'] for each item in the batch
+        else:  # no other dimensions except ['y', 'x'] for each item in the batch
             return class_integral
 
     def batch_forward(self, batch_detector_data: torch.Tensor) -> torch.Tensor:
@@ -363,7 +363,7 @@ class DetectorProcessorClf(nn.Module):
         ----------
         batch_detector_data : torch.Tensor
             A batch of images from a detector.
-            shape=(batch_size, ... 'H', 'W').
+            shape=(batch_size, ... 'y', 'x').
 
         Returns
         -------

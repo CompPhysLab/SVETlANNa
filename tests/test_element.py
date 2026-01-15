@@ -25,8 +25,8 @@ class ElementToTest(svetlanna.elements.Element):
 def test_setattr():
     sim_params = svetlanna.SimulationParameters(
         {
-            "W": torch.linspace(-10, 10, 100),
-            "H": torch.linspace(-10, 10, 100),
+            "x": torch.linspace(-10, 10, 100),
+            "y": torch.linspace(-10, 10, 100),
             "wavelength": 1.0,
         }
     )
@@ -60,8 +60,8 @@ def test_setattr():
 def test_make_buffer(device):
     sim_params = svetlanna.SimulationParameters(
         {
-            "W": torch.linspace(-10, 10, 100),
-            "H": torch.linspace(-10, 10, 100),
+            "x": torch.linspace(-10, 10, 100),
+            "y": torch.linspace(-10, 10, 100),
             "wavelength": 1.0,
         }
     )
@@ -82,8 +82,8 @@ def test_make_buffer(device):
         # Create fresh sim_params on CPU (previous one was moved by element.to())
         sim_params_cpu = svetlanna.SimulationParameters(
             {
-                "W": torch.linspace(-10, 10, 100),
-                "H": torch.linspace(-10, 10, 100),
+                "x": torch.linspace(-10, 10, 100),
+                "y": torch.linspace(-10, 10, 100),
                 "wavelength": 1.0,
             }
         )
@@ -114,8 +114,8 @@ def test_make_buffer(device):
 def test_process_parameter(device):
     sim_params = svetlanna.SimulationParameters(
         {
-            "W": torch.linspace(-10, 10, 100),
-            "H": torch.linspace(-10, 10, 100),
+            "x": torch.linspace(-10, 10, 100),
+            "y": torch.linspace(-10, 10, 100),
             "wavelength": 1.0,
         }
     )
@@ -133,8 +133,8 @@ def test_process_parameter(device):
     # test tensor as a parameter (create fresh sim_params since previous was moved)
     sim_params = svetlanna.SimulationParameters(
         {
-            "W": torch.linspace(-10, 10, 100),
-            "H": torch.linspace(-10, 10, 100),
+            "x": torch.linspace(-10, 10, 100),
+            "y": torch.linspace(-10, 10, 100),
             "wavelength": 1.0,
         }
     )
@@ -152,8 +152,8 @@ def test_process_parameter(device):
         # Create fresh sim_params on CPU
         sim_params_cpu = svetlanna.SimulationParameters(
             {
-                "W": torch.linspace(-10, 10, 100),
-                "H": torch.linspace(-10, 10, 100),
+                "x": torch.linspace(-10, 10, 100),
+                "y": torch.linspace(-10, 10, 100),
                 "wavelength": 1.0,
             }
         )
@@ -168,8 +168,8 @@ def test_process_parameter(device):
 def test_to_specs():
     sim_params = svetlanna.SimulationParameters(
         {
-            "W": torch.linspace(-10, 10, 100),
-            "H": torch.linspace(-10, 10, 100),
+            "x": torch.linspace(-10, 10, 100),
+            "y": torch.linspace(-10, 10, 100),
             "wavelength": 1.0,
         }
     )
@@ -188,8 +188,8 @@ def test_to_specs():
 def test_make_buffer_pattern():
     sim_params = svetlanna.SimulationParameters(
         {
-            "W": torch.linspace(-10, 10, 100),
-            "H": torch.linspace(-10, 10, 100),
+            "x": torch.linspace(-10, 10, 100),
+            "y": torch.linspace(-10, 10, 100),
             "wavelength": 1.0,
         }
     )
@@ -206,8 +206,8 @@ def test_make_buffer_pattern():
 def test_repr_html():
     sim_params = svetlanna.SimulationParameters(
         {
-            "W": torch.linspace(-10, 10, 100),
-            "H": torch.linspace(-10, 10, 100),
+            "x": torch.linspace(-10, 10, 100),
+            "y": torch.linspace(-10, 10, 100),
             "wavelength": 1.0,
         }
     )

@@ -43,11 +43,11 @@ class FreeSpace(Element):
         # params extracted from SimulationParameters
         device = self.simulation_parameters.device
 
-        self._w_index = self.simulation_parameters.axes.index("W")
-        self._h_index = self.simulation_parameters.axes.index("H")
+        self._w_index = self.simulation_parameters.axes.index("x")
+        self._h_index = self.simulation_parameters.axes.index("y")
 
-        x_linear = self.simulation_parameters.axes.W
-        y_linear = self.simulation_parameters.axes.H
+        x_linear = self.simulation_parameters.axes.x
+        y_linear = self.simulation_parameters.axes.y
 
         x_nodes = x_linear.shape[0]
         y_nodes = y_linear.shape[0]
@@ -61,20 +61,20 @@ class FreeSpace(Element):
         ky_linear = 2 * torch.pi * torch.fft.fftfreq(y_nodes, dy, device=device)
 
         # Compute wave vectors grids
-        kx_grid = kx_linear[None, :]  # shape: (1, 'W')
-        ky_grid = ky_linear[:, None]  # shape: ('H', 1)
+        kx_grid = kx_linear[None, :]  # shape: (1, 'x')
+        ky_grid = ky_linear[:, None]  # shape: ('y', 1)
 
         # Calculate (kx^2+ky^2) / k^2 relation
         # 1) Calculate wave vector of shape ('wavelength') or ()
         k = 2 * torch.pi / self.simulation_parameters.axes.wavelength
 
         # 2) Calculate (kx^2+ky^2) tensor
-        kx2ky2 = kx_grid**2 + ky_grid**2  # shape: ('H', 'W')
+        kx2ky2 = kx_grid**2 + ky_grid**2  # shape: ('y', 'x')
 
         # 3) Calculate (kx^2+ky^2) / k^2
         relation, relation_axes = tensor_dot(
-            a=1 / (k**2), b=kx2ky2, a_axis="wavelength", b_axis=("H", "W")
-        )  # shape: ('wavelength', 'H', 'W') or ('H', 'W') depending on k shape
+            a=1 / (k**2), b=kx2ky2, a_axis="wavelength", b_axis=("y", "x")
+        )  # shape: ('wavelength', 'y', 'x') or ('y', 'x') depending on k shape
 
         # TODO: Remove legacy filter
         use_legacy_filter = False
@@ -241,12 +241,12 @@ class FreeSpace(Element):
 
         # Fourier image of output field
         output_field_fft, _ = tensor_dot(
-            a=input_field_fft,  # example shape: (5, 'wavelength', 1, 'H', 'W')
-            b=impulse_response_fft,  # example shape: ('wavelength', 'H', 'W')
+            a=input_field_fft,  # example shape: (5, 'wavelength', 1, 'y', 'x')
+            b=impulse_response_fft,  # example shape: ('wavelength', 'y', 'x')
             a_axis=self.simulation_parameters.axes.names,
             b_axis=self._calc_axes,
             preserve_a_axis=True,  # check that the output has the input shape
-        )  # example output shape: (5, 'wavelength', 1, 'H', 'W')
+        )  # example output shape: (5, 'wavelength', 1, 'y', 'x')
 
         output_field = torch.fft.ifft2(
             output_field_fft, dim=(self._h_index, self._w_index)
@@ -278,12 +278,12 @@ class FreeSpace(Element):
 
         # Fourier image of output field
         incident_field_fft, _ = tensor_dot(
-            a=transmission_field_fft,  # example shape: (5, 'wavelength', 1, 'H', 'W')  # noqa
-            b=impulse_response_fft,  # example shape: ('wavelength', 'H', 'W')
+            a=transmission_field_fft,  # example shape: (5, 'wavelength', 1, 'y', 'x')  # noqa
+            b=impulse_response_fft,  # example shape: ('wavelength', 'y', 'x')
             a_axis=self.simulation_parameters.axes.names,
             b_axis=self._calc_axes,
             preserve_a_axis=True,  # check that the output has the first input shape  # noqa
-        )  # example output shape: (5, 'wavelength', 1, 'H', 'W')
+        )  # example output shape: (5, 'wavelength', 1, 'y', 'x')
 
         incident_field = torch.fft.ifft2(
             incident_field_fft, dim=(self._h_index, self._w_index)

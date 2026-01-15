@@ -54,7 +54,7 @@ class DiffractiveRNN(nn.Module):
         self.sim_params = sim_params
 
         self.h, self.w = self.sim_params.axes_size(
-            axs=("H", "W")
+            axs=("y", "x")
         )  # height and width for a wavefronts
 
         self.__device = torch.device(device)
@@ -72,7 +72,7 @@ class DiffractiveRNN(nn.Module):
         """
         Parameters
         ----------
-        subsequence_wf: Wavefront('batch_size', 'sequence_len', 'H', 'W')
+        subsequence_wf: Wavefront('batch_size', 'sequence_len', 'y', 'x')
             Wavefronts for a sequence.
             Comment: works for a single wavelength in SimulationParameters!
         """

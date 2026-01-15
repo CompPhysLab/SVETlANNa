@@ -12,7 +12,21 @@ class AxisNotFound(Exception):
     pass
 
 
-REQUIRED_AXES = {"W", "H", "wavelength"}
+REQUIRED_AXES = {"x", "y", "wavelength"}
+
+
+def legacy_axis_support(name: str) -> str:
+    if name == "W":  # legacy
+        warnings.warn(
+            "'W' axis is deprecated, use 'x' instead", DeprecationWarning, stacklevel=2
+        )
+        return "x"
+    if name == "H":  # legacy
+        warnings.warn(
+            "'H' axis is deprecated, use 'y' instead", DeprecationWarning, stacklevel=2
+        )
+        return "y"
+    return name
 
 
 class SimulationParameters:
@@ -20,7 +34,7 @@ class SimulationParameters:
     Simulation parameters.
 
     Manages coordinate systems and physical parameters for optical simulations.
-    Required axes: W (width/x), H (height/y), wavelength.
+    Required axes: x, y, wavelength.
     Additional axes can be added dynamically.
 
     Examples
@@ -29,15 +43,15 @@ class SimulationParameters:
     >>>
     >>> # Basic setup with units
     >>> params = SimulationParameters(
-    ...     W=torch.linspace(-0.5*ureg.mm, 0.5*ureg.mm, 512),
-    ...     H=torch.linspace(-0.5*ureg.mm, 0.5*ureg.mm, 512),
+    ...     x=torch.linspace(-0.5*ureg.mm, 0.5*ureg.mm, 512),
+    ...     y=torch.linspace(-0.5*ureg.mm, 0.5*ureg.mm, 512),
     ...     wavelength=632.8*ureg.nm
     ... )
     >>>
     >>> # Convenient constructor
     >>> params = SimulationParameters.from_ranges(
-    ...     w_range=(-0.5*ureg.mm, 0.5*ureg.mm), w_points=512,
-    ...     h_range=(-0.5*ureg.mm, 0.5*ureg.mm), h_points=512,
+    ...     x_range=(-0.5*ureg.mm, 0.5*ureg.mm), x_points=512,
+    ...     y_range=(-0.5*ureg.mm, 0.5*ureg.mm), y_points=512,
     ...     wavelength=632.8*ureg.nm
     ... )
     >>>
@@ -49,8 +63,8 @@ class SimulationParameters:
         self,
         axes: dict[str, torch.Tensor | float] | None = None,
         *,
-        W: torch.Tensor | float | None = None,
-        H: torch.Tensor | float | None = None,
+        x: torch.Tensor | float | None = None,
+        y: torch.Tensor | float | None = None,
         wavelength: torch.Tensor | float | None = None,
         **additional_axes: torch.Tensor | float,
     ) -> None:
@@ -62,9 +76,9 @@ class SimulationParameters:
         axes : dict[str, torch.Tensor | float] | None, optional
             Dictionary mapping axis names to values (legacy API).
             Cannot be used together with keyword arguments.
-        W : torch.Tensor | float | None, optional
+        x : torch.Tensor | float | None, optional
             Width/x-axis coordinates in meters. Required if `axes` not provided.
-        H : torch.Tensor | float | None, optional
+        y : torch.Tensor | float | None, optional
             Height/y-axis coordinates in meters. Required if `axes` not provided.
         wavelength : torch.Tensor | float | None, optional
             Optical wavelength in meters. Required if `axes` not provided.
@@ -79,19 +93,23 @@ class SimulationParameters:
         """
         # Handle backward compatibility
         if axes is not None:
-            if any(x is not None for x in [W, H, wavelength]) or additional_axes:
+            if any(x is not None for x in [x, y, wavelength]) or additional_axes:
                 raise ValueError(
                     "Cannot use both 'axes' dict and keyword arguments. "
-                    "Use either axes={...} or W=..., H=..., wavelength=..."
+                    "Use either axes={...} or x=..., y=..., wavelength=..."
                 )
             all_axes = dict(axes)
         else:
             # New style initialization
-            if any(x is None for x in [W, H, wavelength]):
+            if any(x is None for x in [x, y, wavelength]):
                 raise ValueError(
-                    "W, H, and wavelength are required when not using 'axes' dict"
+                    "x, y, and wavelength are required when not using 'axes' dict"
                 )
-            all_axes = {"W": W, "H": H, "wavelength": wavelength, **additional_axes}
+            all_axes = {"x": x, "y": y, "wavelength": wavelength, **additional_axes}
+
+        all_axes = {
+            legacy_axis_support(name): value for name, value in all_axes.items()
+        }
 
         # Check required axes presence
         if not all(name in all_axes.keys() for name in REQUIRED_AXES):
@@ -121,8 +139,8 @@ class SimulationParameters:
                     tensor_value = tensor_value.to(device)
                 converted_axes[name] = tensor_value
 
-        # Validate W and H are 1-dimensional
-        for name in ("W", "H"):
+        # Validate x and y are 1-dimensional
+        for name in ("x", "y"):
             if converted_axes[name].dim() != 1:
                 raise ValueError(
                     f"Axis '{name}' must be 1-dimensional, "
@@ -163,8 +181,10 @@ class SimulationParameters:
         self._clear_caches()
 
         if TYPE_CHECKING:
-            self.W: torch.Tensor
-            self.H: torch.Tensor
+            self.x: torch.Tensor
+            self.y: torch.Tensor
+            self.W: torch.Tensor  # legacy
+            self.H: torch.Tensor  # legacy
             self.wavelength: torch.Tensor
 
     def _clear_caches(self) -> None:
@@ -184,10 +204,10 @@ class SimulationParameters:
     def from_ranges(
         cls,
         *,
-        w_range: tuple[float, float],
-        w_points: int,
-        h_range: tuple[float, float],
-        h_points: int,
+        x_range: tuple[float, float],
+        x_points: int,
+        y_range: tuple[float, float],
+        y_points: int,
         wavelength: float,
         **additional_axes: torch.Tensor | float,
     ) -> Self:
@@ -196,14 +216,14 @@ class SimulationParameters:
 
         Parameters
         ----------
-        w_range : tuple[float, float]
-            (min, max) range for W-axis. Use `ureg` for units.
-        w_points : int
-            Number of points along W-axis.
-        h_range : tuple[float, float]
-            (min, max) range for H-axis. Use `ureg` for units.
-        h_points : int
-            Number of points along H-axis.
+        x_range : tuple[float, float]
+            (min, max) range for x-axis. Use `ureg` for units.
+        x_points : int
+            Number of points along x-axis.
+        y_range : tuple[float, float]
+            (min, max) range for y-axis. Use `ureg` for units.
+        y_points : int
+            Number of points along y-axis.
         wavelength : float
             Optical wavelength. Use `ureg` for units.
         **additional_axes : torch.Tensor | float
@@ -219,8 +239,8 @@ class SimulationParameters:
         ... )
         """
         return cls(
-            W=torch.linspace(w_range[0], w_range[1], w_points),
-            H=torch.linspace(h_range[0], h_range[1], h_points),
+            x=torch.linspace(x_range[0], x_range[1], x_points),
+            y=torch.linspace(y_range[0], y_range[1], y_points),
             wavelength=wavelength,
             **additional_axes,
         )
@@ -269,6 +289,8 @@ class SimulationParameters:
             # Avoid infinite recursion for private attributes
             return super().__getattribute__(name)
 
+        name = legacy_axis_support(name)
+
         if (value := self.__axes_dict.get(name)) is not None:
             return value
 
@@ -278,6 +300,7 @@ class SimulationParameters:
         """Set axis value by name using attribute syntax."""
         if hasattr(self, "_SimulationParameters__axes_dict"):
             # __setattr__ is called during __init__ before __axes_dict exists
+            name = legacy_axis_support(name)
             if name in self.__axes_dict:
                 warnings.warn(f"Axis '{name}' is read-only")
                 return
@@ -290,6 +313,9 @@ class SimulationParameters:
 
     def __getitem__(self, name: str) -> torch.Tensor:
         """Get axis by name using bracket notation."""
+
+        name = legacy_axis_support(name)
+
         if name in self.__axes_dict:
             return self.__axes_dict[name]
         raise AxisNotFound(f"Axis '{name}' does not exist")
@@ -321,6 +347,9 @@ class SimulationParameters:
         # Validate input
         if not isinstance(x_axis, str) or not isinstance(y_axis, str):
             raise TypeError("Axis names must be strings")
+        x_axis = legacy_axis_support(x_axis)
+        y_axis = legacy_axis_support(y_axis)
+
         if x_axis not in self.__axes_dict or y_axis not in self.__axes_dict:
             missing = [ax for ax in [x_axis, y_axis] if ax not in self.__axes_dict]
             raise AxisNotFound(f"Axes not found: {missing}")
@@ -369,8 +398,8 @@ class SimulationParameters:
 
         Examples
         --------
-        >>> size = params.axes_size(('H', 'W'))  # New API (cached)
-        >>> size = params.axes_size(axs=('H', 'W'))  # Legacy API
+        >>> size = params.axes_size(('y', 'x'))  # New API (cached)
+        >>> size = params.axes_size(axs=('y', 'x'))  # Legacy API
         """
         # Handle both new and legacy API
         if axs is None and "axs" in kwargs:
@@ -413,6 +442,7 @@ class SimulationParameters:
         AxisNotFound
             If the axis doesn't exist or is scalar.
         """
+        name = legacy_axis_support(name)
         if name in self.__names:
             return -self.__names_inversed.index(name) - 1
         raise AxisNotFound(f"Axis '{name}' does not exist or is scalar")
