@@ -371,7 +371,8 @@ class SimulationParameters:
         if y_data.device != self.__device:
             y_data = y_data.to(self.__device)
 
-        return torch.meshgrid(x_data, y_data, indexing="xy")
+        x, y = torch.meshgrid(x_data, y_data, indexing="xy")
+        return x, y
 
     @functools.lru_cache(maxsize=128)
     def axes_size(self, axs: tuple[str, ...] | None = None) -> torch.Size:
