@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, Iterable, TYPE_CHECKING, Self
+from typing import Any, TYPE_CHECKING, Self
 import torch
 import warnings
 import functools
@@ -13,64 +13,6 @@ class AxisNotFound(Exception):
 
 
 REQUIRED_AXES = {"W", "H", "wavelength"}
-
-
-class Axes:
-    """
-    Storage for simulation axes with dynamic access support.
-
-    Manages coordinate systems and parameter axes for optical simulations.
-    Must contain required axes: 'W' (width/x), 'H' (height/y), and 'wavelength'.
-
-    Examples
-    --------
-    >>> import torch
-    >>> from svetlanna.units import ureg
-    >>> axes_dict = {
-    ...     'W': torch.linspace(-1*ureg.mm, 1*ureg.mm, 100),
-    ...     'H': torch.linspace(-1*ureg.mm, 1*ureg.mm, 100),
-    ...     'wavelength': torch.tensor(632.8*ureg.nm)
-    ... }
-    >>> axes = Axes(axes_dict)
-    >>> print(axes.W.shape)  # torch.Size([100])
-    """
-
-    def __init__(self, axes: dict[str, torch.Tensor]) -> None:
-        self.__axes_dict = axes
-
-        if TYPE_CHECKING:
-            self.W: torch.Tensor
-            self.H: torch.Tensor
-            self.wavelength: torch.Tensor
-
-    def __getattribute__(self, name: str) -> Any:
-        if name == "_Axes__axes_dict":
-            # Avoid infinite recursion for private attributes
-            return super().__getattribute__(name)
-
-        if (value := self.__axes_dict.get(name)) is not None:
-            return value
-
-        return super().__getattribute__(name)
-
-    def __setattr__(self, name: str, value: Any) -> None:
-        if hasattr(self, "_Axes__axes_dict"):
-            # __setattr__ is called during __init__ before __axes_dict exists
-            if name in self.__axes_dict:
-                warnings.warn(f"Axis '{name}' is read-only and cannot be modified")
-                return
-
-        return super().__setattr__(name, value)
-
-    def __getitem__(self, name: str) -> torch.Tensor:
-        """Get axis by name using bracket notation."""
-        if name in self.__axes_dict:
-            return self.__axes_dict[name]
-        raise AxisNotFound(f"Axis '{name}' does not exist")
-
-    def __dir__(self) -> Iterable[str]:
-        """List all available axis names."""
-        return self.__axes_dict.keys()
 
 
 class SimulationParameters:
