@@ -12,10 +12,7 @@ class AxisNotFound(Exception):
     pass
 
 
-_AXES_INNER_ATTRS = tuple(
-    f"_Axes{i}"
-    for i in ("__axes_dict", "__names", "__names_inversed", "__scalar_names")
-)
+REQUIRED_AXES = {"W", "H", "wavelength"}
 
 
 class Axes:
@@ -39,142 +36,29 @@ class Axes:
     """
 
     def __init__(self, axes: dict[str, torch.Tensor]) -> None:
-        # Validate required axes presence
-        required_axes = ("W", "H", "wavelength")
-        if not all(name in axes.keys() for name in required_axes):
-            missing = set(required_axes) - set(axes.keys())
-            raise ValueError(
-                f"Missing required axes: {missing}. " f"Required: {required_axes}"
-            )
-
-        # Validate W and H are 1-dimensional
-        for ax_name in ("W", "H"):
-            if axes[ax_name].dim() != 1:
-                raise ValueError(
-                    f"Axis '{ax_name}' must be 1-dimensional, "
-                    f"got {axes[ax_name].dim()}-dimensional"
-                )
-
-        # Validate all axes are 0- or 1-dimensional
-        non_scalar_names = []
-        scalar_names = []
-        for axis_name, value in axes.items():
-            dim = value.dim()
-            if dim not in (0, 1):
-                raise ValueError(
-                    f"Axis '{axis_name}' must be 0- or 1-dimensional, "
-                    f"got {dim}-dimensional"
-                )
-            if dim == 1:
-                non_scalar_names.append(axis_name)
-            else:
-                scalar_names.append(axis_name)
-
         self.__axes_dict = axes
-        self.__names_inversed = tuple(non_scalar_names)
-        self.__names = tuple(reversed(non_scalar_names))
-        self.__scalar_names = tuple(scalar_names)
 
         if TYPE_CHECKING:
             self.W: torch.Tensor
             self.H: torch.Tensor
             self.wavelength: torch.Tensor
 
-    @property
-    def names(self) -> tuple[str, ...]:
-        """Get names of non-scalar axes (those with length > 1)."""
-        return self.__names
-
-    @property
-    def scalar_names(self) -> tuple[str, ...]:
-        """Get names of scalar (0-dimensional) axes."""
-        return self.__scalar_names
-
-    @property
-    def shapes(self) -> tuple[int, ...]:
-        """Get shapes of non-scalar axes matching negative index order."""
-        return tuple(len(self.__axes_dict[name]) for name in self.__names)
-
-    def index(self, name: str) -> int:
-        """
-        Get the negative index of an axis in tensors.
-
-        Parameters
-        ----------
-        name : str
-            Name of the axis.
-
-        Returns
-        -------
-        int
-            Negative index for use in tensor operations.
-
-        Raises
-        ------
-        AxisNotFound
-            If the axis doesn't exist or is scalar.
-        """
-        if name in self.__names:
-            return -self.__names_inversed.index(name) - 1
-        raise AxisNotFound(f"Axis '{name}' does not exist or is scalar")
-
-    def ensure_order(self, tensor: torch.Tensor, *trailing_axes: str) -> torch.Tensor:
-        """
-        Permute tensor so that specified axes are last, in the given order.
-
-        Parameters
-        ----------
-        tensor : torch.Tensor
-            Input tensor whose trailing dimensions correspond to self.names.
-        *trailing_axes : str
-            Axis names that should become the last dimensions (in order).
-
-        Returns
-        -------
-        torch.Tensor
-            Permuted tensor with trailing_axes as the last dimensions.
-
-        Examples
-        --------
-        If axes are (wavelength, H, W) and tensor has shape (batch, wavelength, H, W):
-
-        >>> axes.ensure_order(tensor, 'H', 'W')      # no change, already (..., H, W)
-        >>> axes.ensure_order(tensor, 'W', 'H')      # -> (batch, wavelength, W, H)
-        >>> axes.ensure_order(tensor, 'wavelength')  # -> (batch, H, W, wavelength)
-        """
-        current = self.__names  # physical order in tensor (left to right)
-        n_batch = tensor.ndim - len(current)
-
-        trailing_set = set(trailing_axes)
-        missing = trailing_set - set(current)
-        if missing:
-            raise AxisNotFound(f"Axes not found: {missing}")
-
-        other = tuple(n for n in current if n not in trailing_set)
-        target = other + trailing_axes
-
-        if current == target:
-            return tensor
-
-        perm = [*range(n_batch), *(n_batch + current.index(n) for n in target)]
-        return tensor.permute(perm)
-
     def __getattribute__(self, name: str) -> Any:
-        if name in _AXES_INNER_ATTRS:
+        if name == "_Axes__axes_dict":
+            # Avoid infinite recursion for private attributes
             return super().__getattribute__(name)
 
-        axes = self.__axes_dict
-        if name in axes:
-            return axes[name]
+        if (value := self.__axes_dict.get(name)) is not None:
+            return value
 
         return super().__getattribute__(name)
 
     def __setattr__(self, name: str, value: Any) -> None:
-        if name in _AXES_INNER_ATTRS:
-            return super().__setattr__(name, value)
-
-        if hasattr(self, "_Axes__axes_dict") and name in self.__axes_dict:
-            warnings.warn(f"Axis '{name}' is read-only and cannot be modified")
+        if hasattr(self, "_Axes__axes_dict"):
+            # __setattr__ is called during __init__ before __axes_dict exists
+            if name in self.__axes_dict:
+                warnings.warn(f"Axis '{name}' is read-only and cannot be modified")
+                return
 
         return super().__setattr__(name, value)
 
@@ -183,12 +67,6 @@ class Axes:
         if name in self.__axes_dict:
             return self.__axes_dict[name]
         raise AxisNotFound(f"Axis '{name}' does not exist")
-
-    def __setitem__(self, name: str, value: Any) -> None:
-        """Prevent modification of axes via bracket notation."""
-        raise RuntimeError(
-            "Axes are read-only. Use SimulationParameters.add_axis() instead"
-        )
 
     def __dir__(self) -> Iterable[str]:
         """List all available axis names."""
@@ -273,9 +151,16 @@ class SimulationParameters:
                 )
             all_axes = {"W": W, "H": H, "wavelength": wavelength, **additional_axes}
 
+        # Check required axes presence
+        if not all(name in all_axes.keys() for name in REQUIRED_AXES):
+            missing = REQUIRED_AXES - set(all_axes.keys())
+            raise ValueError(
+                f"Missing required axes: {missing}. " f"Required: {REQUIRED_AXES}"
+            )
+
         # Convert all values to tensors and ensure device consistency
         device = None
-        converted_axes = {}
+        converted_axes: dict[str, torch.Tensor] = {}
 
         for name, value in all_axes.items():
             if isinstance(value, torch.Tensor):
@@ -294,6 +179,30 @@ class SimulationParameters:
                     tensor_value = tensor_value.to(device)
                 converted_axes[name] = tensor_value
 
+        # Validate W and H are 1-dimensional
+        for name in ("W", "H"):
+            if converted_axes[name].dim() != 1:
+                raise ValueError(
+                    f"Axis '{name}' must be 1-dimensional, "
+                    f"got {converted_axes[name].dim()}-dimensional"
+                )
+
+        # Validate all axes are 0- or 1-dimensional
+        non_scalar_names = []
+        scalar_names = []
+
+        for name, value in converted_axes.items():
+            dim = value.dim()
+            if dim not in (0, 1):
+                raise ValueError(
+                    f"Axis '{name}' must be 0- or 1-dimensional, "
+                    f"got {dim}-dimensional"
+                )
+            if dim == 1:
+                non_scalar_names.append(name)
+            else:
+                scalar_names.append(name)
+
         # Set default device if none specified
         if device is None:
             device = torch.get_default_device()
@@ -302,25 +211,19 @@ class SimulationParameters:
                 name: tensor.to(device) for name, tensor in converted_axes.items()
             }
 
+        self.__names_inversed = tuple(non_scalar_names)
+        self.__names = tuple(reversed(non_scalar_names))
+        self.__scalar_names = tuple(scalar_names)
         self.__axes_dict = converted_axes
         self.__device = device
-        self.__frozen = True
 
         # Lazy initialization and caching
-        self._axes = None
         self._clear_caches()
 
-    @property
-    def axes(self) -> Axes:
-        """
-        Get axes object with convenient access methods.
-
-        The Axes object provides attribute-style access to individual axes
-        and methods for working with the coordinate system.
-        """
-        if self._axes is None:
-            self._axes = Axes(self.__axes_dict)
-        return self._axes
+        if TYPE_CHECKING:
+            self.W: torch.Tensor
+            self.H: torch.Tensor
+            self.wavelength: torch.Tensor
 
     def _clear_caches(self) -> None:
         """Clear all cached method results when axes change."""
@@ -330,41 +233,10 @@ class SimulationParameters:
         if hasattr(self._cast_info, "cache_clear"):
             self._cast_info.cache_clear()
         # Reset lazy axes
-        self._axes = None
 
-    def unfreeze(self) -> Self:
-        """
-        Unfreeze simulation parameters to allow modification.
-
-        By default, SimulationParameters is frozen after creation.
-        Call this method to allow adding/removing axes.
-
-        Returns
-        -------
-        Self
-            The same instance (for chaining).
-
-        Examples
-        --------
-        >>> params = SimulationParameters(W=..., H=..., wavelength=...)
-        >>> params.unfreeze()
-        >>> params.pol = torch.tensor([1, 0])  # now allowed
-        """
-        self.__frozen = False
-        return self
-
-    @property
-    def frozen(self) -> bool:
-        """Check if the simulation parameters are frozen."""
-        return self.__frozen
-
-    def _check_frozen(self, operation: str) -> None:
-        """Raise if frozen."""
-        if self.__frozen:
-            raise RuntimeError(
-                f"Cannot {operation}: SimulationParameters is frozen. "
-                "Call unfreeze() first or create a copy()."
-            )
+    ###########################################################################
+    # Initializers
+    ###########################################################################
 
     @classmethod
     def from_ranges(
@@ -423,158 +295,70 @@ class SimulationParameters:
         """
         return cls(axes=dict(axes_dict))
 
-    def add_axis(self, name: str, values: torch.Tensor | float) -> None:
-        """
-        Add a new axis dynamically.
-
-        Parameters
-        ----------
-        name : str
-            Name of the new axis. Should be descriptive (e.g., 'pol', 'time').
-        values : torch.Tensor | float
-            Values for the axis. Scalars become 0-d tensors, arrays become 1-d.
-
-        Raises
-        ------
-        RuntimeError
-            If the instance is frozen.
-        ValueError
-            If the tensor has more than 1 dimension.
-        """
-        self._check_frozen(f"add axis '{name}'")
-
-        if not isinstance(name, str) or not name:
-            raise ValueError("Axis name must be a non-empty string")
-
-        if name in self.__axes_dict:
-            warnings.warn(f"Axis '{name}' already exists and will be replaced")
-
-        # Convert to tensor and move to correct device
-        if isinstance(values, torch.Tensor):
-            tensor = values.to(self.__device)
-        else:
-            tensor = torch.tensor(float(values), device=self.__device)
-
-        # Validate dimensionality
-        if tensor.dim() > 1:
-            raise ValueError(
-                f"Axis '{name}' must be 0- or 1-dimensional, "
-                f"got {tensor.dim()}-dimensional tensor"
-            )
-
-        # Update internal state
-        self.__axes_dict[name] = tensor
-        self._clear_caches()
-
-    def remove_axis(self, name: str) -> None:
-        """
-        Remove an axis from the simulation parameters.
-
-        Required axes (W, H, wavelength) cannot be removed.
-
-        Parameters
-        ----------
-        name : str
-            Name of the axis to remove.
-
-        Raises
-        ------
-        RuntimeError
-            If the instance is frozen.
-        ValueError
-            If trying to remove a required axis.
-        AxisNotFound
-            If the axis doesn't exist.
-        """
-        self._check_frozen(f"remove axis '{name}'")
-
-        required_axes = {"W", "H", "wavelength"}
-        if name in required_axes:
-            raise ValueError(
-                f"Cannot remove required axis '{name}'. "
-                f"Required axes: {required_axes}"
-            )
-
-        if name not in self.__axes_dict:
-            raise AxisNotFound(f"Axis '{name}' does not exist")
-
-        del self.__axes_dict[name]
-        self._clear_caches()
+    ###########################################################################
+    # Axes related properties and methods
+    ###########################################################################
 
     @property
-    def axis_names(self) -> frozenset[str]:
-        """Get names of all axes as a frozen set."""
-        return frozenset(self.__axes_dict.keys())
+    def names(self) -> tuple[str, ...]:
+        """Get names of non-scalar axes (those with length > 1)."""
+        return self.__names
 
     @property
-    def additional_axes(self) -> frozenset[str]:
+    def names_scalar(self) -> tuple[str, ...]:
+        """Get names of scalar (0-dimensional) axes."""
+        return self.__scalar_names
+
+    @property
+    def names_additional(self) -> frozenset[str]:
         """Get names of additional (non-required) axes."""
-        required = {"W", "H", "wavelength"}
-        return frozenset(self.__axes_dict.keys()) - required
+        return frozenset(self.__axes_dict.keys()) - REQUIRED_AXES
 
-    def __getattr__(self, name: str) -> torch.Tensor:
+    # TODO: move shapes() to axes_size(axs=None)
+    @property
+    def shapes(self) -> tuple[int, ...]:
+        """Get shapes of non-scalar axes matching negative index order."""
+        return tuple(len(self.__axes_dict[name]) for name in self.__names)
+
+    def __getattribute__(self, name: str) -> torch.Tensor:
         """Get axis value by name using attribute syntax."""
         # Avoid infinite recursion for private attributes
-        if name.startswith("_") or name in ("axes", "axis_names", "additional_axes"):
+        if name == "_SimulationParameters__axes_dict":
+            # Avoid infinite recursion for private attributes
             return super().__getattribute__(name)
 
-        if name in self.__axes_dict:
-            return self.__axes_dict[name]
+        if (value := self.__axes_dict.get(name)) is not None:
+            return value
 
-        raise AttributeError(
-            f"'{type(self).__name__}' object has no attribute '{name}'"
-        )
+        return super().__getattribute__(name)
 
-    def __setattr__(self, name: str, value: torch.Tensor | float) -> None:
+    def __setattr__(self, name: str, value: Any) -> None:
         """Set axis value by name using attribute syntax."""
-        # Handle private attributes and initialization
-        if name.startswith("_") or name in ("axes",):
-            super().__setattr__(name, value)
-            return
+        if hasattr(self, "_SimulationParameters__axes_dict"):
+            # __setattr__ is called during __init__ before __axes_dict exists
+            if name in self.__axes_dict:
+                warnings.warn(f"Axis '{name}' is read-only")
+                return
 
-        # Check if we're still in initialization
-        if not hasattr(self, "_SimulationParameters__axes_dict"):
-            super().__setattr__(name, value)
-            return
-
-        # Dynamic axis assignment with warning for required axes
-        required_axes = {"W", "H", "wavelength"}
-        if name in required_axes:
-            warnings.warn(
-                f"Modifying required axis '{name}' may break compatibility. "
-                f"Consider creating a new SimulationParameters instance instead."
-            )
-
-        self.add_axis(name, value)
+        return super().__setattr__(name, value)
 
     def __contains__(self, name: str) -> bool:
         """Check if an axis exists using 'in' operator."""
         return name in self.__axes_dict
 
-    def __dir__(self) -> list[str]:
-        """List all available attributes including axes for autocompletion."""
-        attrs = list(super().__dir__())
-        attrs.extend(self.__axes_dict.keys())
-        return sorted(set(attrs))
-
-    def __repr__(self) -> str:
-        """Concise string representation showing all axes."""
-        axes_info = []
-        for name in sorted(self.__axes_dict.keys()):
-            tensor = self.__axes_dict[name]
-            if tensor.dim() == 0:
-                # Scalar: show value
-                value = tensor.item()
-                axes_info.append(f"{name}={value:.3g}")
-            else:
-                # Vector: show shape
-                axes_info.append(f"{name}={tuple(tensor.shape)}")
-
-        return f"SimulationParameters({', '.join(axes_info)})"
-
-    def __getitem__(self, axis: str) -> torch.Tensor:
+    def __getitem__(self, name: str) -> torch.Tensor:
         """Get axis by name using bracket notation."""
-        return self.axes[axis]
+        if name in self.__axes_dict:
+            return self.__axes_dict[name]
+        raise AxisNotFound(f"Axis '{name}' does not exist")
+
+    def __setitem__(self, name: str, value: Any) -> None:
+        """Prevent modification of axes via bracket notation."""
+        raise RuntimeError(f"Axis '{name}' is read-only")
+
+    ###########################################################################
+    # Utils
+    ###########################################################################
 
     def meshgrid(self, x_axis: str, y_axis: str) -> tuple[torch.Tensor, torch.Tensor]:
         """
@@ -599,8 +383,8 @@ class SimulationParameters:
             missing = [ax for ax in [x_axis, y_axis] if ax not in self.__axes_dict]
             raise AxisNotFound(f"Axes not found: {missing}")
 
-        x_data = self.axes[x_axis]
-        y_data = self.axes[y_axis]
+        x_data = self[x_axis]
+        y_data = self[y_axis]
 
         # Handle scalar axes by unsqueezing to 1D
         if x_data.dim() == 0:
@@ -623,6 +407,8 @@ class SimulationParameters:
 
         return torch.meshgrid(x_data, y_data, indexing="xy")
 
+    # TODO: rename `axs` to `names`(?)
+    # TODO: why kwargs are supported?
     @functools.lru_cache(maxsize=128)
     def axes_size(self, axs: tuple[str, ...] | None = None, **kwargs) -> torch.Size:
         """
@@ -657,7 +443,7 @@ class SimulationParameters:
         sizes = []
         for axis in axs:
             try:
-                axis_tensor = self.axes[axis]
+                axis_tensor = self[axis]
                 axis_len = len(axis_tensor) if axis_tensor.dim() > 0 else 1
             except (TypeError, AxisNotFound):
                 warnings.warn(f"Axis '{axis}' not found. Using size 0.")
@@ -665,6 +451,33 @@ class SimulationParameters:
             sizes.append(axis_len)
 
         return torch.Size(sizes)
+
+    def index(self, name: str) -> int:
+        """
+        Get the negative index of an axis in tensors.
+
+        Parameters
+        ----------
+        name : str
+            Name of the axis.
+
+        Returns
+        -------
+        int
+            Negative index for use in tensor operations.
+
+        Raises
+        ------
+        AxisNotFound
+            If the axis doesn't exist or is scalar.
+        """
+        if name in self.__names:
+            return -self.__names_inversed.index(name) - 1
+        raise AxisNotFound(f"Axis '{name}' does not exist or is scalar")
+
+    ###########################################################################
+    # Casting and reordering
+    ###########################################################################
 
     @functools.lru_cache(maxsize=64)
     def _cast_info(
@@ -675,17 +488,16 @@ class SimulationParameters:
 
         validations is tuple of (input_offset, expected_shape, axis_name).
         """
-        sim_axes = self.axes
         tensor_axes: list[str] = []
         validations: list[tuple[int, int, str]] = []
 
         for i, axis_name in enumerate(axes):
             # Skip scalar axes - they don't correspond to tensor dimensions
-            if axis_name in sim_axes.scalar_names:
+            if axis_name in self.names_scalar:
                 continue
 
             # Check axis exists
-            if axis_name not in sim_axes.names:
+            if axis_name not in self.names:
                 raise ValueError(
                     f"Axis '{axis_name}' not found in simulation parameters"
                 )
@@ -693,8 +505,8 @@ class SimulationParameters:
             tensor_axes.append(axis_name)
 
             # Store validation info: offset from end, expected shape, name
-            axis_idx = sim_axes.index(axis_name)  # negative index
-            expected_shape = sim_axes.shapes[axis_idx]
+            axis_idx = self.index(axis_name)  # negative index
+            expected_shape = self.shapes[axis_idx]
             validations.append((i - len(axes), expected_shape, axis_name))
 
         return tuple(tensor_axes), tuple(validations)
@@ -741,7 +553,7 @@ class SimulationParameters:
                     f"expected {expected_shape}"
                 )
 
-        return cast_tensor(tensor, tensor_axes, self.axes.names)
+        return cast_tensor(tensor, tensor_axes, self.names)
 
     def reorder(self, tensor: torch.Tensor, *trailing_axes: str) -> torch.Tensor:
         """
@@ -766,7 +578,26 @@ class SimulationParameters:
         >>> t = sim_params.reorder(tensor, "W", "H")      # -> (batch, wavelength, W, H)
         >>> t = sim_params.reorder(tensor, "wavelength")  # -> (batch, H, W, wavelength)
         """
-        return self.axes.ensure_order(tensor, *trailing_axes)
+        current = self.__names  # physical order in tensor (left to right)
+        n_batch = tensor.ndim - len(current)
+
+        trailing_set = set(trailing_axes)
+        missing = trailing_set - set(current)
+        if missing:
+            raise AxisNotFound(f"Axes not found: {missing}")
+
+        other = tuple(n for n in current if n not in trailing_set)
+        target = other + trailing_axes
+
+        if current == target:
+            return tensor
+
+        perm = [*range(n_batch), *(n_batch + current.index(n) for n in target)]
+        return tensor.permute(perm)
+
+    ###########################################################################
+    # Device management
+    ###########################################################################
 
     def to(self, device: str | torch.device | int) -> Self:
         """
@@ -797,7 +628,7 @@ class SimulationParameters:
         # Use actual device from tensor (e.g., 'cuda' → 'cuda:0')
         first_tensor = next(iter(self.__axes_dict.values()))
         self.__device = first_tensor.device
-        self._clear_caches()
+
         return self
 
     @property
@@ -805,7 +636,34 @@ class SimulationParameters:
         """Get the device where all axes are stored."""
         return self.__device
 
-    def copy(self) -> Self:
-        """Create a deep copy of this instance."""
-        new_axes = {name: tensor.clone() for name, tensor in self.__axes_dict.items()}
-        return SimulationParameters(axes=new_axes)
+    ###########################################################################
+    # Sugar
+    ###########################################################################
+
+    def __dir__(self) -> list[str]:
+        """List all available attributes including axes for autocompletion."""
+        attrs = list(self.__axes_dict.keys())
+        attrs.extend(super().__dir__())
+        return attrs
+
+    def __repr__(self) -> str:
+        """Concise string representation showing all axes."""
+        axes_info = []
+        for name in sorted(self.__axes_dict.keys()):
+            tensor = self.__axes_dict[name]
+            if tensor.dim() == 0:
+                # Scalar: show value
+                value = tensor.item()
+                axes_info.append(f"{name}={value:.3g}")
+            else:
+                # Vector: show shape
+                axes_info.append(f"{name}={tuple(tensor.shape)}")
+
+        return f"SimulationParameters({', '.join(axes_info)})"
+
+    ###########################################################################
+    # LEGACY SUPPORT
+    ###########################################################################
+    @property
+    def axes(self):
+        return self

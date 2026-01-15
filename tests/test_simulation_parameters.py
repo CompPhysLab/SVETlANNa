@@ -1,4 +1,4 @@
-from svetlanna.simulation_parameters import Axes, AxisNotFound
+from svetlanna.simulation_parameters import AxisNotFound
 from svetlanna import SimulationParameters
 import pytest
 import torch
@@ -7,20 +7,19 @@ import torch
 def test_axes():
     # Test required axes are actually required
     with pytest.raises(ValueError):
-        Axes({})
         SimulationParameters(
             {
                 "W": torch.linspace(-1, 1, 10),
             }
         )
     with pytest.raises(ValueError):
-        Axes(
+        SimulationParameters(
             {
                 "W": torch.linspace(-1, 1, 10),
                 "H": torch.linspace(-1, 1, 10),
             }
         )
-    Axes(
+    SimulationParameters(
         {
             "W": torch.linspace(-1, 1, 10),
             "H": torch.linspace(-1, 1, 10),
@@ -30,7 +29,7 @@ def test_axes():
 
     # Test with wrong H and W axis shape
     with pytest.raises(ValueError):
-        Axes(
+        SimulationParameters(
             {
                 "W": torch.tensor([[10.0]]),  # wrong shape
                 "H": torch.linspace(-1, 1, 10),
@@ -38,7 +37,7 @@ def test_axes():
             }
         )
     with pytest.raises(ValueError):
-        Axes(
+        SimulationParameters(
             {
                 "W": torch.linspace(-1, 1, 10),
                 "H": torch.tensor([[10.0]]),  # wrong shape
@@ -48,7 +47,7 @@ def test_axes():
 
     # Test with wrong additional axes shape
     with pytest.raises(ValueError):
-        Axes(
+        SimulationParameters(
             {
                 "W": torch.linspace(-1, 1, 10),
                 "H": torch.linspace(-1, 1, 10),
@@ -59,7 +58,7 @@ def test_axes():
 
     w_axis = torch.linspace(-1, 1, 10)
     pol_axis = torch.tensor([1.0, 0.0])
-    axes = Axes(
+    axes = SimulationParameters(
         {
             "W": w_axis,
             "H": torch.linspace(-1, 1, 10),
@@ -105,7 +104,7 @@ def test_axes():
         axes["t"] = 123
 
     # Test __dir__
-    assert set(dir(axes)) == {"H", "W", "pol", "wavelength"}
+    assert set(dir(axes)).issuperset({"H", "W", "pol", "wavelength"})
 
 
 def test_simulation_parameters():
@@ -211,8 +210,8 @@ def test_device(default_device: torch.device):
         assert transferred_sim_params.axes[axis_name].device == default_device
 
 
-def test_axes_scalar_names():
-    axes = Axes(
+def test_axes_names_scalar():
+    axes = SimulationParameters(
         {
             "W": torch.linspace(-1, 1, 10),
             "H": torch.linspace(-1, 1, 8),
@@ -222,16 +221,16 @@ def test_axes_scalar_names():
         }
     )
 
-    assert "wavelength" in axes.scalar_names
-    assert "time" in axes.scalar_names
-    assert "W" not in axes.scalar_names
-    assert "H" not in axes.scalar_names
-    assert "pol" not in axes.scalar_names
-    assert len(axes.scalar_names) == 2
+    assert "wavelength" in axes.names_scalar
+    assert "time" in axes.names_scalar
+    assert "W" not in axes.names_scalar
+    assert "H" not in axes.names_scalar
+    assert "pol" not in axes.names_scalar
+    assert len(axes.names_scalar) == 2
 
 
 def test_axes_shapes():
-    axes = Axes(
+    axes = SimulationParameters(
         {
             "W": torch.linspace(-1, 1, 10),
             "H": torch.linspace(-1, 1, 8),
@@ -246,7 +245,7 @@ def test_axes_shapes():
 
 
 def test_axes_ensure_order():
-    axes = Axes(
+    axes = SimulationParameters(
         {
             "W": torch.linspace(-1, 1, 10),
             "H": torch.linspace(-1, 1, 8),
@@ -257,48 +256,20 @@ def test_axes_ensure_order():
     t = torch.rand(2, 5, 8, 10)  # batch, wavelength, H, W
 
     # No change when already in correct order
-    t_same = axes.ensure_order(t, "H", "W")
+    t_same = axes.reorder(t, "H", "W")
     assert t_same.shape == torch.Size([2, 5, 8, 10])
 
     # Swap H and W
-    t_swapped = axes.ensure_order(t, "W", "H")
+    t_swapped = axes.reorder(t, "W", "H")
     assert t_swapped.shape == torch.Size([2, 5, 10, 8])
 
     # Move wavelength to end
-    t_wl_end = axes.ensure_order(t, "wavelength")
+    t_wl_end = axes.reorder(t, "wavelength")
     assert t_wl_end.shape == torch.Size([2, 8, 10, 5])
 
     # Error on non-existent axis
     with pytest.raises(AxisNotFound):
-        axes.ensure_order(t, "nonexistent")
-
-
-def test_frozen_by_default():
-    sp = SimulationParameters(
-        W=torch.linspace(-1, 1, 10),
-        H=torch.linspace(-1, 1, 10),
-        wavelength=torch.tensor(0.5),
-    )
-
-    assert sp.frozen is True
-
-    with pytest.raises(RuntimeError):
-        sp.pol = torch.tensor([1.0, 0.0])
-
-
-def test_unfreeze():
-    sp = SimulationParameters(
-        W=torch.linspace(-1, 1, 10),
-        H=torch.linspace(-1, 1, 10),
-        wavelength=torch.tensor(0.5),
-    )
-
-    assert sp.frozen is True
-    sp.unfreeze()
-    assert sp.frozen is False
-
-    sp.pol = torch.tensor([1.0, 0.0])
-    assert "pol" in sp.axis_names
+        axes.reorder(t, "nonexistent")
 
 
 def test_cast():
@@ -361,21 +332,55 @@ def test_to_inplace():
     assert id(result) == original_id
 
 
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
-def test_to_device_canonical():
+@pytest.mark.parametrize(
+    ("device",),
+    [
+        pytest.param("cpu"),
+        pytest.param(
+            "cuda",
+            marks=pytest.mark.skipif(
+                not torch.cuda.is_available(), reason="cuda is not available"
+            ),
+        ),
+        pytest.param(
+            "mps",
+            marks=pytest.mark.skipif(
+                not torch.backends.mps.is_available(), reason="mps is not available"
+            ),
+        ),
+    ],
+)
+def test_to_device_canonical(device):
     sp = SimulationParameters(
         W=torch.linspace(-1, 1, 10),
         H=torch.linspace(-1, 1, 8),
         wavelength=torch.tensor(0.5),
     )
 
-    sp.to("cuda")
-    assert sp.device == torch.device("cuda:0")
-    assert sp.axes.W.device == sp.device
+    sp.to(device)
+    assert sp.device.type == device
+    assert sp.axes.W.device.type == device
 
 
-@pytest.mark.skipif(not torch.cuda.is_available(), reason="CUDA not available")
-def test_element_to_transfers_sim_params():
+@pytest.mark.parametrize(
+    ("device",),
+    [
+        pytest.param("cpu"),
+        pytest.param(
+            "cuda",
+            marks=pytest.mark.skipif(
+                not torch.cuda.is_available(), reason="cuda is not available"
+            ),
+        ),
+        pytest.param(
+            "mps",
+            marks=pytest.mark.skipif(
+                not torch.backends.mps.is_available(), reason="mps is not available"
+            ),
+        ),
+    ],
+)
+def test_element_to_transfers_sim_params(device):
     from svetlanna.elements import ThinLens
 
     sp = SimulationParameters(
@@ -387,6 +392,6 @@ def test_element_to_transfers_sim_params():
     lens = ThinLens(sp, focal_length=0.1)
     assert sp.device.type == "cpu"
 
-    lens.to("cuda")
-    assert sp.device.type == "cuda"
-    assert sp.axes.W.device.type == "cuda"
+    lens.to(device)
+    assert sp.device.type == device
+    assert sp.axes.W.device.type == device
