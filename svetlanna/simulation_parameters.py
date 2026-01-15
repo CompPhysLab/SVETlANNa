@@ -239,6 +239,7 @@ class SimulationParameters:
         ... )
         """
         return cls(
+            axes=None,
             x=torch.linspace(x_range[0], x_range[1], x_points),
             y=torch.linspace(y_range[0], y_range[1], y_points),
             wavelength=wavelength,
@@ -275,12 +276,6 @@ class SimulationParameters:
     def names_additional(self) -> frozenset[str]:
         """Get names of additional (non-required) axes."""
         return frozenset(self.__axes_dict.keys()) - REQUIRED_AXES
-
-    # TODO: move shapes() to axes_size(axs=None)
-    @property
-    def shapes(self) -> tuple[int, ...]:
-        """Get shapes of non-scalar axes matching negative index order."""
-        return tuple(len(self.__axes_dict[name]) for name in self.__names)
 
     def __getattribute__(self, name: str) -> torch.Tensor:
         """Get axis value by name using attribute syntax."""
@@ -378,10 +373,8 @@ class SimulationParameters:
 
         return torch.meshgrid(x_data, y_data, indexing="xy")
 
-    # TODO: rename `axs` to `names`(?)
-    # TODO: why kwargs are supported?
     @functools.lru_cache(maxsize=128)
-    def axes_size(self, axs: tuple[str, ...] | None = None, **kwargs) -> torch.Size:
+    def axes_size(self, axs: tuple[str, ...] | None = None) -> torch.Size:
         """
         Get the size of specified axes in order (cached for performance).
 
@@ -401,15 +394,9 @@ class SimulationParameters:
         >>> size = params.axes_size(('y', 'x'))  # New API (cached)
         >>> size = params.axes_size(axs=('y', 'x'))  # Legacy API
         """
-        # Handle both new and legacy API
-        if axs is None and "axs" in kwargs:
-            axs = kwargs["axs"]
-            if not isinstance(axs, tuple):
-                axs = tuple(axs)
-        elif axs is None:
-            raise ValueError("axes must be specified")
-        elif not isinstance(axs, tuple):
-            axs = tuple(axs)
+
+        if axs is None:
+            axs = self.__names
 
         sizes = []
         for axis in axs:
@@ -477,8 +464,7 @@ class SimulationParameters:
             tensor_axes.append(axis_name)
 
             # Store validation info: offset from end, expected shape, name
-            axis_idx = self.index(axis_name)  # negative index
-            expected_shape = self.shapes[axis_idx]
+            (expected_shape,) = self.axes_size((axis_name,))
             validations.append((i - len(axes), expected_shape, axis_name))
 
         return tuple(tensor_axes), tuple(validations)

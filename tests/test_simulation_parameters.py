@@ -229,21 +229,6 @@ def test_axes_names_scalar():
     assert len(axes.names_scalar) == 2
 
 
-def test_axes_shapes():
-    axes = SimulationParameters(
-        {
-            "x": torch.linspace(-1, 1, 10),
-            "y": torch.linspace(-1, 1, 8),
-            "wavelength": torch.linspace(0.4, 0.6, 5),
-        }
-    )
-
-    # shapes should match negative indexing
-    assert axes.shapes[-1] == 10  # W
-    assert axes.shapes[-2] == 8  # H
-    assert axes.shapes[-3] == 5  # wavelength
-
-
 def test_axes_ensure_order():
     axes = SimulationParameters(
         {
