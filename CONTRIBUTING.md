@@ -44,6 +44,11 @@ Pytest is used for testing:
 poetry run pytest
 ```
 
+To generate coverage reports, use:
+```bash
+poetry run pytest --cov=svetlanna --cov-report=html
+```
+
 ## VS Code
 
 Extensions for Black, Flake8, and Mypy are available.
