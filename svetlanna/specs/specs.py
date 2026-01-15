@@ -167,7 +167,7 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
     def __init__(
         self,
         value: Any,
-        mode: Literal["1", "L", "LA", "I", "P", "RGB", "RGBA"] = "L",
+        mode: Literal["1", "L", "LA", "P", "RGB", "RGBA"] = "L",
         format: str = "png",
         show_image: bool = True,
     ):
@@ -176,7 +176,7 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
         ----------
         value : Any
             The image data. See `matplotlib.pyplot.imshow` docs.
-        mode : Literal['1', 'L', 'LA', 'I', 'P', 'RGB', 'RGBA'], optional
+        mode : Literal['1', 'L', 'LA', 'P', 'RGB', 'RGBA'], optional
             the mode of the image, see https://pillow.readthedocs.io/en/stable/handbook/concepts.html#concept-modes.
             By default `L`
         format : str, optional
@@ -187,6 +187,53 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
         self.format = format
         self.mode = mode
         self.show_image = show_image
+
+    import numpy as np
+
+    def _to_pillow_mode(
+        self, value: np.ndarray, mode: Literal["1", "L", "LA", "P", "RGB", "RGBA"]
+    ) -> np.ndarray:
+        """
+        Convert a (H, W) numpy array into a numpy array compatible with a Pillow mode.
+
+        Supported modes: "1", "L", "LA", "P", "RGB", "RGBA"
+        """
+        if value.ndim != 2:
+            raise ValueError("Input array must have shape (H, W)")
+
+        H, W = value.shape
+
+        if mode == "1":
+            # 1-bit image (boolean or 0/1)
+            return (value > 0).astype(np.uint8)
+
+        elif mode == "L":
+            # 8-bit grayscale
+            return np.clip(value, 0, 255).astype(np.uint8)
+
+        elif mode == "LA":
+            # Luminance + Alpha
+            L = np.clip(value, 0, 255).astype(np.uint8)
+            A = np.full((H, W), 255, dtype=np.uint8)
+            return np.stack([L, A], axis=-1)
+
+        elif mode == "P":
+            # Paletted image: values are palette indices
+            return np.clip(value, 0, 255).astype(np.uint8)
+
+        elif mode == "RGB":
+            # Replicate grayscale into 3 channels
+            L = np.clip(value, 0, 255).astype(np.uint8)
+            return np.stack([L, L, L], axis=-1)
+
+        elif mode == "RGBA":
+            # Replicate grayscale + opaque alpha
+            L = np.clip(value, 0, 255).astype(np.uint8)
+            A = np.full((H, W), 255, dtype=np.uint8)
+            return np.stack([L, L, L, A], axis=-1)
+
+        else:
+            raise ValueError(f"Unsupported mode: {mode}")
 
     def draw_image(self, context: ParameterSaveContext, filepath: Path) -> Image.Image:
         """Draw image into the file, using `pillow` package.
@@ -200,7 +247,7 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
         """
 
         with context.file(filepath=filepath) as f:
-            image = Image.fromarray(self.value, mode=self.mode)
+            image = Image.fromarray(self._to_pillow_mode(self.value, self.mode))
             image.save(f, format=self.format)
 
         return image
@@ -224,7 +271,7 @@ class ImageRepr(StrRepresentation, MarkdownRepresentation, HTMLRepresentation):
 
     def to_html(self, out: TextIO, context: ParameterSaveContext):
 
-        image = Image.fromarray(self.value, mode=self.mode)
+        image = Image.fromarray(self._to_pillow_mode(self.value, self.mode))
 
         if self.show_image:
             buffer = BytesIO()

@@ -70,7 +70,7 @@ def test_save_context_rel_filepath(tmp_path):
 
 
 @pytest.mark.usefixtures("tmp_path")
-@pytest.mark.parametrize("mode", ("1", "L", "LA", "I", "P", "RGB", "RGBA"))
+@pytest.mark.parametrize("mode", ("1", "L", "LA", "P", "RGB", "RGBA"))
 def test_image_repr_draw_image(tmp_path, mode):
     context = ParameterSaveContext(
         parameter_name="test",
