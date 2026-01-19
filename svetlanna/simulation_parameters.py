@@ -93,7 +93,12 @@ class SimulationParameters:
         """
         # Handle backward compatibility
         if axes is not None:
-            if any(x is not None for x in [x, y, wavelength]) or additional_axes:
+            if (
+                x is not None
+                or y is not None
+                or wavelength is not None
+                or additional_axes
+            ):
                 raise ValueError(
                     "Cannot use both 'axes' dict and keyword arguments. "
                     "Use either axes={...} or x=..., y=..., wavelength=..."
@@ -101,7 +106,7 @@ class SimulationParameters:
             all_axes = dict(axes)
         else:
             # New style initialization
-            if any(x is None for x in [x, y, wavelength]):
+            if x is None or y is None or wavelength is None:
                 raise ValueError(
                     "x, y, and wavelength are required when not using 'axes' dict"
                 )
@@ -177,9 +182,6 @@ class SimulationParameters:
         self.__axes_dict = converted_axes
         self.__device = device
 
-        # Lazy initialization and caching
-        self._clear_caches()
-
         if TYPE_CHECKING:
             self.x: torch.Tensor
             self.y: torch.Tensor
@@ -194,7 +196,6 @@ class SimulationParameters:
             self.axes_size.cache_clear()
         if hasattr(self._cast_info, "cache_clear"):
             self._cast_info.cache_clear()
-        # Reset lazy axes
 
     ###########################################################################
     # Initializers
@@ -233,8 +234,8 @@ class SimulationParameters:
         --------
         >>> from svetlanna.units import ureg
         >>> params = SimulationParameters.from_ranges(
-        ...     w_range=(-1*ureg.mm, 1*ureg.mm), w_points=256,
-        ...     h_range=(-1*ureg.mm, 1*ureg.mm), h_points=256,
+        ...     x_range=(-1*ureg.mm, 1*ureg.mm), x_points=256,
+        ...     y_range=(-1*ureg.mm, 1*ureg.mm), y_points=256,
         ...     wavelength=632.8*ureg.nm
         ... )
         """
@@ -272,12 +273,7 @@ class SimulationParameters:
         """Get names of scalar (0-dimensional) axes."""
         return self.__scalar_names
 
-    @property
-    def names_additional(self) -> frozenset[str]:
-        """Get names of additional (non-required) axes."""
-        return frozenset(self.__axes_dict.keys()) - REQUIRED_AXES
-
-    def __getattribute__(self, name: str) -> torch.Tensor:
+    def __getattribute__(self, name: str) -> Any:
         """Get axis value by name using attribute syntax."""
         # Avoid infinite recursion for private attributes
         if name == "_SimulationParameters__axes_dict":

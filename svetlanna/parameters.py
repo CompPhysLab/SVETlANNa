@@ -1,5 +1,5 @@
 import torch
-from typing import Callable, Any, TypeAlias
+from typing import Callable, Any, TypeAlias, TYPE_CHECKING
 
 # TODO: fix impropriate .to() method handling in parameters
 
@@ -7,7 +7,7 @@ from typing import Callable, Any, TypeAlias
 class InnerParameterStorageModule(torch.nn.Module):
     def __init__(self, params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]):
         super().__init__()
-        self.params_to_store = {}
+        self.params_to_store: dict[str, torch.Tensor | torch.nn.Parameter] = {}
         self.expand(params_to_store)
 
     def expand(self, params_to_store: dict[str, torch.Tensor | torch.nn.Parameter]):
@@ -30,6 +30,10 @@ class InnerParameterStorageModule(torch.nn.Module):
                     "The type {type(value)} of {name} is not compatible."
                 )
             self.params_to_store[name] = value
+
+    if TYPE_CHECKING:
+
+        def __getattr__(self, name: str) -> torch.Tensor | torch.nn.Parameter: ...
 
 
 class Parameter(torch.Tensor):
@@ -80,7 +84,7 @@ class Parameter(torch.Tensor):
         args = (a.inner_parameter if isinstance(a, cls) else a for a in args)
         return func(*args, **kwargs)
 
-    def __repr__(self, *args, **kwargs) -> str:
+    def __repr__(self, **kwargs):
         return repr(self.inner_parameter)
 
 
@@ -187,7 +191,7 @@ class ConstrainedParameter(Parameter):
         args = (a.value if isinstance(a, cls) else a for a in args)
         return func(*args, **kwargs)
 
-    def __repr__(self) -> str:
+    def __repr__(self, **kwargs):
         return f"Bounded parameter containing:\n{repr(self.value)}"
 
 
