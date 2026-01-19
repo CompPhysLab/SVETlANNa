@@ -2,8 +2,8 @@ from __future__ import annotations
 from typing import Any, TYPE_CHECKING, Self
 import torch
 import warnings
-import functools
 from collections.abc import Mapping
+from functools import lru_cache
 
 
 class AxisNotFound(Exception):
@@ -13,6 +13,7 @@ class AxisNotFound(Exception):
 
 
 REQUIRED_AXES = ("x", "y", "wavelength")
+CACHE_SIZE = 128
 
 
 def legacy_axis_support(name: str) -> str:
@@ -116,6 +117,13 @@ class SimulationParameters:
             legacy_axis_support(name): value for name, value in all_axes.items()
         }
 
+        # Validate axis names
+        for name in all_axes.keys():
+            if not isinstance(name, str):
+                raise TypeError(
+                    f"Axis names must be strings, but got {type(name)}: {name})"
+                )
+
         # Check required axes presence
         if not all(name in all_axes.keys() for name in REQUIRED_AXES):
             missing = set(REQUIRED_AXES).difference(all_axes.keys())
@@ -176,9 +184,9 @@ class SimulationParameters:
                 name: tensor.to(device) for name, tensor in converted_axes.items()
             }
 
-        self.__names_inversed = tuple(non_scalar_names)
+        self.__names_reversed = tuple(non_scalar_names)
         self.__names = tuple(reversed(non_scalar_names))
-        self.__scalar_names = tuple(scalar_names)
+        self.__names_scalar = tuple(scalar_names)
         self.__axes_dict = converted_axes
         self.__device = device
 
@@ -209,7 +217,7 @@ class SimulationParameters:
         x_points: int,
         y_range: tuple[float, float],
         y_points: int,
-        wavelength: float,
+        wavelength: torch.Tensor | float,
         **additional_axes: torch.Tensor | float,
     ) -> Self:
         """
@@ -225,7 +233,7 @@ class SimulationParameters:
             (min, max) range for y-axis. Use `ureg` for units.
         y_points : int
             Number of points along y-axis.
-        wavelength : float
+        wavelength : torch.Tensor | float
             Optical wavelength. Use `ureg` for units.
         **additional_axes : torch.Tensor | float
             Additional axes.
@@ -248,7 +256,10 @@ class SimulationParameters:
         )
 
     @classmethod
-    def from_dict(cls, axes_dict: Mapping[str, torch.Tensor | float]) -> Self:
+    def from_dict(
+        cls,
+        axes_dict: Mapping[str, torch.Tensor | float],
+    ) -> Self:
         """
         Create SimulationParameters from a dictionary.
 
@@ -271,7 +282,7 @@ class SimulationParameters:
     @property
     def names_scalar(self) -> tuple[str, ...]:
         """Get names of scalar (0-dimensional) axes."""
-        return self.__scalar_names
+        return self.__names_scalar
 
     def __getattribute__(self, name: str) -> Any:
         """Get axis value by name using attribute syntax."""
@@ -326,51 +337,43 @@ class SimulationParameters:
         Parameters
         ----------
         x_axis : str
-            Name of the axis for x-coordinates (typically 'W').
+            Name of the axis for x-coordinates (typically 'x').
         y_axis : str
-            Name of the axis for y-coordinates (typically 'H').
+            Name of the axis for y-coordinates (typically 'y').
 
         Returns
         -------
         x_grid, y_grid : tuple[torch.Tensor, torch.Tensor]
             2D coordinate grids with 'xy' indexing convention.
         """
-        # Validate input
-        if not isinstance(x_axis, str) or not isinstance(y_axis, str):
-            raise TypeError("Axis names must be strings")
+
         x_axis = legacy_axis_support(x_axis)
         y_axis = legacy_axis_support(y_axis)
 
-        if x_axis not in self.__axes_dict or y_axis not in self.__axes_dict:
-            missing = [ax for ax in [x_axis, y_axis] if ax not in self.__axes_dict]
-            raise AxisNotFound(f"Axes not found: {missing}")
+        missing = [ax for ax in [x_axis, y_axis] if ax not in self.__axes_dict]
+        if missing:
+            raise AxisNotFound(f"Axes not found: {', '.join(missing)}")
 
-        x_data = self[x_axis]
-        y_data = self[y_axis]
+        x = self[x_axis]
+        y = self[y_axis]
 
         # Handle scalar axes by unsqueezing to 1D
-        if x_data.dim() == 0:
-            x_data = x_data.unsqueeze(0)
-        if y_data.dim() == 0:
-            y_data = y_data.unsqueeze(0)
+        if x.dim() == 0:
+            x = x.unsqueeze(0)
+        if y.dim() == 0:
+            y = y.unsqueeze(0)
 
-        # Validate axes are 1D
-        if x_data.dim() != 1 or y_data.dim() != 1:
-            raise ValueError(
-                f"Both axes must be 0- or 1-dimensional. "
-                f"Got {x_axis}: {x_data.dim()}D, {y_axis}: {y_data.dim()}D"
-            )
-
+        # TODO: if this code should be uncommented, add tests for it
         # Only transfer to device if necessary (optimization)
-        if x_data.device != self.__device:
-            x_data = x_data.to(self.__device)
-        if y_data.device != self.__device:
-            y_data = y_data.to(self.__device)
+        # if x.device != self.__device:
+        #     x = x.to(self.__device)
+        # if y.device != self.__device:
+        #     y = y.to(self.__device)
 
-        x, y = torch.meshgrid(x_data, y_data, indexing="xy")
-        return x, y
+        X, Y = torch.meshgrid(x, y, indexing="xy")
+        return X, Y
 
-    @functools.lru_cache(maxsize=128)
+    @lru_cache(maxsize=CACHE_SIZE)
     def axes_size(self, axs: tuple[str, ...] | None = None) -> torch.Size:
         """
         Get the size of specified axes in order (cached for performance).
@@ -397,12 +400,10 @@ class SimulationParameters:
 
         sizes = []
         for axis in axs:
-            try:
-                axis_tensor = self[axis]
-                axis_len = len(axis_tensor) if axis_tensor.dim() > 0 else 1
-            except (TypeError, AxisNotFound):
-                warnings.warn(f"Axis '{axis}' not found. Using size 0.")
-                axis_len = 0
+
+            axis_tensor = self[axis]
+            axis_len = len(axis_tensor) if axis_tensor.dim() > 0 else 1
+
             sizes.append(axis_len)
 
         return torch.Size(sizes)
@@ -428,43 +429,42 @@ class SimulationParameters:
         """
         name = legacy_axis_support(name)
         if name in self.__names:
-            return -self.__names_inversed.index(name) - 1
+            return -self.__names_reversed.index(name) - 1
         raise AxisNotFound(f"Axis '{name}' does not exist or is scalar")
 
     ###########################################################################
     # Casting and reordering
     ###########################################################################
 
-    @functools.lru_cache(maxsize=64)
+    @lru_cache(maxsize=CACHE_SIZE)
     def _cast_info(
         self, axes: tuple[str, ...]
-    ) -> tuple[tuple[str, ...], tuple[tuple[int, int, str], ...]]:
+    ) -> tuple[tuple[str, ...], tuple[int, ...]]:
         """
-        Cached helper for cast(). Returns (tensor_axes, validations).
-
-        validations is tuple of (input_offset, expected_shape, axis_name).
+        Cached helper for cast(). Returns (tensor_axes, tensor_sizes).
+        tensor_axes is  tuple of (axis_name),
+        tensor_sizes is tuple of (axis_size).
         """
         tensor_axes: list[str] = []
-        validations: list[tuple[int, int, str]] = []
+        tensor_sizes: list[int] = []
 
-        for i, axis_name in enumerate(axes):
+        for axis_name, axis_size in zip(axes, self.axes_size(axes)):
             # Skip scalar axes - they don't correspond to tensor dimensions
             if axis_name in self.names_scalar:
                 continue
 
+            # You do't need to check axis existence here because
+            # axes_size() already does that.
             # Check axis exists
-            if axis_name not in self.names:
-                raise ValueError(
-                    f"Axis '{axis_name}' not found in simulation parameters"
-                )
+            # if axis_name not in self.names:
+            #     raise ValueError(
+            #         f"Axis '{axis_name}' not found in simulation parameters"
+            #     )
 
             tensor_axes.append(axis_name)
+            tensor_sizes.append(axis_size)
 
-            # Store validation info: offset from end, expected shape, name
-            (expected_shape,) = self.axes_size((axis_name,))
-            validations.append((i - len(axes), expected_shape, axis_name))
-
-        return tuple(tensor_axes), tuple(validations)
+        return tuple(tensor_axes), tuple(tensor_sizes)
 
     def cast(self, tensor: torch.Tensor, *axes: str) -> torch.Tensor:
         """
@@ -497,16 +497,18 @@ class SimulationParameters:
         from svetlanna.axes_math import cast_tensor
 
         # Get cached preprocessing
-        tensor_axes, validations = self._cast_info(axes)
+        tensor_axes, tensor_sizes = self._cast_info(axes)
 
         # Validate shapes
-        for offset, expected_shape, axis_name in validations:
-            actual_shape = tensor.shape[offset]
-            if expected_shape != actual_shape:
-                raise ValueError(
-                    f"Axis '{axis_name}' has shape {actual_shape}, "
-                    f"expected {expected_shape}"
-                )
+        if tensor.shape[: len(tensor_sizes)] != tensor_sizes:
+            # If shapes are not matching, find the first mismatch
+            for i, (actual, expected) in enumerate(zip(tensor.shape, tensor_sizes)):
+                if actual != expected:
+                    axis_name = tensor_axes[i]
+                    raise ValueError(
+                        f"Axis '{axis_name}' has shape {actual}, "
+                        f"expected {expected}."
+                    )
 
         return cast_tensor(tensor, tensor_axes, self.names)
 
