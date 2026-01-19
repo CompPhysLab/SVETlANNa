@@ -12,7 +12,7 @@ class AxisNotFound(Exception):
     pass
 
 
-REQUIRED_AXES = {"x", "y", "wavelength"}
+REQUIRED_AXES = ("x", "y", "wavelength")
 
 
 def legacy_axis_support(name: str) -> str:
@@ -118,7 +118,7 @@ class SimulationParameters:
 
         # Check required axes presence
         if not all(name in all_axes.keys() for name in REQUIRED_AXES):
-            missing = REQUIRED_AXES - set(all_axes.keys())
+            missing = set(REQUIRED_AXES).difference(all_axes.keys())
             raise ValueError(
                 f"Missing required axes: {missing}. " f"Required: {REQUIRED_AXES}"
             )
