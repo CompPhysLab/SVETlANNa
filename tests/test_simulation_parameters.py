@@ -591,6 +591,7 @@ def test_clear_cache():
     )
 
     # Test axes_size cache
+    sp.axes_size.cache_clear()
     sp.axes_size(("x", "y"))
     assert sp.axes_size.cache_info().hits == 0
     sp.axes_size(("x", "y"))
@@ -601,6 +602,7 @@ def test_clear_cache():
     assert sp.axes_size.cache_info().hits == 0
 
     # Test _cast_info cache
+    sp._cast_info.cache_clear()
     t = torch.rand(100)
     sp.cast(t, "x")
     assert sp._cast_info.cache_info().hits == 0
