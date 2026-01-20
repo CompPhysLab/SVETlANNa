@@ -499,15 +499,18 @@ class SimulationParameters:
         # Get cached preprocessing
         tensor_axes, tensor_sizes = self._cast_info(axes)
 
-        # Validate shapes
-        if tensor.shape[: len(tensor_sizes)] != tensor_sizes:
+        if tensor.shape != tensor_sizes:
+            if len(tensor.shape) != len(tensor_sizes):
+                raise ValueError(
+                    f"Tensor has shape {tuple(tensor.shape)}, "
+                    f"expected shape {tensor_sizes} for axes {tensor_axes}."
+                )
             # If shapes are not matching, find the first mismatch
-            for i, (actual, expected) in enumerate(zip(tensor.shape, tensor_sizes)):
+            for actual, expected in zip(tensor.shape, tensor_sizes):
                 if actual != expected:
-                    axis_name = tensor_axes[i]
                     raise ValueError(
-                        f"Axis '{axis_name}' has shape {actual}, "
-                        f"expected {expected}."
+                        f"Tensor has shape {tuple(tensor.shape)}, "
+                        f"expected shape {tensor_sizes} for axes {tensor_axes}."
                     )
 
         return cast_tensor(tensor, tensor_axes, self.names)

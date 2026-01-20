@@ -463,6 +463,18 @@ def test_cast():
     with pytest.raises(ValueError):
         sp.cast(torch.rand(Ny + 1, Nx), "y", "x")
 
+    # Error on additional axis in the tensor
+    with pytest.raises(ValueError):
+        sp.cast(torch.rand(10, Ny, Nx), "y", "x")
+    with pytest.raises(ValueError):
+        sp.cast(torch.rand(Ny, Nx, 10), "y", "x")
+
+    # Error on absence of axis in the tensor
+    with pytest.raises(ValueError):
+        sp.cast(torch.rand(Ny, Nx), "wavelength", "y", "x")
+    with pytest.raises(ValueError):
+        sp.cast(torch.rand(Ny, Nx), "y", "wavelength", "x")
+
     # Error on unknown axis
     with pytest.raises(AxisNotFound):
         sp.cast(torch.rand(Nx, Ny), "y", "m")
