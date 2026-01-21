@@ -1,7 +1,7 @@
 import torch
 from .element import Element
 from ..simulation_parameters import SimulationParameters
-from ..wavefront import Wavefront, mul
+from ..wavefront import Wavefront
 from ..parameters import OptimizableTensor
 from typing import Iterable
 from ..specs import ImageRepr, PrettyReprRepr, ParameterSpecs
@@ -40,7 +40,9 @@ class DiffractiveLayer(Element):
 
     @property
     def transmission_function(self) -> torch.Tensor:
-        return torch.exp((2j * torch.pi / self.mask_norm) * self.mask)
+        return self.simulation_parameters.cast(
+            torch.exp((2j * torch.pi / self.mask_norm) * self.mask), "y", "x"
+        )
 
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Method that calculates the field after propagating through the SLM
@@ -55,12 +57,7 @@ class DiffractiveLayer(Element):
         Wavefront
             The field after propagating through the SLM
         """
-        return mul(
-            incident_wavefront,
-            self.transmission_function,
-            ("y", "x"),
-            self.simulation_parameters,
-        )
+        return incident_wavefront * self.transmission_function
 
     def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
         """Method that calculates the field after passing the SLM in back
@@ -78,12 +75,7 @@ class DiffractiveLayer(Element):
             Field transmitted on the SLM in back propagation
             (incident field in forward propagation)
         """
-        return mul(
-            transmission_wavefront,
-            torch.conj(self.transmission_function),
-            ("y", "x"),
-            self.simulation_parameters,
-        )
+        return transmission_wavefront * torch.conj(self.transmission_function)
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         mask = self.mask.numpy(force=True)
