@@ -3,7 +3,7 @@ import torch
 from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableTensor
-from ..wavefront import Wavefront, mul
+from ..wavefront import Wavefront
 from abc import ABC, abstractmethod
 from typing import Iterable
 from ..specs import ImageRepr, PrettyReprRepr, ParameterSpecs
@@ -26,19 +26,6 @@ class MulElement(Element, ABC):
             transmission function
         """
 
-    @property
-    @abstractmethod
-    def transmission_function_axes(self) -> tuple[str, ...]:
-        """Axes of the transmission function.
-        For example, `('y', 'x')`
-
-        Returns
-        -------
-        tuple[str, ...]
-            Axes
-        """
-        ...
-
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Calculate the field after propagating through the
         element
@@ -53,12 +40,7 @@ class MulElement(Element, ABC):
         Wavefront
             The field after propagating through the element
         """
-        return mul(
-            incident_wavefront,
-            self.get_transmission_function(),
-            self.transmission_function_axes,
-            self.simulation_parameters,
-        )
+        return incident_wavefront * self.get_transmission_function()
 
     @staticmethod
     def _widget_html_(
@@ -92,14 +74,9 @@ class Aperture(MulElement):
         super().__init__(simulation_parameters=simulation_parameters)
 
         self.mask = self.process_parameter("mask", mask)
-        self._calc_axes = ("y", "x")
-
-    @property
-    def transmission_function_axes(self) -> tuple[str, ...]:
-        return self._calc_axes
 
     def get_transmission_function(self) -> torch.Tensor:
-        return self.mask
+        return self.simulation_parameters.cast(self.mask, "y", "x")
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         return [
@@ -140,7 +117,6 @@ class RectangularAperture(MulElement):
 
         _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="x", y_axis="y")
 
-        self._calc_axes = ("y", "x")
         self._mask = self.make_buffer(
             "_mask",
             (
@@ -149,12 +125,8 @@ class RectangularAperture(MulElement):
             ).to(dtype=torch.get_default_dtype()),
         )
 
-    @property
-    def transmission_function_axes(self) -> tuple[str, ...]:
-        return self._calc_axes
-
     def get_transmission_function(self) -> torch.Tensor:
-        return self._mask
+        return self.simulation_parameters.cast(self._mask, "y", "x")
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         return [
@@ -185,7 +157,6 @@ class RoundAperture(MulElement):
 
         _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="x", y_axis="y")
 
-        self._calc_axes = ("y", "x")
         self._mask = self.make_buffer(
             "_mask",
             (_x_grid**2 + _y_grid**2 <= self.radius**2).to(
@@ -193,12 +164,8 @@ class RoundAperture(MulElement):
             ),
         )
 
-    @property
-    def transmission_function_axes(self) -> tuple[str, ...]:
-        return self._calc_axes
-
     def get_transmission_function(self) -> torch.Tensor:
-        return self._mask
+        return self.simulation_parameters.cast(self._mask, "y", "x")
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         return [ParameterSpecs("radius", [PrettyReprRepr(self.radius)])]
