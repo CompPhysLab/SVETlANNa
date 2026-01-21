@@ -96,6 +96,7 @@ class Element(nn.Module, metaclass=ABCMeta):
                     "internal type _BufferedValueContainer. "
                     "Make sure this is the intended behavior."
                 )
+                return super().__setattr__(name, value)  # type: ignore
 
         # BoundedParameter and Parameter are handled by pointing
         # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
@@ -206,9 +207,9 @@ class Element(nn.Module, metaclass=ABCMeta):
                     f"Parameter {name} must be on " "the simulation parameters device."
                 )
         if isinstance(value, (nn.Parameter, Parameter)):
-            return value
+            return value  # type: ignore
         if isinstance(value, Tensor):
-            return self.make_buffer(name, value, persistent=True)
+            return self.make_buffer(name, value, persistent=True)  # type: ignore
         return value
 
     # === methods below are added for typing only ===
