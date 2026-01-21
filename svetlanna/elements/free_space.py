@@ -5,7 +5,6 @@ from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableFloat
 from ..wavefront import Wavefront
-from ..axes_math import tensor_dot
 from warnings import warn
 from ..specs import PrettyReprRepr, ParameterSpecs
 from ..visualization import ElementHTML, jinja_env
@@ -43,38 +42,38 @@ class FreeSpace(Element):
         # params extracted from SimulationParameters
         device = self.simulation_parameters.device
 
-        self._w_index = self.simulation_parameters.axes.index("x")
-        self._h_index = self.simulation_parameters.axes.index("y")
+        self._x_index = self.simulation_parameters.index("x")
+        self._y_index = self.simulation_parameters.index("y")
 
-        x_linear = self.simulation_parameters.axes.x
-        y_linear = self.simulation_parameters.axes.y
+        x = self.simulation_parameters.x
+        y = self.simulation_parameters.y
 
-        x_nodes = x_linear.shape[0]
-        y_nodes = y_linear.shape[0]
+        x_nodes = x.shape[0]
+        y_nodes = y.shape[0]
 
         # Compute spatial grid spacing
-        dx = (x_linear[1] - x_linear[0]) if x_nodes > 1 else 1.0
-        dy = (y_linear[1] - y_linear[0]) if y_nodes > 1 else 1.0
+        dx = (x[1] - x[0]) if x_nodes > 1 else 1.0
+        dy = (y[1] - y[0]) if y_nodes > 1 else 1.0
 
         # Compute wave vectors
-        kx_linear = 2 * torch.pi * torch.fft.fftfreq(x_nodes, dx, device=device)
-        ky_linear = 2 * torch.pi * torch.fft.fftfreq(y_nodes, dy, device=device)
+        kx = 2 * torch.pi * torch.fft.fftfreq(x_nodes, dx, device=device)
+        ky = 2 * torch.pi * torch.fft.fftfreq(y_nodes, dy, device=device)
 
         # Compute wave vectors grids
-        kx_grid = kx_linear[None, :]  # shape: (1, 'x')
-        ky_grid = ky_linear[:, None]  # shape: ('y', 1)
+        _kx = self.simulation_parameters.cast(kx, "x")
+        _ky = self.simulation_parameters.cast(ky, "y")
 
         # Calculate (kx^2+ky^2) / k^2 relation
-        # 1) Calculate wave vector of shape ('wavelength') or ()
-        k = 2 * torch.pi / self.simulation_parameters.axes.wavelength
+        # 1) Calculate wave vector
+        wave_number = self.simulation_parameters.cast(
+            2 * torch.pi / self.simulation_parameters.wavelength, "wavelength"
+        )
 
         # 2) Calculate (kx^2+ky^2) tensor
-        kx2ky2 = kx_grid**2 + ky_grid**2  # shape: ('y', 'x')
+        kx2ky2 = _kx**2 + _ky**2
 
         # 3) Calculate (kx^2+ky^2) / k^2
-        relation, relation_axes = tensor_dot(
-            a=1 / (k**2), b=kx2ky2, a_axis="wavelength", b_axis=("y", "x")
-        )  # shape: ('wavelength', 'y', 'x') or ('y', 'x') depending on k shape
+        relation = kx2ky2 / wave_number**2
 
         # TODO: Remove legacy filter
         use_legacy_filter = False
@@ -84,22 +83,19 @@ class FreeSpace(Element):
         if use_legacy_filter:
             # TODO: Shouldn't the 88'th string be here?
             condition = relation <= 1  # calculate the low pass filter condition  # noqa
-            condition = condition.to(kx_grid)  # cast bool to float
+            condition = condition.to(_kx)  # cast bool to float
 
             # Registering Buffer for _low_pass_filter
-            self._low_pass_filter = self.make_buffer("_low_pass_filter", condition)
+            self._low_pass_filter: torch.Tensor | int = self.make_buffer(
+                "_low_pass_filter", condition
+            )
         else:
             self._low_pass_filter = 1
 
         # Reshape wave vector for further calculations
-        wave_number = k[
-            ..., None, None
-        ]  # shape: ('wavelength', 1, 1) or (1, 1)  # noqa
 
         # Registering Buffer for _wave_number
         self._wave_number = self.make_buffer("_wave_number", wave_number)
-
-        self._calc_axes = relation_axes  # axes tuple used during calculations
 
         # Calculate kz
         if use_legacy_filter:
@@ -130,13 +126,17 @@ class FreeSpace(Element):
         # See (9.32), (9.36) in
         # Fourier Optics and Computational Imaging (2nd ed)
         # by Kedar Khare, Mansi Butola and Sunaina Rajor
-        Lx = torch.abs(x_linear[-1] - x_linear[0])
-        Ly = torch.abs(y_linear[-1] - y_linear[0])
+        Lx = torch.abs(x[-1] - x[0])
+        Ly = torch.abs(y[-1] - y[0])
         if method == "AS":
-            kx_max = torch.max(torch.abs(kx_linear))
-            ky_max = torch.max(torch.abs(ky_linear))
-            x_condition = kx_max >= k / torch.sqrt(1 + (2 * distance / Lx) ** 2)
-            y_condition = ky_max >= k / torch.sqrt(1 + (2 * distance / Ly) ** 2)
+            kx_max = torch.max(torch.abs(_kx))
+            ky_max = torch.max(torch.abs(_ky))
+            x_condition = kx_max >= wave_number / torch.sqrt(
+                1 + (2 * distance / Lx) ** 2
+            )
+            y_condition = ky_max >= wave_number / torch.sqrt(
+                1 + (2 * distance / Ly) ** 2
+            )
 
             if not torch.all(x_condition):
                 warn(
@@ -153,7 +153,7 @@ class FreeSpace(Element):
 
         if method == "fresnel":
             diagonal_squared = Lx**2 + Ly**2
-            condition = distance**3 > k / 8 * (diagonal_squared) ** 2
+            condition = distance**3 > wave_number / 8 * (diagonal_squared) ** 2
 
             if not torch.all(condition):
                 warn(
@@ -234,22 +234,16 @@ class FreeSpace(Element):
         """
 
         input_field_fft = torch.fft.fft2(
-            incident_wavefront, dim=(self._h_index, self._w_index)
+            incident_wavefront, dim=(self._y_index, self._x_index)
         )
 
         impulse_response_fft = self._impulse_response()
 
         # Fourier image of output field
-        output_field_fft, _ = tensor_dot(
-            a=input_field_fft,  # example shape: (5, 'wavelength', 1, 'y', 'x')
-            b=impulse_response_fft,  # example shape: ('wavelength', 'y', 'x')
-            a_axis=self.simulation_parameters.axes.names,
-            b_axis=self._calc_axes,
-            preserve_a_axis=True,  # check that the output has the input shape
-        )  # example output shape: (5, 'wavelength', 1, 'y', 'x')
+        output_field_fft = input_field_fft * impulse_response_fft
 
         output_field = torch.fft.ifft2(
-            output_field_fft, dim=(self._h_index, self._w_index)
+            output_field_fft, dim=(self._y_index, self._x_index)
         )
 
         return output_field
@@ -271,22 +265,16 @@ class FreeSpace(Element):
         """
 
         transmission_field_fft = torch.fft.fft2(
-            transmission_wavefront, dim=(self._h_index, self._w_index)
+            transmission_wavefront, dim=(self._y_index, self._x_index)
         )
 
         impulse_response_fft = self._impulse_response().conj()
 
         # Fourier image of output field
-        incident_field_fft, _ = tensor_dot(
-            a=transmission_field_fft,  # example shape: (5, 'wavelength', 1, 'y', 'x')  # noqa
-            b=impulse_response_fft,  # example shape: ('wavelength', 'y', 'x')
-            a_axis=self.simulation_parameters.axes.names,
-            b_axis=self._calc_axes,
-            preserve_a_axis=True,  # check that the output has the first input shape  # noqa
-        )  # example output shape: (5, 'wavelength', 1, 'y', 'x')
+        incident_field_fft = transmission_field_fft * impulse_response_fft
 
         incident_field = torch.fft.ifft2(
-            incident_field_fft, dim=(self._h_index, self._w_index)
+            incident_field_fft, dim=(self._y_index, self._x_index)
         )
 
         return incident_field
