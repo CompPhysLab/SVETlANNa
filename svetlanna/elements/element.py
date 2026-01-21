@@ -207,7 +207,7 @@ class Element(nn.Module, metaclass=ABCMeta):
                     f"Parameter {name} must be on " "the simulation parameters device."
                 )
         if isinstance(value, (nn.Parameter, Parameter)):
-            return value  # type: ignore
+            return value
         if isinstance(value, Tensor):
             return self.make_buffer(name, value, persistent=True)  # type: ignore
         return value
