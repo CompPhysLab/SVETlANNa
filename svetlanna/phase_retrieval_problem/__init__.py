@@ -6,9 +6,9 @@ from .phase_retrieval_result import PhaseRetrievalResult
 
 
 __all__ = [
-    'retrieve_phase',
-    'gerchberg_saxton_algorithm',
-    'hybrid_input_output',
-    'PhaseRetrievalResult',
-    'SetupLike'
+    "retrieve_phase",
+    "gerchberg_saxton_algorithm",
+    "hybrid_input_output",
+    "PhaseRetrievalResult",
+    "SetupLike",
 ]

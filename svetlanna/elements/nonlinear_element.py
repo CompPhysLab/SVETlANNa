@@ -10,9 +10,11 @@ class FunctionModule(torch.nn.Module):
     """A class for transforming an arbitrary function with multiple parameters.
     Allows training function parameters
     """
+
     def __init__(
-        self, function: Callable[[torch.Tensor], torch.Tensor],
-        function_parameters: Dict | None
+        self,
+        function: Callable[[torch.Tensor], torch.Tensor],
+        function_parameters: Dict | None,
     ) -> None:
         """Constructor method
 
@@ -35,10 +37,7 @@ class FunctionModule(torch.nn.Module):
                 elif isinstance(value, torch.Tensor):
                     self.register_buffer(name, value)
 
-    def forward(
-        self,
-        function_argument: torch.Tensor
-    ) -> torch.Tensor:
+    def forward(self, function_argument: torch.Tensor) -> torch.Tensor:
         """forward method for a class inherited from torch.nn.Module
 
         Parameters
@@ -57,11 +56,8 @@ class FunctionModule(torch.nn.Module):
             return self.function(function_argument)
 
     if TYPE_CHECKING:
-        def __call__(
-            self,
-            function_argument: torch.Tensor
-        ) -> torch.Tensor:
-            ...
+
+        def __call__(self, function_argument: torch.Tensor) -> torch.Tensor: ...
 
 
 class NonlinearElement(Element):
@@ -74,7 +70,7 @@ class NonlinearElement(Element):
         self,
         simulation_parameters: SimulationParameters,
         response_function: Callable[[torch.Tensor], torch.Tensor],
-        response_parameters: Dict | None = None
+        response_parameters: Dict | None = None,
     ):
         """Constructor method
 
@@ -91,10 +87,7 @@ class NonlinearElement(Element):
 
         super().__init__(simulation_parameters)
 
-        self.response_function = FunctionModule(
-            response_function,
-            response_parameters
-        )
+        self.response_function = FunctionModule(response_function, response_parameters)
 
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Method calculating the wavefront after passing a nonlinear optical
@@ -110,12 +103,8 @@ class NonlinearElement(Element):
         Wavefront
             Wavefront passing through a nonlinear optical element
         """
-        transformed_amplitude = self.response_function(
-            torch.abs(incident_wavefront)
-        )
+        transformed_amplitude = self.response_function(torch.abs(incident_wavefront))
         # preserve the phase of the incident wavefront
         # phase = incident_wavefront / torch.abs(incident_wavefront)
         phase = torch.exp(1j * incident_wavefront.phase)
-        return Wavefront(
-            transformed_amplitude * phase
-        )
+        return Wavefront(transformed_amplitude * phase)

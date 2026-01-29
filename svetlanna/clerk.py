@@ -42,9 +42,7 @@ class ClerkMode(StrEnum):
 
 
 CHECKPOINT_FILENAME_SUFFIX = ".pt"
-CHECKPOINT_FILENAME_PATTERN = re.compile(
-    f"^\\d+\\{CHECKPOINT_FILENAME_SUFFIX}$"
-)
+CHECKPOINT_FILENAME_PATTERN = re.compile(f"^\\d+\\{CHECKPOINT_FILENAME_SUFFIX}$")
 CHECKPOINT_BACKUP_FILENAME_PATTERN = re.compile(
     f"^backup_\\d{{4}}-\\d{{2}}-\\d{{2}}_\\d{{2}}-\\d{{2}}-\\d{{2}}\\.\\d{{6}}\\{CHECKPOINT_FILENAME_SUFFIX}$"
 )
@@ -358,7 +356,7 @@ class Clerk(Generic[ConditionsType]):
         self,
         index: str | int,
         targets: dict[str, StatefulTorchClass] | None = None,
-        weights_only: bool = True
+        weights_only: bool = True,
     ) -> object | None:
         """Load the checkpoint with a specific index and apply state dicts to
         checkpoint targets. If the targets are not provided, the checkpoint
@@ -471,8 +469,7 @@ class Clerk(Generic[ConditionsType]):
                     file.unlink()
 
     def clean_backup_checkpoints(self):
-        """Remove checkpoints that are matches backup checkpoints name pattern.
-        """
+        """Remove checkpoints that are matches backup checkpoints name pattern."""
         for file in self.experiment_directory.iterdir():
             filename = file.name
             if CHECKPOINT_BACKUP_FILENAME_PATTERN.match(filename):
@@ -546,7 +543,7 @@ class Clerk(Generic[ConditionsType]):
                 "description": "Backup checkpoint",
                 "time": time,
             }
-            time_str = time.replace(' ', '_').replace(':', '-')
+            time_str = time.replace(" ", "_").replace(":", "-")
             index = f"backup_{time_str}{CHECKPOINT_FILENAME_SUFFIX}"
 
             try:

@@ -14,12 +14,12 @@ nonlinear_element_parameters = [
     "oy_nodes",
     "wavelength_test",
     "response_function",
-    "response_parameters"
+    "response_parameters",
 ]
 
 
 def func(x, a, b):
-    return a / 1 + torch.exp(-b*x)
+    return a / 1 + torch.exp(-b * x)
 
 
 @pytest.mark.parametrize(
@@ -27,9 +27,25 @@ def func(x, a, b):
     [
         (10, 10, 1000, 1200, 1064 * 1e-6, lambda x: x**2, None),
         (4, 4, 1300, 1000, 1064 * 1e-6, lambda x: torch.sin(x) + x**3, None),
-        (15, 8, 1319, 917, 1e-6 * torch.tensor([330, 660, 1064]), lambda x: torch.sin(x) + x**3, None),  # noqa: E501
-        (16, 7, 500, 868, 1e-6 * torch.tensor([330, 660, 1064]), func, {"a": 1., "b": 9.})  # noqa: E501
-    ]
+        (
+            15,
+            8,
+            1319,
+            917,
+            1e-6 * torch.tensor([330, 660, 1064]),
+            lambda x: torch.sin(x) + x**3,
+            None,
+        ),  # noqa: E501
+        (
+            16,
+            7,
+            500,
+            868,
+            1e-6 * torch.tensor([330, 660, 1064]),
+            func,
+            {"a": 1.0, "b": 9.0},
+        ),  # noqa: E501
+    ],
 )
 def test_nonlinear_element(
     ox_size: float,
@@ -38,13 +54,13 @@ def test_nonlinear_element(
     oy_nodes: int,
     wavelength_test: float,
     response_function: Callable[[torch.Tensor], torch.Tensor],
-    response_parameters: Dict
+    response_parameters: Dict,
 ):
     params = SimulationParameters(
         {
-            'W': torch.linspace(-ox_size/2, ox_size/2, ox_nodes),
-            'H': torch.linspace(-oy_size/2, oy_size/2, oy_nodes),
-            'wavelength': wavelength_test
+            "x": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
+            "y": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
+            "wavelength": wavelength_test,
         }
     )
 
@@ -53,7 +69,7 @@ def test_nonlinear_element(
     nle = elements.NonlinearElement(
         simulation_parameters=params,
         response_function=response_function,
-        response_parameters=response_parameters
+        response_parameters=response_parameters,
     )
 
     incident_amplitude = torch.abs(incident_field)
@@ -65,7 +81,7 @@ def test_nonlinear_element(
         output_amplitude = response_function(
             incident_amplitude,
             response_parameters[keys[0]],
-            response_parameters[keys[1]]
+            response_parameters[keys[1]],
         )
 
     else:

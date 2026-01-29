@@ -18,21 +18,21 @@ import builtins
 
 def test_save_context_get_new_filepath(tmp_path):
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
     # test filename
     path = context.get_new_filepath("testext")
-    assert Path(tmp_path, 'test_0.testext') == path
+    assert Path(tmp_path, "test_0.testext") == path
 
     path = context.get_new_filepath("testext")
-    assert Path(tmp_path, 'test_1.testext') == path
+    assert Path(tmp_path, "test_1.testext") == path
 
 
 def test_save_context_file(tmp_path):
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
@@ -43,7 +43,7 @@ def test_save_context_file(tmp_path):
         file.write(text.encode())
 
     # check if the test text is written into the file
-    with open(path, 'rb') as file:
+    with open(path, "rb") as file:
         assert file.readline() == text.encode()
 
     # check if the new file will have another name, but same folder
@@ -54,7 +54,7 @@ def test_save_context_file(tmp_path):
 
 def test_save_context_rel_filepath(tmp_path):
     contexts = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
@@ -69,23 +69,18 @@ def test_save_context_rel_filepath(tmp_path):
 ###############################################################################
 
 
-@pytest.mark.usefixtures('tmp_path')
-@pytest.mark.parametrize(
-    'mode', ('1', 'L', 'LA', 'I', 'P', 'RGB', 'RGBA')
-)
+@pytest.mark.usefixtures("tmp_path")
+@pytest.mark.parametrize("mode", ("1", "L", "LA", "P", "RGB", "RGBA"))
 def test_image_repr_draw_image(tmp_path, mode):
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
     # TODO: mode-based test
-    image_to_draw = np.array([[1]])
+    image_to_draw = np.array([[1.0]])
 
-    repr = ImageRepr(
-        value=image_to_draw,
-        mode=mode
-    )
+    repr = ImageRepr(value=image_to_draw, mode=mode)
 
     # draw image to the path
     path = context.get_new_filepath("png")
@@ -97,13 +92,11 @@ def test_image_repr_draw_image(tmp_path, mode):
 
 def test_image_repr_to(tmp_path):
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = ImageRepr(
-        value=np.array([[0.5]])
-    )
+    repr = ImageRepr(value=np.array([[0.5]]))
 
     # test for all possible exports
     test_out = StringIO()
@@ -126,13 +119,11 @@ def test_image_repr_to(tmp_path):
 
 def test_repr_repr_to(tmp_path):
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = ReprRepr(
-        value=np.array([[0.5]])
-    )
+    repr = ReprRepr(value=np.array([[0.5]]))
 
     # test for all possible exports
     test_out = StringIO()
@@ -153,26 +144,25 @@ def test_repr_repr_to(tmp_path):
 ###############################################################################
 
 
-@pytest.mark.usefixtures('tmp_path')
+@pytest.mark.usefixtures("tmp_path")
 @pytest.mark.parametrize(
-    'value', (
+    "value",
+    (
         np.random.rand(2, 2),
         torch.rand(2, 2),
         torch.tensor(random.random()),
         random.random(),
         random.randint(0, 10),
-        ConstrainedParameter(10, 0, 20)
-    )
+        ConstrainedParameter(10, 0, 20),
+    ),
 )
 def test_pretty_repr_repr_to(tmp_path, value, monkeypatch):
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = PrettyReprRepr(
-        value=value
-    )
+    repr = PrettyReprRepr(value=value)
 
     # test for all possible exports
     test_out = StringIO()
@@ -198,13 +188,13 @@ def test_pretty_repr_repr_to(tmp_path, value, monkeypatch):
                 raise ImportError
             return original_import(name, *args, **kwargs)
 
-        monkeypatch.setattr(builtins, '__import__', import_with_no_svetlanna)
+        monkeypatch.setattr(builtins, "__import__", import_with_no_svetlanna)
 
         # Test if default string is written to the buffer
         test_out = StringIO()
         repr.to_str(test_out, context)
         class_name = value.__class__.__name__
-        assert test_out.getvalue() == f'{class_name}\n{value.item()}\n'
+        assert test_out.getvalue() == f"{class_name}\n{value.item()}\n"
 
 
 ###############################################################################
@@ -212,23 +202,22 @@ def test_pretty_repr_repr_to(tmp_path, value, monkeypatch):
 ###############################################################################
 
 
-@pytest.mark.usefixtures('tmp_path')
+@pytest.mark.usefixtures("tmp_path")
 @pytest.mark.parametrize(
-    'value', (
+    "value",
+    (
         np.random.rand(10, 10),
         random.random(),
         random.randint(0, 10),
-    )
+    ),
 )
 def test_npy_file_repr_save_to_file(tmp_path, value):
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = NpyFileRepr(
-        value=value
-    )
+    repr = NpyFileRepr(value=value)
 
     # save the value to a new file
     path = context.get_new_filepath("png")
@@ -240,13 +229,11 @@ def test_npy_file_repr_save_to_file(tmp_path, value):
 
 def test_npy_file_repr_to(tmp_path):
     context = ParameterSaveContext(
-        parameter_name='test',
+        parameter_name="test",
         directory=tmp_path,
     )
 
-    repr = NpyFileRepr(
-        value=np.array([[0.5]])
-    )
+    repr = NpyFileRepr(value=np.array([[0.5]]))
 
     # test for all possible exports
     test_out = StringIO()
@@ -269,10 +256,7 @@ def test_parameter_specs():
         ReprRepr(321),
     )
 
-    specs = ParameterSpecs(
-        parameter_name='test',
-        representations=representations
-    )
+    specs = ParameterSpecs(parameter_name="test", representations=representations)
 
     assert specs.representations == representations
 
@@ -283,18 +267,13 @@ def test_parameter_specs():
 
 
 def test_subelement_specs():
-    specs = [
-        ParameterSpecs('test', [])
-    ]
+    specs = [ParameterSpecs("test", [])]
 
     class Subelement:
         def to_specs(self):
             return specs
 
     subelement = Subelement()
-    subelement_specs = SubelementSpecs(
-        'test_type',
-        subelement
-    )
+    subelement_specs = SubelementSpecs("test_type", subelement)
 
     assert subelement_specs.subelement is subelement
