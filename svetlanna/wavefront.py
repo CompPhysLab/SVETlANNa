@@ -1,7 +1,6 @@
 import torch
 from .simulation_parameters import SimulationParameters
 from typing import Any, Self, Iterable, cast, TYPE_CHECKING
-from .axes_math import tensor_dot, cast_tensor
 
 
 class Wavefront(torch.Tensor):
@@ -106,25 +105,29 @@ class Wavefront(torch.Tensor):
             wave_direction = [0.0, 0.0, 1.0]
 
         wave_direction = torch.tensor(
-            wave_direction, dtype=torch.float32, device=simulation_parameters.device
+            wave_direction, device=simulation_parameters.device
         )
         if wave_direction.shape != torch.Size([3]):
             raise ValueError("wave_direction should contain exactly three components")
-        wave_direction = wave_direction / torch.norm(wave_direction)
 
-        wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
-        x = simulation_parameters.axes.x[None, :]
-        y = simulation_parameters.axes.y[:, None]
+        wave_direction = wave_direction / torch.norm(
+            wave_direction + 0.0  # if wave_direction is Int, cast to Float
+        )
 
-        kxx, axes = tensor_dot(wave_number, x, "wavelength", ("y", "x"))
-        kyy, _ = tensor_dot(wave_number, y, "wavelength", ("y", "x"))
-        kzz = wave_number[..., None, None] * distance
+        # Cast axes
+        sim_params = simulation_parameters
+        wavelength = sim_params.cast(sim_params.wavelength, "wavelength")
+        x = sim_params.cast(sim_params.x, "x")
+        y = sim_params.cast(sim_params.y, "y")
 
-        field = torch.exp(1j * wave_direction[0] * kxx)
-        field = field * torch.exp(1j * wave_direction[1] * kyy)
-        field = field * torch.exp(1j * wave_direction[2] * kzz + initial_phase)
+        wave_number = 2 * torch.pi / wavelength
+        kxx = wave_direction[0] * wave_number * x
+        kyy = wave_direction[1] * wave_number * y
+        kzz = wave_direction[2] * wave_number * distance
 
-        return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
+        field = torch.exp(1j * (kxx + kyy + kzz + initial_phase))
+
+        return cls(field)
 
     @classmethod
     def gaussian_beam(
@@ -156,71 +159,33 @@ class Wavefront(torch.Tensor):
             Beam field in the plane oXY propagated over the distance
         """
 
-        wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
+        # Cast axes
+        sim_params = simulation_parameters
+        wavelength = sim_params.cast(sim_params.wavelength, "wavelength")
+        x = sim_params.cast(sim_params.x, "x")
+        y = sim_params.cast(sim_params.y, "y")
 
-        rayleigh_range = (
-            torch.pi * (waist_radius**2) / simulation_parameters.axes.wavelength
-        )  # noqa: E501
+        wave_number = 2 * torch.pi / wavelength
 
-        x = simulation_parameters.axes.x[None, :] - dx
-        y = simulation_parameters.axes.y[:, None] - dy
-        radial_distance_squared = x**2 + y**2
+        rayleigh_range = torch.pi * waist_radius**2 / wavelength
 
-        hyperbolic_relation = waist_radius * (1 + (distance / rayleigh_range) ** 2) ** (
-            1 / 2
-        )  # noqa: E501
+        radial_distance_squared = (x - dx) ** 2 + (y - dy) ** 2
 
-        inverse_radius_of_curvature = distance / (
-            distance**2 + rayleigh_range**2
-        )  # noqa: E501
+        hyperbolic_relation = waist_radius * torch.sqrt(
+            1 + (distance / rayleigh_range) ** 2
+        )
 
-        # Gouy phase
+        inverse_radius_of_curvature = distance / (distance**2 + rayleigh_range**2)
+
         gouy_phase = torch.arctan(distance / rayleigh_range)
 
-        phase1, axes1 = tensor_dot(
-            a=1j * wave_number * inverse_radius_of_curvature / 2,
-            b=radial_distance_squared,
-            a_axis="wavelength",
-            b_axis=("y", "x"),
-        )
+        field = waist_radius / hyperbolic_relation
+        field = field * torch.exp(-radial_distance_squared / hyperbolic_relation**2)
+        field = field * torch.exp(1j * wave_number * distance)
+        field = field * torch.exp(1j * wave_number * radial_distance_squared * inverse_radius_of_curvature / 2)  # fmt: skip
+        field = field * torch.exp(-1j * gouy_phase)
 
-        field = torch.exp(phase1)
-        field, _ = tensor_dot(
-            a=field,
-            b=torch.exp(1j * wave_number * distance),
-            a_axis=axes1,
-            b_axis="wavelength",
-            preserve_a_axis=True,
-        )
-        field, _ = tensor_dot(
-            a=field,
-            b=torch.exp(-1j * gouy_phase),
-            a_axis=axes1,
-            b_axis="wavelength",
-            preserve_a_axis=True,
-        )
-        phase2, axes2 = tensor_dot(
-            a=-1 / (hyperbolic_relation) ** 2,
-            b=radial_distance_squared,
-            a_axis="wavelength",
-            b_axis=("y", "x"),
-        )
-        field, axes = tensor_dot(
-            a=field,
-            b=torch.exp(phase2),
-            a_axis=axes1,
-            b_axis=axes2,
-            preserve_a_axis=True,
-        )
-        field, _ = tensor_dot(
-            a=field,
-            b=waist_radius / hyperbolic_relation,
-            a_axis=axes,
-            b_axis="wavelength",
-            preserve_a_axis=True,
-        )
-
-        return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
+        return cls(field)
 
     @classmethod
     def spherical_wave(
@@ -251,25 +216,19 @@ class Wavefront(torch.Tensor):
         Wavefront
             Beam field
         """
-        wave_number = 2 * torch.pi / simulation_parameters.axes.wavelength
+        # Cast axes
+        sim_params = simulation_parameters
+        wavelength = sim_params.cast(sim_params.wavelength, "wavelength")
+        x = sim_params.cast(sim_params.x, "x")
+        y = sim_params.cast(sim_params.y, "y")
 
-        x = simulation_parameters.axes.x[None, :] - dx
-        y = simulation_parameters.axes.y[:, None] - dy
+        wave_number = 2 * torch.pi / wavelength
+        radius = torch.sqrt((x - dx) ** 2 + (y - dy) ** 2 + distance**2)
 
-        radius = torch.sqrt((x**2 + y**2) + distance**2)
+        phase = wave_number * radius
+        field = torch.exp(1j * (phase + initial_phase)) / radius
 
-        phase, axes = tensor_dot(
-            a=wave_number, b=radius, a_axis="wavelength", b_axis=("y", "x")
-        )
-        field, _ = tensor_dot(
-            a=torch.exp(1j * (phase + initial_phase)),
-            b=1 / radius,
-            a_axis=axes,
-            b_axis=("y", "x"),
-            preserve_a_axis=True,
-        )
-
-        return cls(cast_tensor(field, axes, simulation_parameters.axes.names))
+        return cls(field)
 
     # === methods below are added for typing only ===
 
@@ -329,6 +288,8 @@ def mul(
         wf_axes = DEFAULT_LAST_AXES_NAMES
     else:
         wf_axes = sim_params.axes.names
+
+    from .axes_math import tensor_dot
 
     res, _ = tensor_dot(wf, b, wf_axes, b_axis, preserve_a_axis=True)
     return cast(Wavefront, res)
