@@ -82,16 +82,15 @@ class DiffractiveLayer(Element):
         mask_min = mask.min()
         mask_max = mask.max()
 
+        norm = mask_max - mask_min
+        img = 255 * (mask - mask_min) / norm if norm > 0 else 0 * mask
+
         return [
             ParameterSpecs(
                 "mask",
                 [
                     PrettyReprRepr(self.mask),
-                    ImageRepr(
-                        (255 * (mask - mask_min) / (mask_max - mask_min)).astype(
-                            "uint8"
-                        )
-                    ),
+                    ImageRepr(img.astype("uint8")),
                 ],
             ),
             ParameterSpecs("mask_norm", [PrettyReprRepr(self.mask_norm)]),
