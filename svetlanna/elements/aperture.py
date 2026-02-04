@@ -117,16 +117,17 @@ class RectangularAperture(MulElement):
 
         _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="x", y_axis="y")
 
-        self._mask = self.make_buffer(
-            "_mask",
-            (
-                (torch.abs(_x_grid) <= self.width / 2)
-                * (torch.abs(_y_grid) <= self.height / 2)
-            ).to(dtype=torch.get_default_dtype()),
+        _mask = self.simulation_parameters.cast(
+            (torch.abs(_x_grid) <= self.width / 2)
+            * (torch.abs(_y_grid) <= self.height / 2)
+            + 0.0,  # to convert bool to float
+            "y",
+            "x",
         )
+        self._mask = self.make_buffer("_mask", _mask)
 
     def get_transmission_function(self) -> torch.Tensor:
-        return self.simulation_parameters.cast(self._mask, "y", "x")
+        return self._mask
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         return [
@@ -157,15 +158,16 @@ class RoundAperture(MulElement):
 
         _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="x", y_axis="y")
 
-        self._mask = self.make_buffer(
-            "_mask",
-            (_x_grid**2 + _y_grid**2 <= self.radius**2).to(
-                dtype=torch.get_default_dtype()
-            ),
+        _mask = self.simulation_parameters.cast(
+            (_x_grid**2 + _y_grid**2 <= self.radius**2)
+            + 0.0,  # to convert bool to float
+            "y",
+            "x",
         )
+        self._mask = self.make_buffer("_mask", _mask)
 
     def get_transmission_function(self) -> torch.Tensor:
-        return self.simulation_parameters.cast(self._mask, "y", "x")
+        return self._mask
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         return [ParameterSpecs("radius", [PrettyReprRepr(self.radius)])]
