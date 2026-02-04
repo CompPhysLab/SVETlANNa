@@ -6,7 +6,7 @@ from ..specs import PrettyReprRepr, ParameterSpecs, SubelementSpecs, Specsable
 from ..specs.specs_writer import write_specs_to_html, context_generator
 from io import StringIO
 from typing import Iterable, TypeVar, TYPE_CHECKING
-from ..parameters import ConstrainedParameter, Parameter
+from ..parameters import Parameter
 from ..wavefront import Wavefront
 from warnings import warn
 
@@ -100,7 +100,7 @@ class Element(nn.Module, metaclass=ABCMeta):
 
         # BoundedParameter and Parameter are handled by pointing
         # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
-        if isinstance(value, (ConstrainedParameter, Parameter)):
+        if isinstance(value, Parameter):
             super().__setattr__(name + INNER_PARAMETER_SUFFIX, value.inner_storage)
 
         return super().__setattr__(name, value)
