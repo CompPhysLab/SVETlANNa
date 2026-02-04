@@ -3,6 +3,7 @@ from typing import Callable, Dict, TYPE_CHECKING
 from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..wavefront import Wavefront
+from ..parameters import Parameter
 
 
 # TODO: add docstrings
@@ -32,7 +33,9 @@ class FunctionModule(torch.nn.Module):
         # convert the parameters into an object capable of learning
         if self.function_parameters:
             for name, value in self.function_parameters.items():
-                if isinstance(value, torch.nn.Parameter):
+                if isinstance(value, Parameter):
+                    self.register_module(name + "_inner_storage", value.inner_storage)
+                elif isinstance(value, torch.nn.Parameter):
                     self.register_parameter(name, value)
                 elif isinstance(value, torch.Tensor):
                     self.register_buffer(name, value)
