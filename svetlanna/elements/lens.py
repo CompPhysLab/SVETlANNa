@@ -39,7 +39,7 @@ class ThinLens(Element):
         self.radius = self.process_parameter("radius", radius)
 
         wave_number = self.simulation_parameters.cast(
-            2 * torch.pi / self.simulation_parameters.axes.wavelength, "wavelength"
+            2 * torch.pi / self.simulation_parameters.wavelength, "wavelength"
         )
 
         # Registering Buffer for _wave_number
@@ -59,9 +59,7 @@ class ThinLens(Element):
         else:
             self._radius_mask = self.make_buffer(
                 "_radius_mask",
-                (self._radius_squared <= self.radius**2).to(
-                    dtype=torch.get_default_dtype()  # cast bool to float
-                ),
+                (self._radius_squared <= self.radius**2) + 0.0,  # cast bool to float
             )
 
     @property
