@@ -10,9 +10,9 @@ def test_init(tmp_path):
     assert clerk.experiment_directory == tmp_path
 
     # Test if the experiment directory is not a directory case
-    new_path = tmp_path / 'test'
+    new_path = tmp_path / "test"
     assert not new_path.exists()
-    with open(new_path, 'w'):
+    with open(new_path, "w"):
         pass
 
     with pytest.raises(ValueError):
@@ -20,7 +20,7 @@ def test_init(tmp_path):
 
 
 def test_make_experiment_dir(tmp_path):
-    new_path = tmp_path / 'test'
+    new_path = tmp_path / "test"
     clerk = Clerk(new_path)
 
     assert not new_path.exists()
@@ -31,10 +31,10 @@ def test_make_experiment_dir(tmp_path):
 def test_get_log_stream(tmp_path):
     clerk = Clerk(tmp_path)
 
-    tag = '123'
+    tag = "123"
     with clerk._get_log_stream(tag) as stream:
         # Test if the file was created
-        assert (tmp_path / (tag + '.jsonl')).exists()
+        assert (tmp_path / (tag + ".jsonl")).exists()
 
     # Test if the stream is not closed after the context is closed
     assert not stream.closed
@@ -44,7 +44,7 @@ def test_get_log_stream(tmp_path):
         assert stream is stream2
 
     # Test if the same stream is not used for the different tag
-    other_tag = '312'
+    other_tag = "312"
     assert tag != other_tag
     with clerk._get_log_stream(other_tag) as stream3:
         assert stream is not stream3
@@ -53,14 +53,14 @@ def test_get_log_stream(tmp_path):
 def test_get_log_stream_mode(tmp_path):
     clerk = Clerk(tmp_path)
 
-    tag = '123'
+    tag = "123"
     # Test if the stream mode is 'w' for 'new_run' mode
     # By default 'new_run' mode is used
     with clerk:
         with clerk._get_log_stream(tag) as stream:
 
             assert clerk._mode == ClerkMode.new_run
-            assert stream.mode == 'w'
+            assert stream.mode == "w"
 
     # Test if the stream mode is 'a' for 'resume' mode
     # The clerk.begin() should be used to set 'resume' mode
@@ -68,13 +68,13 @@ def test_get_log_stream_mode(tmp_path):
         with clerk._get_log_stream(tag) as stream:
 
             assert clerk._mode == ClerkMode.resume
-            assert stream.mode == 'a'
+            assert stream.mode == "a"
 
 
 def test_get_log_stream_flushed(tmp_path):
     # TODO: refactoring
     clerk = Clerk(tmp_path)
-    tag = '123'
+    tag = "123"
 
     with clerk._get_log_stream(tag) as stream:
         pass
@@ -99,26 +99,19 @@ def test_get_log_stream_flushed(tmp_path):
 
 
 def test_conditions(tmp_path):
-    experiment_dir = tmp_path / 'experiment'
+    experiment_dir = tmp_path / "experiment"
     clerk = Clerk(experiment_dir)
 
     conditions = {
-        'test1': 123,
-        'test2': [
-            123,
-            10.,
-            'a'
-        ],
-        'test3': {
-            't': 'e',
-            's': 't'
-        }
+        "test1": 123,
+        "test2": [123, 10.0, "a"],
+        "test3": {"t": "e", "s": "t"},
     }
     clerk.save_conditions(conditions)
 
     # Test if the folder and the file are created
     assert experiment_dir.exists()
-    assert (experiment_dir / 'conditions.json').exists()
+    assert (experiment_dir / "conditions.json").exists()
 
     # Test if when loaded, the conditions are the same
     new_clerk = Clerk(experiment_dir)
@@ -131,11 +124,8 @@ def test_conditions(tmp_path):
 def test_logs(tmp_path):
     clerk = Clerk(tmp_path)
 
-    tag = 'test'
-    messages = [
-        {'a': 123, 'b': 321.},
-        {'a': 321, 'b': 5423}
-    ]
+    tag = "test"
+    messages = [{"a": 123, "b": 321.0}, {"a": 321, "b": 5423}]
 
     # Test if log can't be written before the clerk is used in any context
     with pytest.raises(RuntimeError):
@@ -143,7 +133,7 @@ def test_logs(tmp_path):
             clerk.write_log(tag, message)
 
     # Test if log file does not exist
-    assert not (tmp_path / (tag + '.jsonl')).exists()
+    assert not (tmp_path / (tag + ".jsonl")).exists()
 
     # Write the logs
     with clerk:
@@ -151,7 +141,7 @@ def test_logs(tmp_path):
             clerk.write_log(tag, message)
 
     # Test if log file is created
-    assert (tmp_path / (tag + '.jsonl')).exists()
+    assert (tmp_path / (tag + ".jsonl")).exists()
 
     # Test if when loaded, the messages are the same
     loaded_messages = list(clerk.load_logs(tag))
@@ -159,14 +149,14 @@ def test_logs(tmp_path):
     assert loaded_messages == messages
 
     # Test if in resume mode the logs are appended in existing file
-    tag2 = 'test2'
-    assert not (tmp_path / (tag2 + '.jsonl')).exists()
+    tag2 = "test2"
+    assert not (tmp_path / (tag2 + ".jsonl")).exists()
 
     with clerk.begin(resume=True):
         for message in messages:
             clerk.write_log(tag2, message)
 
-    assert (tmp_path / (tag2 + '.jsonl')).exists()
+    assert (tmp_path / (tag2 + ".jsonl")).exists()
 
     loaded_messages = clerk.load_logs(tag2)
     for i, message in enumerate(loaded_messages):
@@ -185,11 +175,8 @@ def test_logs(tmp_path):
 def test_logs_pandas(tmp_path):
     clerk = Clerk(tmp_path)
 
-    tag = 'test'
-    messages = [
-        {'a': 123, 'b': 321.},
-        {'a': 321, 'b': 5423}
-    ]
+    tag = "test"
+    messages = [{"a": 123, "b": 321.0}, {"a": 321, "b": 5423}]
 
     with clerk:
         for message in messages:
@@ -202,7 +189,7 @@ def test_logs_pandas(tmp_path):
 
 def test_checkpoints(tmp_path):
     clerk = Clerk(tmp_path)
-    checkpoints_filepath = tmp_path / 'checkpoints.txt'
+    checkpoints_filepath = tmp_path / "checkpoints.txt"
 
     # Test if checkpoint can't be written before
     # the clerk is used in any context
@@ -217,9 +204,7 @@ def test_checkpoints(tmp_path):
     # Write checkpoint with metadata and no targets
     with clerk:
         for i in range(11):
-            clerk.write_checkpoint(metadata={
-                'i': i
-            })
+            clerk.write_checkpoint(metadata={"i": i})
 
     assert checkpoints_filepath.exists()
 
@@ -228,15 +213,15 @@ def test_checkpoints(tmp_path):
     first_run_checkpoint_filenames: list[str] = []
     with open(checkpoints_filepath) as file:
         for i, line in enumerate(file.readlines()):
-            checkpoint_filename = f'{i}.pt'
+            checkpoint_filename = f"{i}.pt"
             first_run_checkpoint_filenames.append(checkpoint_filename)
 
-            assert line == checkpoint_filename + '\n'
+            assert line == checkpoint_filename + "\n"
 
             assert (tmp_path / checkpoint_filename).exists()
 
             metadata = clerk.load_checkpoint(i)
-            assert metadata == {'i': i}
+            assert metadata == {"i": i}
             same_metadata = clerk.load_checkpoint(checkpoint_filename)
             assert same_metadata == metadata
 
@@ -254,7 +239,7 @@ def test_checkpoints(tmp_path):
     with open(checkpoints_filepath) as file:
         assert len(file.readlines()) == 3
         for i in range(3):
-            second_run_checkpoint_filenames.append(f'{i}.pt')
+            second_run_checkpoint_filenames.append(f"{i}.pt")
 
     # Test clean_checkpoints
     clerk.clean_checkpoints()
@@ -274,15 +259,12 @@ def test_checkpoints(tmp_path):
         def __init__(self) -> None:
             super().__init__()
             self.test_parameter: torch.Tensor
-            self.register_buffer('test_parameter', torch.tensor(0.0))
+            self.register_buffer("test_parameter", torch.tensor(0.0))
 
     clerk = Clerk(tmp_path)
     object1 = ObjectWithState()
     object2 = ObjectWithState()
-    clerk.set_checkpoint_targets({
-        '1': object1,
-        '2': object2
-    })
+    clerk.set_checkpoint_targets({"1": object1, "2": object2})
 
     # Write checkpoint with targets
     with clerk:
@@ -294,16 +276,14 @@ def test_checkpoints(tmp_path):
     for i in range(6):
         clerk.load_checkpoint(i)
         assert object1.test_parameter.item() == 0
-        assert object2.test_parameter.item() == 2. + 2. * i
+        assert object2.test_parameter.item() == 2.0 + 2.0 * i
 
     # Test load_checkpoint for specific target
     object1.test_parameter = torch.tensor(123)
     object2.test_parameter = torch.tensor(321)
     object3 = ObjectWithState()
     for i in range(6):
-        clerk.load_checkpoint(i, targets={
-            '2': object3
-        })
+        clerk.load_checkpoint(i, targets={"2": object3})
         # Test if object1 and object2 does not change
         assert object1.test_parameter.item() == 123
         assert object2.test_parameter.item() == 321
@@ -312,10 +292,7 @@ def test_checkpoints(tmp_path):
 
     # Test if more checkpoints has been saved when resume mode
     clerk = Clerk(tmp_path)
-    clerk.set_checkpoint_targets({
-        '1': object1,
-        '2': object2
-    })
+    clerk.set_checkpoint_targets({"1": object1, "2": object2})
     assert object1.test_parameter.item() != 0
     assert object2.test_parameter.item() != 16
 
@@ -333,10 +310,7 @@ def test_checkpoints(tmp_path):
 
     # Test if resume_load_last_checkpoint can be turned off
     clerk = Clerk(tmp_path)
-    clerk.set_checkpoint_targets({
-        '1': object1,
-        '2': object2
-    })
+    clerk.set_checkpoint_targets({"1": object1, "2": object2})
     object1.test_parameter = torch.tensor(123)
     object2.test_parameter = torch.tensor(321)
 
@@ -351,7 +325,7 @@ def test_checkpoints(tmp_path):
 
 
 def test_context(tmp_path):
-    new_path = tmp_path / 'test'
+    new_path = tmp_path / "test"
     clerk = Clerk(new_path)
 
     assert not new_path.exists()
@@ -365,7 +339,7 @@ def test_context(tmp_path):
     assert new_path.exists()
 
     # Test if all streams are closed automatically
-    with clerk._get_log_stream('test', flush=False) as stream:
+    with clerk._get_log_stream("test", flush=False) as stream:
         assert not stream.closed
 
         with clerk:
@@ -374,14 +348,14 @@ def test_context(tmp_path):
         assert stream.closed
 
     with pytest.raises(ExceptionGroup):
-        with clerk._get_log_stream('test', flush=False) as stream:
+        with clerk._get_log_stream("test", flush=False) as stream:
             with clerk:
                 stream.detach()
 
 
 def test_backup_checkpoint(tmp_path):
     clerk = Clerk(tmp_path)
-    checkpoints_filepath = tmp_path / 'checkpoints.txt'
+    checkpoints_filepath = tmp_path / "checkpoints.txt"
 
     class SpecificException(Exception):
         pass
@@ -395,12 +369,12 @@ def test_backup_checkpoint(tmp_path):
 
     # Test if the backup checkpoint is not in 'checkpoints.txt'
     with open(checkpoints_filepath) as file:
-        assert file.readlines() == ['0.pt\n']
+        assert file.readlines() == ["0.pt\n"]
 
     backup_checkpoints: list[str] = []
     # Find backup checkpoint files
     for file in tmp_path.iterdir():
-        if file.name.endswith('.pt'):
+        if file.name.endswith(".pt"):
             if not CHECKPOINT_FILENAME_PATTERN.match(file.name):
                 backup_checkpoints.append(file.name)
 
@@ -409,8 +383,8 @@ def test_backup_checkpoint(tmp_path):
     # Test metadata
     metadata = clerk.load_checkpoint(backup_checkpoints[0])
     assert isinstance(metadata, dict)
-    assert 'time' in metadata
-    assert 'description' in metadata
+    assert "time" in metadata
+    assert "description" in metadata
 
     # Test clean_backup_checkpoints method
     assert (tmp_path / backup_checkpoints[0]).exists()

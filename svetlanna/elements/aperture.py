@@ -3,7 +3,7 @@ import torch
 from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableTensor
-from ..wavefront import Wavefront, mul
+from ..wavefront import Wavefront
 from abc import ABC, abstractmethod
 from typing import Iterable
 from ..specs import ImageRepr, PrettyReprRepr, ParameterSpecs
@@ -26,19 +26,6 @@ class MulElement(Element, ABC):
             transmission function
         """
 
-    @property
-    @abstractmethod
-    def transmission_function_axes(self) -> tuple[str, ...]:
-        """Axes of the transmission function.
-        For example, `('H', 'W')`
-
-        Returns
-        -------
-        tuple[str, ...]
-            Axes
-        """
-        ...
-
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Calculate the field after propagating through the
         element
@@ -53,21 +40,13 @@ class MulElement(Element, ABC):
         Wavefront
             The field after propagating through the element
         """
-        return mul(
-            incident_wavefront,
-            self.get_transmission_function(),
-            self.transmission_function_axes,
-            self.simulation_parameters
-        )
+        return incident_wavefront * self.get_transmission_function()
 
     @staticmethod
     def _widget_html_(
-        index: int,
-        name: str,
-        element_type: str | None,
-        subelements: list[ElementHTML]
+        index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
     ) -> str:
-        return jinja_env.get_template('widget_aperture.html.jinja').render(
+        return jinja_env.get_template("widget_aperture.html.jinja").render(
             index=index, name=name, subelements=subelements
         )
 
@@ -79,9 +58,7 @@ class Aperture(MulElement):
     """
 
     def __init__(
-        self,
-        simulation_parameters: SimulationParameters,
-        mask: OptimizableTensor
+        self, simulation_parameters: SimulationParameters, mask: OptimizableTensor
     ):
         """Aperture of the optical element defined by mask tensor.
 
@@ -94,27 +71,21 @@ class Aperture(MulElement):
             Each element must be either 0 (blocks light) or 1 (allows light).
         """
 
-        super().__init__(
-            simulation_parameters=simulation_parameters
-        )
+        super().__init__(simulation_parameters=simulation_parameters)
 
-        self.mask = self.process_parameter('mask', mask)
-        self._calc_axes = ('H', 'W')
-
-    @property
-    def transmission_function_axes(self) -> tuple[str, ...]:
-        return self._calc_axes
+        self.mask = self.process_parameter("mask", mask)
 
     def get_transmission_function(self) -> torch.Tensor:
-        return self.mask
+        return self.simulation_parameters.cast(self.mask, "y", "x")
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         return [
             ParameterSpecs(
-                'mask', [
+                "mask",
+                [
                     PrettyReprRepr(self.mask),
                     ImageRepr(self.mask.numpy(force=True)),
-                ]
+                ],
             )
         ]
 
@@ -122,14 +93,11 @@ class Aperture(MulElement):
 # TODO" check docstring
 class RectangularAperture(MulElement):
     """A rectangle-shaped aperture with a transmission function taking either
-      a value of 0 or 1
+    a value of 0 or 1
     """
 
     def __init__(
-        self,
-        simulation_parameters: SimulationParameters,
-        height: float,
-        width: float
+        self, simulation_parameters: SimulationParameters, height: float, width: float
     ):
         """Constructor method
 
@@ -142,61 +110,39 @@ class RectangularAperture(MulElement):
         width : float
             aperture width
         """
-        super().__init__(
-            simulation_parameters=simulation_parameters
+        super().__init__(simulation_parameters=simulation_parameters)
+
+        self.height = self.process_parameter("height", height)
+        self.width = self.process_parameter("width", width)
+
+        _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="x", y_axis="y")
+
+        _mask = self.simulation_parameters.cast(
+            (torch.abs(_x_grid) <= self.width / 2)
+            * (torch.abs(_y_grid) <= self.height / 2)
+            + 0.0,  # to convert bool to float
+            "y",
+            "x",
         )
-
-        self.height = self.process_parameter('height', height)
-        self.width = self.process_parameter('width', width)
-
-        _x_grid, _y_grid = self.simulation_parameters.meshgrid(
-            x_axis='W', y_axis='H'
-        )
-
-        self._calc_axes = ('H', 'W')
-        self._mask = self.make_buffer(
-            '_mask',
-            (
-                (
-                    torch.abs(_x_grid) <= self.width/2
-                ) * (
-                    torch.abs(_y_grid) <= self.height/2
-                )
-            ).to(dtype=torch.get_default_dtype())
-        )
-
-    @property
-    def transmission_function_axes(self) -> tuple[str, ...]:
-        return self._calc_axes
+        self._mask = self.make_buffer("_mask", _mask)
 
     def get_transmission_function(self) -> torch.Tensor:
         return self._mask
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
         return [
-            ParameterSpecs(
-                'height', [
-                    PrettyReprRepr(self.height)
-                ]
-            ),
-            ParameterSpecs(
-                'width', [
-                    PrettyReprRepr(self.width)
-                ]
-            )
+            ParameterSpecs("height", [PrettyReprRepr(self.height)]),
+            ParameterSpecs("width", [PrettyReprRepr(self.width)]),
         ]
 
 
 # TODO: check docstrings
 class RoundAperture(MulElement):
     """A round-shaped aperture with a transmission function taking either
-      a value of 0 or 1
+    a value of 0 or 1
     """
-    def __init__(
-        self,
-        simulation_parameters: SimulationParameters,
-        radius: float
-    ):
+
+    def __init__(self, simulation_parameters: SimulationParameters, radius: float):
         """Constructor method
 
         Parameters
@@ -206,36 +152,22 @@ class RoundAperture(MulElement):
         radius : float
             Radius of the round-shaped aperture
         """
-        super().__init__(
-            simulation_parameters=simulation_parameters
+        super().__init__(simulation_parameters=simulation_parameters)
+
+        self.radius = self.process_parameter("radius", radius)
+
+        _x_grid, _y_grid = self.simulation_parameters.meshgrid(x_axis="x", y_axis="y")
+
+        _mask = self.simulation_parameters.cast(
+            (_x_grid**2 + _y_grid**2 <= self.radius**2)
+            + 0.0,  # to convert bool to float
+            "y",
+            "x",
         )
-
-        self.radius = self.process_parameter('radius', radius)
-
-        _x_grid, _y_grid = self.simulation_parameters.meshgrid(
-            x_axis='W', y_axis='H'
-        )
-
-        self._calc_axes = ('H', 'W')
-        self._mask = self.make_buffer(
-            '_mask',
-            (
-                _x_grid**2 + _y_grid**2 <= self.radius**2
-            ).to(dtype=torch.get_default_dtype())
-        )
-
-    @property
-    def transmission_function_axes(self) -> tuple[str, ...]:
-        return self._calc_axes
+        self._mask = self.make_buffer("_mask", _mask)
 
     def get_transmission_function(self) -> torch.Tensor:
         return self._mask
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
-        return [
-            ParameterSpecs(
-                'radius', [
-                    PrettyReprRepr(self.radius)
-                ]
-            )
-        ]
+        return [ParameterSpecs("radius", [PrettyReprRepr(self.radius)])]

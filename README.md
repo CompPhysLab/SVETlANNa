@@ -31,7 +31,7 @@ SLM - Spatial Light Modulator
 - support for custom elements and optimization methods
 - support for various free-space ONN architectures including feed-forward NN, autoencoders, and recurrent NN
 - cross platform
-- full GPU aceleration
+- full GPU acceleration
 - companion repository with numerous .ipynb examples
 - custom logging, project management, analysis, and visualization tools
 - tests for the whole functionality
@@ -46,7 +46,7 @@ SLM - Spatial Light Modulator
 
 1.	Intel Core i5 8400 / AMD Ryzen 5 1400 or higher;
 2.	memory greater than 8 Gb;
-3.	HDD/SSD space not less than 16 Гб (virtual enviroment takes about 6 Gb);
+3.	HDD/SSD space not less than 16 Gb (virtual enviroment takes about 6 Gb);
 4.	for running on GPU you need an Nvidia card with CUDA support and memory not less than 2 Gb;
 5.	OS Windows 10 or greater, or Linux with kernel 5.15 or greater;
 6.	the library requires Python 3.11.
@@ -69,7 +69,7 @@ We reccomend first to install [git](https://git-scm.com) in your system.
 ```bash
   git clone https://github.com/CompPhysLab/SVETlANNa.git
 ```
-2. Move to the project dyrectory:
+2. Move to the project directory:
 ```bash
   cd SVETlANNa
 ```
@@ -115,7 +115,7 @@ To run the example locally follow the instructions:
 ```bash
   cd SVETlANNa.docs
 ```
-3.Create a virtual environment for Python 3.11 (see [venv documentation](https://docs.python.org/3/library/venv.html)) and activate it. All subsequent actions should be done within the activated environment.
+3. Create a virtual environment for Python 3.11 (see [venv documentation](https://docs.python.org/3/library/venv.html)) and activate it. All subsequent actions should be done within the activated environment.
 4. Install the main library:
 ```bash
   pip install svetlanna
@@ -134,15 +134,17 @@ To run the example locally follow the instructions:
   jupyter notebook
 ```
 and open the page in your browser (see “Or copy and paste one of these URLs:” in a terminal window)
+
 9. Go to the folder SVETlANNa.docs. Examples are grouped into subject subfolders in form of .ipynb files. To run them you need to open a file in the Jupyter notebook and run all code cells (key Shift+Enter).
 
-## Running exaples with SVETlANNa installed from source
+## Running examples with SVETlANNa installed from source
 
 1. Clone the repository (you should have an installed [git](https://git-scm.com)):
 ```bash
 	git clone https://github.com/CompPhysLab/SVETlANNa.docs.git 
 ```
 All subsequent actions should be done within the activated environment, which was used to install the SVETlANNa library from source.
+
 2. If you do not have the Jupyter notebook in your system, install it:
 ```bash
   pip install notebook
@@ -156,6 +158,7 @@ All subsequent actions should be done within the activated environment, which wa
   jupyter notebook
 ```
 and open the page in your browser (see “Or copy and paste one of these URLs:” in a terminal window)
+
 5. Go to the folder SVETlANNa.docs. Examples are grouped into subject subfolders in form of .ipynb files. To run them you need to open a file in the Jupyter notebook and run all code cells (key Shift+Enter).
 
 ## Examples
@@ -166,7 +169,7 @@ Examples of visualzation of optical set-ups and optical fields:
 
 <img src="./pics/visualization.png" alt="drawing" width="400"/>
 
-Example a of five-layer DONN trained to recognize numbers from the MNIST database:
+Example of a five-layer DONN trained to recognize numbers from the MNIST database:
 
 <img src="./pics/MNIST example 1.png" alt="drawing" width="400"/>
 

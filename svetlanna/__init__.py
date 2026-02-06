@@ -1,4 +1,5 @@
 from .parameters import Parameter, ConstrainedParameter
+from .partial_with_parameters import PartialWithParameters
 from .setup import LinearOpticalSetup
 from .simulation_parameters import SimulationParameters
 from .wavefront import Wavefront
@@ -10,15 +11,16 @@ from .clerk import Clerk
 from . import networks
 
 __all__ = [
-    'Parameter',
-    'ConstrainedParameter',
-    'LinearOpticalSetup',
-    'SimulationParameters',
-    'Wavefront',
-    'set_debug_logging',
-    'elements',
-    'units',
-    'specs',
-    'Clerk',
-    'networks'
+    "Parameter",
+    "ConstrainedParameter",
+    "PartialWithParameters",
+    "LinearOpticalSetup",
+    "SimulationParameters",
+    "Wavefront",
+    "set_debug_logging",
+    "elements",
+    "units",
+    "specs",
+    "Clerk",
+    "networks",
 ]

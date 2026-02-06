@@ -13,33 +13,37 @@ import pytest
 
 def test_html_element():
     sim_params = svetlanna.SimulationParameters(
-        {'W': torch.tensor([0]), 'H': torch.tensor([0]), 'wavelength': 1}
+        {
+            "x": torch.tensor([0]),
+            "y": torch.tensor([0]),
+            "wavelength": 1,
+        }
     )
-    element = svetlanna.elements.FreeSpace(sim_params, distance=1, method='AS')
+    element = svetlanna.elements.FreeSpace(sim_params, distance=1, method="AS")
 
     assert element._repr_html_()
 
 
 def test_default_widget_html_method():
-    assert default_widget_html_method(123, 'test', 'element_type', [])
+    assert default_widget_html_method(123, "test", "element_type", [])
 
 
 def test_generate_structure_html():
     sim_params = svetlanna.SimulationParameters(
-        {'W': torch.tensor([0]), 'H': torch.tensor([0]), 'wavelength': 1}
+        {
+            "x": torch.tensor([0]),
+            "y": torch.tensor([0]),
+            "wavelength": 1,
+        }
     )
-    element = svetlanna.elements.FreeSpace(sim_params, distance=1, method='AS')
+    element = svetlanna.elements.FreeSpace(sim_params, distance=1, method="AS")
 
     class NoWidgetHTMLElement:
         def to_specs(self):
             return []
 
     assert generate_structure_html(
-        [
-            _ElementInTree(element, 0, [
-                _ElementInTree(NoWidgetHTMLElement(), 0, [])
-            ])
-        ]
+        [_ElementInTree(element, 0, [_ElementInTree(NoWidgetHTMLElement(), 0, [])])]
     )
 
 
@@ -53,7 +57,7 @@ def test_show_structure(monkeypatch):
         nonlocal displayed
         displayed = True
 
-    monkeypatch.setattr(IPython.display, 'display', lambda _: set_displayed())
+    monkeypatch.setattr(IPython.display, "display", lambda _: set_displayed())
 
     # Test if the HTML has been displayed
     displayed = False
@@ -80,49 +84,45 @@ def test_show_structure(monkeypatch):
 
 def test_show_specs():
     sim_params = svetlanna.SimulationParameters(
-        {'W': torch.tensor([0]), 'H': torch.tensor([0]), 'wavelength': 1}
+        {
+            "x": torch.tensor([0]),
+            "y": torch.tensor([0]),
+            "wavelength": 1,
+        }
     )
-    element = svetlanna.elements.FreeSpace(sim_params, distance=1, method='AS')
+    element = svetlanna.elements.FreeSpace(sim_params, distance=1, method="AS")
 
     widget = show_specs(element)
     assert isinstance(widget, SpecsWidget)
     assert len(widget.elements) == 1
-    assert widget.elements[0]['name'] == 'FreeSpace'
+    assert widget.elements[0]["name"] == "FreeSpace"
 
 
 def test_draw_wavefront():
     sim_params = svetlanna.SimulationParameters(
         {
-            'W': torch.linspace(-1, 1, 10),
-            'H': torch.linspace(-1, 1, 10),
-            'wavelength': 1
+            "x": torch.linspace(-1, 1, 10),
+            "y": torch.linspace(-1, 1, 10),
+            "wavelength": 1,
         }
     )
     wavefront = svetlanna.Wavefront.plane_wave(sim_params)
 
     # Single type
-    types = ('A', 'I', 'phase', 'Re', 'Im')
+    types = ("A", "I", "phase", "Re", "Im")
     for t in types:
-        assert draw_wavefront(
-            wavefront,
-            sim_params,
-            types_to_plot=(t,)
-        )
+        assert draw_wavefront(wavefront, sim_params, types_to_plot=(t,))
 
     # All types
-    assert draw_wavefront(
-        wavefront,
-        sim_params,
-        types_to_plot=types
-    )
+    assert draw_wavefront(wavefront, sim_params, types_to_plot=types)
 
 
 def test_show_stepwise_forward():
     sim_params = svetlanna.SimulationParameters(
         {
-            'W': torch.linspace(-1, 1, 10),
-            'H': torch.linspace(-1, 1, 10),
-            'wavelength': 1
+            "x": torch.linspace(-1, 1, 10),
+            "y": torch.linspace(-1, 1, 10),
+            "wavelength": 1,
         }
     )
 
@@ -135,36 +135,32 @@ def test_show_stepwise_forward():
 
     class WrongTensorForwardElement(torch.nn.Module):
         def forward(self, x):
-            return torch.tensor([1, 2, 3.])
+            return torch.tensor([1, 2, 3.0])
 
         def to_specs(self):
             return []
 
-    element1 = svetlanna.elements.FreeSpace(sim_params, distance=1, method='AS')
+    element1 = svetlanna.elements.FreeSpace(sim_params, distance=1, method="AS")
     element2 = NoneForwardElement()
     element3 = WrongTensorForwardElement()
 
     wavefront = svetlanna.Wavefront.plane_wave(sim_params)
 
     widget = show_stepwise_forward(
-        element1,
-        element2,
-        element3,
-        input=wavefront,
-        simulation_parameters=sim_params
+        element1, element2, element3, input=wavefront, simulation_parameters=sim_params
     )
 
     assert isinstance(widget, StepwiseForwardWidget)
     assert len(widget.elements) == 3
 
     element1_json = widget.elements[0]
-    assert element1_json['name'] == 'FreeSpace'
-    assert element1_json['output_image']
+    assert element1_json["name"] == "FreeSpace"
+    assert element1_json["output_image"]
 
     element2_json = widget.elements[1]
-    assert element2_json['name'] == 'NoneForwardElement'
-    assert element2_json['output_image'] is None
+    assert element2_json["name"] == "NoneForwardElement"
+    assert element2_json["output_image"] is None
 
     element3_json = widget.elements[2]
-    assert element3_json['name'] == 'WrongTensorForwardElement'
-    assert element3_json['output_image'][:1] == '\n'
+    assert element3_json["name"] == "WrongTensorForwardElement"
+    assert element3_json["output_image"][:1] == "\n"

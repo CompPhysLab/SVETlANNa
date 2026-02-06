@@ -22,6 +22,7 @@ class ureg(Enum):
         var = 10
         assert var * ureg.mm == 10*1e-2
     """
+
     Gm = _G
     Mm = _M
     km = _k
@@ -69,12 +70,11 @@ class ureg(Enum):
         return other / self.value
 
     def __pow__(self, other):
-        return self.value ** other
+        return self.value**other
 
     def __array__(self, dtype=None, copy=None):
         import numpy
+
         if copy is False:
-            raise ValueError(
-                "`copy=False` isn't supported. A copy is always created."
-            )
+            raise ValueError("`copy=False` isn't supported. A copy is always created.")
         return numpy.array(self.value, dtype=dtype)

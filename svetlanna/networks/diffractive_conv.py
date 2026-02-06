@@ -4,24 +4,27 @@ import torch
 from torch import nn
 from svetlanna import Wavefront, SimulationParameters, ConstrainedParameter
 from svetlanna import elements
+
 # for visualisation:
 from svetlanna import LinearOpticalSetup
 from svetlanna.specs import ParameterSpecs, SubelementSpecs
+
 
 class ConvLayer4F(nn.Module):
     """
     Diffractive convolutional layer based on a 4f system.
     """
+
     # TODO: Add a custom aperture (defined by a mask) before a DiffractiveLayer?
 
     def __init__(
-            self,
-            sim_params: SimulationParameters,
-            focal_length: float,
-            conv_diffractive_mask: torch.Tensor,
-            learnable_mask: bool = False,
-            max_phase: float = 2 * torch.pi,
-            fs_method: Literal['fresnel', 'AS'] = 'AS',
+        self,
+        sim_params: SimulationParameters,
+        focal_length: float,
+        conv_diffractive_mask: torch.Tensor,
+        learnable_mask: bool = False,
+        max_phase: float = 2 * torch.pi,
+        fs_method: Literal["fresnel", "AS"] = "AS",
     ):
         """
         Parameters
@@ -62,7 +65,7 @@ class ConvLayer4F(nn.Module):
         return elements.FreeSpace(
             simulation_parameters=self.sim_params,
             distance=self.focal_length,  # distance is not learnable!
-            method=self.fs_method
+            method=self.fs_method,
         )
 
     def get_thin_lens(self):
@@ -83,9 +86,7 @@ class ConvLayer4F(nn.Module):
             diff_layer = elements.DiffractiveLayer(
                 simulation_parameters=self.sim_params,
                 mask=ConstrainedParameter(
-                    self.conv_diffractive_mask,
-                    min_value=0,
-                    max_value=self.max_phase
+                    self.conv_diffractive_mask, min_value=0, max_value=self.max_phase
                 ),
             )
         else:
@@ -99,11 +100,11 @@ class ConvLayer4F(nn.Module):
     def get_conv_layer_4f(self):
         system_elements = [
             self.get_free_space(),  # <-- F
-            self.get_thin_lens(),   # <-- ThinLens
+            self.get_thin_lens(),  # <-- ThinLens
             self.get_free_space(),  # <-- F
             self.get_diffractive_layer(),  # <-- convolution in a Fourier plane
             self.get_free_space(),  # <-- F
-            self.get_thin_lens(),   # <-- ThinLens
+            self.get_thin_lens(),  # <-- ThinLens
             self.get_free_space(),  # <-- F
         ]
         return nn.Sequential(*system_elements)
@@ -114,7 +115,7 @@ class ConvLayer4F(nn.Module):
 
         Parameters
         ----------
-        input_wf: Wavefront('batch_size', 'H', 'W')
+        input_wf: Wavefront('batch_size', 'y', 'x')
             An input wavefront(s).
 
         Returns
@@ -132,15 +133,15 @@ class ConvDiffNetwork4F(nn.Module):
     """
 
     def __init__(
-            self,
-            sim_params: SimulationParameters,
-            network_elements_list: list,
-            focal_length: float,
-            conv_phase_mask: torch.Tensor,
-            learnable_mask: bool = False,
-            max_phase: float = 2 * torch.pi,
-            fs_method: Literal['fresnel', 'AS'] = 'AS',
-            device: str | torch.device = torch.get_default_device(),
+        self,
+        sim_params: SimulationParameters,
+        network_elements_list: list,
+        focal_length: float,
+        conv_phase_mask: torch.Tensor,
+        learnable_mask: bool = False,
+        max_phase: float = 2 * torch.pi,
+        fs_method: Literal["fresnel", "AS"] = "AS",
+        device: str | torch.device = torch.get_default_device(),
     ):
         """
         Parameters
@@ -183,18 +184,20 @@ class ConvDiffNetwork4F(nn.Module):
             conv_diffractive_mask=self.conv_phase_mask,
             learnable_mask=self.learnable_mask,
             max_phase=self.max_phase,
-            fs_method=self.fs_method
+            fs_method=self.fs_method,
         ).to(self.__device)
 
         # PART OF THE NETWORK AFTER A 4F CONVOLUTION
         self.network_elements_list = network_elements_list
-        self.net_after_conv = nn.Sequential(*self.network_elements_list).to(self.__device)
+        self.net_after_conv = nn.Sequential(*self.network_elements_list).to(
+            self.__device
+        )
 
     def forward(self, wavefront_in):
         """
         Parameters
         ----------
-        wavefront_in: Wavefront('bs', 'H', 'W')
+        wavefront_in: Wavefront('bs', 'y', 'x')
             Input wavefront or a batch of Wavefronts.
 
         Returns
@@ -212,16 +215,15 @@ class ConvDiffNetwork4F(nn.Module):
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
         return (
             SubelementSpecs(
-                '4F Convolution System',
-                LinearOpticalSetup(list(self.conv_layer.conv_layer_4f))
+                "4F Convolution System",
+                LinearOpticalSetup(list(self.conv_layer.conv_layer_4f)),
             ),
             SubelementSpecs(
-                'Linear Setup',
-                LinearOpticalSetup(list(self.net_after_conv))
+                "Linear Setup", LinearOpticalSetup(list(self.net_after_conv))
             ),
         )
 
-    def to(self, device: str | torch.device | int) -> 'ConvDiffNetwork4F':
+    def to(self, device: str | torch.device | int) -> "ConvDiffNetwork4F":
         if self.__device == torch.device(device):
             return self
 
