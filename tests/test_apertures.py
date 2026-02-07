@@ -67,7 +67,7 @@ def test_rectangle_aperture(
     aperture = elements.RectangularAperture(
         simulation_parameters=params, height=height_test, width=width_test
     )
-    transmission_function = aperture.get_transmission_function()
+    transmission_function = aperture.transmission_function
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
@@ -147,7 +147,7 @@ def test_round_aperture(
 
     # transmission function of the round aperture as a class method
     aperture = elements.RoundAperture(simulation_parameters=params, radius=radius_test)
-    transmission_function = aperture.get_transmission_function()
+    transmission_function = aperture.transmission_function
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
@@ -225,7 +225,7 @@ def test_aperture(
     # transmission function for the aperture with arbitrary shape as a
     # class method
     aperture = elements.Aperture(simulation_parameters=params, mask=mask_test)
-    transmission_function = aperture.get_transmission_function()
+    transmission_function = aperture.transmission_function
 
     transmission_function_analytic = mask_test
 
