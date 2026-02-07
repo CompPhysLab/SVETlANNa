@@ -88,7 +88,7 @@ def test_lens(
     # transmission function of the thin lens as a class method
     transmission_function = elements.ThinLens(
         simulation_parameters=params, focal_length=focal_length_test, radius=radius_test
-    ).get_transmission_function()
+    ).transmission_function
 
     x_linear = torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes)
     y_linear = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
