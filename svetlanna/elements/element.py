@@ -5,7 +5,7 @@ from ..simulation_parameters import SimulationParameters
 from ..specs import PrettyReprRepr, ParameterSpecs, SubelementSpecs, Specsable
 from ..specs.specs_writer import write_specs_to_html, context_generator
 from io import StringIO
-from typing import Iterable, TypeVar, TYPE_CHECKING
+from typing import Iterable, TypeVar, TYPE_CHECKING, Self
 from ..parameters import Parameter
 from ..wavefront import Wavefront
 from warnings import warn
@@ -22,7 +22,7 @@ class _BufferedValueContainer(tuple):
 
     It is used to prevent double __setattr__ calls with the same value in
     patterns like `self.x = self.make_buffer('x', x_value)`.
-    Inheriting from tuple is used for performance reasons, so the `__slots__`.
+    Inheriting from tuple is used for performance reasons, hence `__slots__`.
     This approach was identified by GPT as the fastest one.
     """
 
@@ -32,47 +32,44 @@ class _BufferedValueContainer(tuple):
         return super().__new__(cls, (obj,))
 
 
-# TODO: check docstring
 class Element(nn.Module, metaclass=ABCMeta):
-    """A class that describes each element of the system"""
-
     def __init__(self, simulation_parameters: SimulationParameters) -> None:
-        """A class that describes each element of the system
+        """
+        This is the abstract class for all optical elements in SVETlANNa.
+        It is inherited from `torch.nn.Module`, so it is PyTorch-compatible.
+        Each element takes an incident wavefront and produces a transmitted wavefront.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            Class exemplar that describes the optical system
+            Simulation parameters.
         """
 
         super().__init__()
 
         self.simulation_parameters = simulation_parameters
 
-    # TODO: check doctrings
     @abstractmethod
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
-        """Forward propagation through the optical element"""
+        """Forward propagation through the optical element."""
 
-    def to(self, *args, **kwargs) -> "Element":
+    def to(self, *args, **kwargs) -> Self:
         """
         Move element to a different device/dtype.
 
-        Overrides nn.Module.to() to also transfer simulation_parameters.
-        Since SimulationParameters.to() is inplace and idempotent,
+        Overrides `torch.nn.Module.to()` to also transfer simulation_parameters.
+        Since this method is inplace and idempotent,
         multiple Elements sharing the same instance will work correctly.
 
         Returns
         -------
-        Element
-            Self (for chaining).
+        Self
+            The element itself, not a copy.
         """
         self.simulation_parameters.to(*args, **kwargs)
         return super().to(*args, **kwargs)
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
-        """Create specs"""
-
         for name, parameter in self.named_parameters():
 
             yield ParameterSpecs(
@@ -143,27 +140,27 @@ class Element(nn.Module, metaclass=ABCMeta):
     def make_buffer(self, name: str, value: _T, persistent: bool = False) -> _T:
         """Make buffer for internal use.
 
-        Use case:
+        Use case in `__init__` method:
+        ```python linenums="0"
+        self.mask = self.make_buffer('mask', some_tensor)
         ```
-        self.mask = make_buffer('mask', some_tensor)
-        ```
-        This allow torch to properly process `.to` method on Element
-        by marking that `mask` should be transferred to required device.
+        This allow torch to properly process the `.to` method on the element, since the buffer `maask` will be transferred to the required device along with simulation parameters.
+        This allows torch to properly process the `.to` method on the element, since the buffer `mask` will be transferred to the required device along with simulation parameters.
 
         Parameters
         ----------
         name : str
-            name of the new buffer
-            (it is more convenient to use name of new attribute)
+            Name of the new buffer
+            (it is more convenient to use the name of the new attribute).
         value : _T
-            tensor to be buffered
+            Tensor to be buffered.
         persistent : bool, optional
-            see torch docs on buffers, by default False
+            See torch docs on buffers, by default `False`.
 
         Returns
         -------
         _T
-            the value passed to the method
+            The value passed to the method.
         """
 
         if value is not None:
@@ -183,23 +180,30 @@ class Element(nn.Module, metaclass=ABCMeta):
         """Process element parameter passed by user.
         Automatically registers buffer for non-parametric tensors.
 
-        Use case:
-        ```
-        self.mask = process_parameter('mask', some_tensor)
+        Use case in `__init__` method:
+        ```python linenums="0"
+        class SomeElement(Element):
+            def __init__(self, simulation_parameters, mask, a):
+                super().__init__(simulation_parameters)
+
+                self.mask = self.process_parameter('mask', mask)
+                self.a = self.process_parameter('a', a)
+
+                ...
         ```
 
         Parameters
         ----------
         name : str
-            name of the new buffer
-            (it is more convenient to use name of new attribute)
+            Name of the new buffer
+            (it is more convenient to use the name of the new attribute).
         value : _V
-            the value of the element parameter
+            The value of the element parameter.
 
         Returns
         -------
         _V
-            the value passed to the method
+            The value passed to the method.
         """
         if isinstance(value, Tensor):
             if value.device != self.simulation_parameters.device:
