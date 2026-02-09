@@ -246,6 +246,8 @@ class Wavefront(torch.Tensor):
 
         def __rtruediv__(self, other: Any) -> Self: ...
 
+        def to(self, *args, **kwargs) -> Self: ...
+
 
 DEFAULT_LAST_AXES_NAMES = (
     # 'pol',
