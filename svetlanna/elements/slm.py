@@ -4,8 +4,9 @@ from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableTensor
 from ..wavefront import Wavefront
-from typing import Callable, Tuple, Literal, TypeVar, Generic
+from typing import Callable, Tuple, Literal, Generic
 from typing import ParamSpec, Concatenate
+from typing_extensions import TypeVar
 from torch.nn.functional import interpolate
 
 
@@ -166,7 +167,11 @@ def identity(phase: torch.Tensor) -> torch.Tensor:
     return phase
 
 
-_F = TypeVar("_F", bound=Callable[[torch.Tensor], torch.Tensor])
+_F = TypeVar(
+    "_F",
+    bound=Callable[[torch.Tensor], torch.Tensor],
+    default=Callable[[torch.Tensor], torch.Tensor],
+)
 
 
 class SpatialLightModulator(Element, Generic[_F]):
@@ -247,7 +252,7 @@ class SpatialLightModulator(Element, Generic[_F]):
 
         x_index = self.simulation_parameters.index("x")
         y_index = self.simulation_parameters.index("y")
-        _mesh_slice = [slice(None) for _ in range(max(-x_index, -y_index))]
+        _mesh_slice = [...] + [slice(None) for _ in range(max(-x_index, -y_index))]
         _mesh_slice[x_index] = x_slice
         _mesh_slice[y_index] = y_slice
         self._mesh_slice = tuple(_mesh_slice)
@@ -271,7 +276,9 @@ class SpatialLightModulator(Element, Generic[_F]):
 
         resized_mask = self.lut_function(resized_mask)
 
-        return resized_mask
+        return self.simulation_parameters.cast(
+            resized_mask, "y", "x", shape_check=False
+        )
 
     @property
     def transmission_function(self) -> torch.Tensor:
