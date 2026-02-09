@@ -20,52 +20,42 @@ def test_queue():
         input_gain=1,
     )
 
-    # feedback queue is empty
-    # delay is 2, but no element in queue,
-    # therefore pop_feedback_queue returns None
+    # Empty queue yields no feedback.
     assert reservoir.pop_feedback_queue() is None
 
     wf1 = Wavefront.plane_wave(sim_params)
     wf2 = Wavefront.plane_wave(sim_params)
 
     reservoir.append_feedback_queue(wf1)
-    # feedback queue (wf1,)
-    # delay is 2, but only 1 element in queue,
-    # therefore pop_feedback_queue returns None
+    # Still below delay length.
     assert reservoir.pop_feedback_queue() is None
 
     reservoir.append_feedback_queue(wf2)
-    # delay line (wf1, wf2)
-    # delay is 2, there are 2 elements in queue,
-    # therefore pop_feedback_queue returns element
+    # Queue length reaches delay, first element is returned.
     assert reservoir.pop_feedback_queue() is wf1
-    # delay line (wf2,)
-    # delay is 2, but only 1 element in queue
+    # Back below delay length.
     assert reservoir.pop_feedback_queue() is None
 
-    # test drop_feedback_queue
+    # Validate queue reset.
     assert len(reservoir.feedback_queue) > 0
     reservoir.drop_feedback_queue()
     assert len(reservoir.feedback_queue) == 0
 
 
-def test_forward():
-    sim_params = SimulationParameters(
-        {
-            "x": torch.tensor([0]),
-            "y": torch.tensor([0]),
-            "wavelength": 1.0,
-        }
+def test_forward(sim_params_simple: SimulationParameters):
+    # Elements are placeholders; only queueing matters here.
+    nonlinear_element = DiffractiveLayer(
+        sim_params_simple, mask=torch.zeros(sim_params_simple.axes_size(("y", "x")))
     )
-
-    nonlinear_element = DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]]))
-    delay_element = DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]]))
+    delay_element = DiffractiveLayer(
+        sim_params_simple, mask=torch.zeros(sim_params_simple.axes_size(("y", "x")))
+    )
     feedback_gain = 0.8
     input_gain = 0.6
     delay = 5
 
     reservoir = SimpleReservoir(
-        sim_params,
+        sim_params_simple,
         nonlinear_element=nonlinear_element,
         delay_element=delay_element,
         delay=delay,
@@ -73,10 +63,10 @@ def test_forward():
         input_gain=input_gain,
     )
 
-    wf = Wavefront.plane_wave(sim_params)
+    wf = Wavefront.plane_wave(sim_params_simple)
 
     for i in range(delay):
-        # test if feedback queue grows
+        # Queue grows until it reaches the delay length.
         assert len(reservoir.feedback_queue) == i
         wf_out = reservoir(wf)
         assert len(reservoir.feedback_queue) == i + 1
@@ -85,15 +75,38 @@ def test_forward():
         assert torch.allclose(wf_out, wf_out_expected)
 
     wf_out = reservoir(wf)
-    # test if feedback queue does not grows over delay size
+    # Queue does not exceed the delay length.
     assert len(reservoir.feedback_queue) == delay
 
-    # test if delay line now play some role in the output
+    # Delay line contributes after it is filled.
     wf_out_not_expected = nonlinear_element(input_gain * wf)
     assert not torch.allclose(wf_out, wf_out_not_expected)
 
-    # hard coded very first delay line related contribution
+    # First contribution from the delay line.
     wf_out_expected = nonlinear_element(
         input_gain * wf + feedback_gain * nonlinear_element(input_gain * wf)
     )
     assert torch.allclose(wf_out, wf_out_expected)
+
+
+def test_device(device_simple: str):
+    """Test reservoir on different devices."""
+
+    sim_params = SimulationParameters(
+        x=torch.tensor([0]), y=torch.tensor([0]), wavelength=1.0
+    )
+    wavefront = Wavefront.plane_wave(sim_params).to(device=device_simple)
+
+    sim_params.to(torch.get_default_device())  # TODO: remove
+    assert sim_params.device == torch.get_default_device()
+    reservoir = SimpleReservoir(
+        sim_params,
+        nonlinear_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
+        delay_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
+        delay=2,
+        feedback_gain=1,
+        input_gain=1,
+    )
+    reservoir.to(device=device_simple)
+
+    assert reservoir(wavefront).device.type == device_simple
