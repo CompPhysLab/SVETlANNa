@@ -61,19 +61,19 @@ def test_types(default_type: torch.dtype):
 
     lens = elements.ThinLens(
         simulation_parameters=params, focal_length=focal_length, radius=radius
-    ).get_transmission_function()
+    ).transmission_function
 
     aperture = elements.Aperture(
         simulation_parameters=params, mask=torch.zeros(x_grid.shape)
-    ).get_transmission_function()
+    ).transmission_function
 
     rectangular_aperture = elements.RectangularAperture(
         simulation_parameters=params, height=height, width=width
-    ).get_transmission_function()
+    ).transmission_function
 
     round_aperture = elements.RoundAperture(
         simulation_parameters=params, radius=radius
-    ).get_transmission_function()
+    ).transmission_function
 
     slm = elements.SpatialLightModulator(
         simulation_parameters=params, mask=torch.ones_like(x_grid), height=8, width=9

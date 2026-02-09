@@ -19,7 +19,7 @@ class ElementToTest(svetlanna.elements.Element):
         self.test_buffer = self.make_buffer("test_buffer", test_buffer)
 
     def forward(self, incident_wavefront: svetlanna.Wavefront) -> svetlanna.Wavefront:
-        return super().forward(incident_wavefront)
+        return incident_wavefront
 
 
 def test_setattr():
@@ -39,25 +39,7 @@ def test_setattr():
     assert element.test_parameter.inner_parameter in element.parameters()
 
 
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param("cpu"),
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_make_buffer(device):
+def test_make_buffer(device_simple: str):
     sim_params = svetlanna.SimulationParameters(
         {
             "x": torch.linspace(-10, 10, 100),
@@ -73,12 +55,12 @@ def test_make_buffer(device):
     assert getattr(element, "test_buffer") in element.buffers()
 
     # check if buffer is automatically transferred to device
-    element.to(device)
-    assert getattr(element, "test_buffer").device.type == device
+    element.to(device_simple)
+    assert getattr(element, "test_buffer").device.type == device_simple
 
     # test if a buffer cannot be registered with a tensor on a device
     # distinct from the simulation parameters' device
-    if device != "cpu":
+    if device_simple != "cpu":
         # Create fresh sim_params on CPU (previous one was moved by element.to())
         sim_params_cpu = svetlanna.SimulationParameters(
             {
@@ -89,29 +71,13 @@ def test_make_buffer(device):
         )
         with pytest.raises(ValueError):
             element = ElementToTest(
-                sim_params_cpu, test_parameter=None, test_buffer=test_buffer.to(device)
+                sim_params_cpu,
+                test_parameter=None,
+                test_buffer=test_buffer.to(device_simple),
             )
 
 
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param("cpu"),
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_process_parameter(device):
+def test_process_parameter(device_simple: str):
     sim_params = svetlanna.SimulationParameters(
         {
             "x": torch.linspace(-10, 10, 100),
@@ -127,8 +93,8 @@ def test_process_parameter(device):
     assert getattr(element, "test_parameter") in element.parameters()
 
     # check if parameter is automatically transferred to device
-    element.to(device)
-    assert getattr(element, "test_parameter").device.type == device
+    element.to(device_simple)
+    assert getattr(element, "test_parameter").device.type == device_simple
 
     # test tensor as a parameter (create fresh sim_params since previous was moved)
     sim_params = svetlanna.SimulationParameters(
@@ -138,7 +104,7 @@ def test_process_parameter(device):
             "wavelength": 1.0,
         }
     )
-    test_parameter = torch.tensor(123.0)
+    test_parameter = torch.tensor(123.0)  # type: ignore
     element = ElementToTest(sim_params, test_parameter=test_parameter, test_buffer=None)
 
     # check if test_parameter has been registered as a buffer
@@ -148,7 +114,7 @@ def test_process_parameter(device):
 
     # test if a parameter cannot be registered with a tensor on a device
     # distinct from the simulation parameters' device
-    if device != "cpu":
+    if device_simple != "cpu":
         # Create fresh sim_params on CPU
         sim_params_cpu = svetlanna.SimulationParameters(
             {
@@ -160,7 +126,7 @@ def test_process_parameter(device):
         with pytest.raises(ValueError):
             element = ElementToTest(
                 sim_params_cpu,
-                test_parameter=test_parameter.to(device),
+                test_parameter=test_parameter.to(device_simple),
                 test_buffer=None,
             )
 
@@ -178,6 +144,7 @@ def test_to_specs():
 
     specs = list(element.to_specs())
     assert len(specs) == 1
+    assert isinstance(specs[0], svetlanna.specs.specs.ParameterSpecs)
     assert specs[0].parameter_name == "test_parameter"
 
     representations = list(specs[0].representations)
@@ -200,7 +167,7 @@ def test_make_buffer_pattern():
     with pytest.warns(
         match="You set the attribute y with an object of internal type _BufferedValueContainer. Make sure this is the intended behavior."
     ):
-        element.y = element.make_buffer("x", None)
+        element.y = element.make_buffer("x", None)  # type: ignore
 
 
 def test_repr_html():

@@ -4,40 +4,125 @@ from .element import Element
 from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableTensor
 from ..wavefront import Wavefront
-from typing import Callable, Tuple, Literal, TypeVar, Generic
+from typing import Callable, Tuple, Literal, Generic
 from typing import ParamSpec, Concatenate
+from typing_extensions import TypeVar
 from torch.nn.functional import interpolate
 
 
 def one_step_tanh(x: torch.Tensor, alpha: torch.Tensor) -> torch.Tensor:
-    "function f: [0,1] -> [0,1] with steeper transition controlled by alpha"
-    "f(0) = 0, f(1) = 1"
-    "f'(0) = f'(1)"
+    r"""A one-step function that can be used in [QuantizerFromStepFunction][svetlanna.elements.slm.QuantizerFromStepFunction].
+    This function is defined as
+
+    $$f(x) = \dfrac{\tanh(\alpha(x-0.5))}{2\tanh(\alpha/2)} + \frac{1}{2}$$
+
+    The parameter $\alpha \in [0, +\infty)$ controls the steepness of the transition.
+    $\alpha=0$ corresponds to a linear function.
+
+    <figure markdown="span">
+        ![Image title](slm/one_step_function_one_step_tanh_dark_background.jpg#only-dark){ width="500" }
+        ![Image title](slm/one_step_function_one_step_tanh_default.jpg#only-light){ width="500" }
+    </figure>
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Input tensor with values from 0 to 1.
+    alpha : torch.Tensor
+        Steepness control parameter.
+
+    Returns
+    -------
+    torch.Tensor
+        Output tensor with values from 0 to 1.
+    """
     if alpha == 0:
         return x
     return torch.tanh(alpha * (x - 0.5)) / torch.tanh(alpha / 2) / 2 + 0.5
 
 
 def one_step_cos(x: torch.Tensor, alpha: torch.Tensor) -> torch.Tensor:
-    "function f: [0,1] -> [0,1] with steeper transition controlled by alpha"
-    "f(0) = 0, f(1) = 1"
-    "f'(0) = f'(1)"
+    r"""A one-step function that can be used in [QuantizerFromStepFunction][svetlanna.elements.slm.QuantizerFromStepFunction].
+    This function is defined as
+
+    $$f(x) = \dfrac{1 - \cos(\pi x^{\alpha + 1})}{2}$$
+
+    The parameter $\alpha \in [0, +\infty)$ controls the steepness of the transition.
+    $\alpha=0$ corresponds to a function with a smooth transition, but **not linear**, and as $\alpha$ increases, the transition becomes steeper.
+
+    <figure markdown="span">
+        ![Image title](slm/one_step_function_one_step_cos_dark_background.jpg#only-dark){ width="500" }
+        ![Image title](slm/one_step_function_one_step_cos_default.jpg#only-light){ width="500" }
+    </figure>
+
+    Parameters
+    ----------
+    x : torch.Tensor
+        Input tensor with values from 0 to 1.
+    alpha : torch.Tensor
+        Steepness control parameter.
+
+    Returns
+    -------
+    torch.Tensor
+        Output tensor with values from 0 to 1.
+    """
     return (1 - torch.cos(torch.pi * x ** (alpha + 1))) / 2
 
 
-_P = ParamSpec("_P")
+Params = ParamSpec("Params")
 
 
 def QuantizerFromStepFunction(
     N: int,
     max_value: float,
     one_step_function: Callable[
-        Concatenate[torch.Tensor, _P],
+        Concatenate[torch.Tensor, Params],
         torch.Tensor,
     ],
-) -> Callable[Concatenate[torch.Tensor, _P], torch.Tensor]:
+) -> Callable[Concatenate[torch.Tensor, Params], torch.Tensor]:
+    r"""Create a quantizer function from a given one-step function.
+    The resulting quantizer function takes a tensor of values from 0 to `max_value` and returns a tensor of values from 0 to `max_value` with `N` quantization levels.
+    Each level is defined as the output of the one-step function at the fractional part of the input value, divided by `max_value` and multiplied by `N`.
 
-    def f(x: torch.Tensor, *args: _P.args, **kwargs: _P.kwargs) -> torch.Tensor:
+    Parameters
+    ----------
+    N : int
+        Number of quantization levels.
+    max_value : float
+        Maximum value of the input tensor.
+    one_step_function : Callable[Concatenate[torch.Tensor, Params], torch.Tensor]
+        The one-step function that takes a tensor of values from 0 to 1 as the first argument and returns a tensor of values from 0 to 1.
+        The function should have a steep transition from 0 to 1, and the steepness can be controlled by an additional parameter (for example, alpha).
+        The function should satisfy the following conditions: $f(0) = 0$, $f(1)=1$, and $f'(0) = f'(1)$ to ensure that the quantizer function is continuous and smooth.
+
+    Examples
+    --------
+    ```python
+    import svetlanna as sv
+    from svetlanna.elements.slm import QuantizerFromStepFunction, one_step_tanh
+
+    sv.elements.SpatialLightModulator(
+        lut_function=sv.PartialWithParameters(
+            QuantizerFromStepFunction(
+                N=256,
+                max_value=2 * torch.pi,
+                one_step_function=one_step_tanh
+            ),
+            alpha=torch.tensor(1.0),
+        ),
+        ...
+    )
+    ```
+
+
+    Returns
+    -------
+    Callable[Concatenate[torch.Tensor, Params], torch.Tensor]
+        Quantizer function that takes the same parameters as the one-step function and applies quantization to the input tensor.
+    """
+
+    def f(x: torch.Tensor, *args: Params.args, **kwargs: Params.kwargs) -> torch.Tensor:
         y = x / max_value * N
 
         y = torch.remainder(y, N)
@@ -82,14 +167,14 @@ def identity(phase: torch.Tensor) -> torch.Tensor:
     return phase
 
 
-_F = TypeVar("_F", bound=Callable[[torch.Tensor], torch.Tensor])
+_F = TypeVar(
+    "_F",
+    bound=Callable[[torch.Tensor], torch.Tensor],
+    default=Callable[[torch.Tensor], torch.Tensor],
+)
 
 
 class SpatialLightModulator(Element, Generic[_F]):
-    """A class that described the field after propagating through the
-    Spatial Light Modulator with a given phase mask
-    """
-
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
@@ -102,6 +187,29 @@ class SpatialLightModulator(Element, Generic[_F]):
             "nearest", "bilinear", "bicubic", "area", "nearest-exact"
         ] = "nearest",
     ):
+        """Spatial Light Modulator (SLM) element implementation.
+        SLM supports pixel size that differs from the simulation grid size.
+        The lookup table function (`lut_function`) allows applying a non-linear transformation to the mask values, for example, to implement quantization.
+
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Simulation parameters.
+        mask : OptimizableTensor
+            Mask tensor of the shape `(Ny_mask, Nx_mask)`, where `Ny_mask` and `Nx_mask` are the height and width of the mask in pixels.
+            It can be different from the simulation grid shape `(Ny, Nx)`; interpolation is applied to fit the mask to the SLM area.
+        height : float
+            Height of the SLM.
+        width : float
+            Width of the SLM.
+        lut_function : _F, optional
+            Lookup table function applied to the mask values, by default `identity`.
+        center : Tuple[float, float], optional
+            Center coordinate `(x, y)` of the SLM in the simulation grid coordinates, by default `(0.0, 0.0)`.
+        mode : Literal[ 'nearest', 'bilinear', 'bicubic', 'area', 'nearest-exact' ], optional
+            Interpolation mode for resizing the mask, by default `'nearest'`.
+            See [`torch.nn.functional.interpolate` documentation](https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.interpolate.html) for more details.
+        """
 
         super().__init__(simulation_parameters)
 
@@ -144,7 +252,7 @@ class SpatialLightModulator(Element, Generic[_F]):
 
         x_index = self.simulation_parameters.index("x")
         y_index = self.simulation_parameters.index("y")
-        _mesh_slice = [slice(None) for _ in range(max(-x_index, -y_index))]
+        _mesh_slice = [...] + [slice(None) for _ in range(max(-x_index, -y_index))]
         _mesh_slice[x_index] = x_slice
         _mesh_slice[y_index] = y_slice
         self._mesh_slice = tuple(_mesh_slice)
@@ -168,7 +276,9 @@ class SpatialLightModulator(Element, Generic[_F]):
 
         resized_mask = self.lut_function(resized_mask)
 
-        return resized_mask
+        return self.simulation_parameters.cast(
+            resized_mask, "y", "x", shape_check=False
+        )
 
     @property
     def transmission_function(self) -> torch.Tensor:

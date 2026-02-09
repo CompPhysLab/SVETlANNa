@@ -77,7 +77,7 @@ def test_devices(device_type: torch.device):
         simulation_parameters=params, focal_length=focal_length, radius=radius
     )
 
-    tensors.append(lens.get_transmission_function())
+    tensors.append(lens.transmission_function)
     tensors.append(lens.forward(gaussian_beam))
     tensors.append(lens.reverse(gaussian_beam))
 
@@ -85,19 +85,19 @@ def test_devices(device_type: torch.device):
         simulation_parameters=params, mask=torch.zeros(x_grid.shape).to(device_type)
     )
 
-    tensors.append(aperture.get_transmission_function())
+    tensors.append(aperture.transmission_function)
     tensors.append(aperture.forward(gaussian_beam))
 
     rectangular_aperture = elements.RectangularAperture(
         simulation_parameters=params, height=height, width=width
     )
 
-    tensors.append(rectangular_aperture.get_transmission_function())
+    tensors.append(rectangular_aperture.transmission_function)
     tensors.append(rectangular_aperture.forward(gaussian_beam))
 
     round_aperture = elements.RoundAperture(simulation_parameters=params, radius=radius)
 
-    tensors.append(round_aperture.get_transmission_function())
+    tensors.append(round_aperture.transmission_function)
     tensors.append(round_aperture.forward(gaussian_beam))
 
     slm = elements.SpatialLightModulator(

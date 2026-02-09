@@ -1,6 +1,7 @@
 from enum import Enum
 
 # SI prefixes
+_T = 1e12
 _G = 1e9
 _M = 1e6
 _k = 1e3
@@ -46,6 +47,7 @@ class ureg(Enum):
     ps = _p
     fs = _f
 
+    THz = _T
     GHz = _G
     MHz = _M
     kHz = _k

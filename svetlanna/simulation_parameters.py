@@ -466,7 +466,9 @@ class SimulationParameters:
 
         return tuple(tensor_axes), tuple(tensor_sizes)
 
-    def cast(self, tensor: torch.Tensor, *axes: str) -> torch.Tensor:
+    def cast(
+        self, tensor: torch.Tensor, *axes: str, shape_check: bool = True
+    ) -> torch.Tensor:
         """
         Cast tensor to match simulation parameters axes for broadcasting.
 
@@ -499,7 +501,7 @@ class SimulationParameters:
         # Get cached preprocessing
         tensor_axes, tensor_sizes = self._cast_info(axes)
 
-        if tuple(tensor.shape) != tensor_sizes:
+        if shape_check and tuple(tensor.shape) != tensor_sizes:
             raise ValueError(
                 f"Tensor has shape {tuple(tensor.shape)}, "
                 f"expected shape {tensor_sizes} for axes {tensor_axes}."

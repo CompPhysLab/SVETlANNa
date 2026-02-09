@@ -10,27 +10,25 @@ from ..visualization import jinja_env, ElementHTML
 
 
 class ThinLens(Element):
-    """A class that described the field after propagating through the
-    thin lens.
-    """
-
     def __init__(
         self,
         simulation_parameters: SimulationParameters,
         focal_length: OptimizableFloat,
         radius: float = torch.inf,
     ):
-        """Thin lens element.
+        r"""Thin lens element.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            An instance describing the optical system's simulation parameters.
+            Simulation parameters.
         focal_length : OptimizableFloat
             The focal length of the lens.
-            Must be greater than 0 for a converging lens.
+            $\text{focal\_length} > 0$ for a converging lens.
         radius : float
             The radius of the thin lens.
+            The field outside the radius ($x^2 + y^2 > \text{radius}^2$) will propagate with no change in phase.
+            Default is infinity, meaning that the lens has no aperture and the field will propagate with a phase change everywhere.
         """
 
         super().__init__(simulation_parameters)
@@ -64,6 +62,13 @@ class ThinLens(Element):
 
     @property
     def transmission_function(self) -> torch.Tensor:
+        r"""
+        The tensor representing the transmission function of the element
+        $\exp\left(-i \dfrac{k}{2f} (x^2 + y^2)\right)$,
+        where $k$ is the wave number and $f$ is the focal length.
+        The radius of the lens is taken into account.
+        The shape of the tensor is broadcastable to the incident wavefront's shape.
+        """
         return torch.exp(
             -1j
             * self._radius_mask
@@ -71,48 +76,10 @@ class ThinLens(Element):
             * (self._wave_number / (2 * self.focal_length))
         )
 
-    def get_transmission_function(self) -> torch.Tensor:
-        """Returns the transmission function of the thin lens.
-
-        Returns
-        -------
-        torch.Tensor
-            The transmission function of the thin lens.
-        """
-
-        return self.transmission_function
-
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
-        """Calculates the field after propagation through the thin lens.
-
-        Parameters
-        ----------
-        input_field : Wavefront
-            The field incident on the thin lens.
-
-        Returns
-        -------
-        Wavefront
-            The field after propagation through the thin lens.
-        """
         return incident_wavefront * self.transmission_function
 
     def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
-        """Calculates the field after passing through the lens during
-        back propagation.
-
-        Parameters
-        ----------
-        transmission_field : Wavefront
-            The field incident on the lens during back propagation.
-            This corresponds to the transmitted field in forward propagation.
-
-        Returns
-        -------
-        Wavefront
-            The field transmitted through the lens during back propagation.
-            This corresponds to the incident field in forward propagation.
-        """
         return transmission_wavefront * torch.conj(self.transmission_function)
 
     def to_specs(self) -> Iterable[ParameterSpecs]:

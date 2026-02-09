@@ -10,37 +10,29 @@ from ..specs import ImageRepr, PrettyReprRepr, ParameterSpecs
 from ..visualization import ElementHTML, jinja_env
 
 
-class MulElement(Element, ABC):
-    """Class that generalize all elements with E->T@E like forward function,
-    where T is transmission function
+class AbstractMulElement(Element, ABC):
+    r"""
+    Class that generalize all apertures with $E^\text{out} = \hat{T}E^\text{in}$ like forward function,
+    where $\hat{T}$ is transmission function.
     """
 
+    @property
     @abstractmethod
-    def get_transmission_function(self) -> torch.Tensor:
-        """Method which returns the transmission function of
-        the element
-
-        Returns
-        -------
-        torch.Tensor
-            transmission function
+    def transmission_function(self) -> torch.Tensor:
+        r"""
+        The tensor representing transmission function of the element, $\hat{T}$.
+        The shape of the transmission function should be broadcastable to the shape of the incident wavefront.
+        To achive this, one can use `SimpulationParameters.cast` method to cast the transmission function to the shape of the incident wavefront:
+        ```python linenums="0"
+        @property
+        def transmission_function(self) -> torch.Tensor:
+            T = ...  # tensor with shape (Ny, Nx)
+            return self.simulation_parameters.cast(T, "y", "x")
+        ```
         """
 
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
-        """Calculate the field after propagating through the
-        element
-
-        Parameters
-        ----------
-        input_field : Wavefront
-            Field incident on the aperture
-
-        Returns
-        -------
-        Wavefront
-            The field after propagating through the element
-        """
-        return incident_wavefront * self.get_transmission_function()
+        return incident_wavefront * self.transmission_function
 
     @staticmethod
     def _widget_html_(
@@ -51,31 +43,34 @@ class MulElement(Element, ABC):
         )
 
 
-# TODO: check docstring
-class Aperture(MulElement):
-    """Aperture of the optical element with transmission function, which takes
-    the value 0 or 1
-    """
-
+class Aperture(AbstractMulElement):
     def __init__(
         self, simulation_parameters: SimulationParameters, mask: OptimizableTensor
     ):
-        """Aperture of the optical element defined by mask tensor.
+        r"""
+        Aperture defined by mask tensor.
+        Commonly, the mask is a tensor with values of either 0 or 1,
+        where 0 represents blocked light and 1 represents allowed light.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            Class exemplar that describes the optical system
+            Simulation parameters.
         mask : torch.Tensor
-            Two-dimensional tensor representing the aperture mask.
-            Each element must be either 0 (blocks light) or 1 (allows light).
+            Two-dimensional tensor representing the aperture mask of shape `(Ny, Nx)`.
+            The mask works as following:
+
+            $$E^\text{out}_{xyw...} = \text{mask}_{xy} E^\text{in}_{xyw...}$$
+
+            In this case 0 blocks light and 1 allows light go through.
         """
 
         super().__init__(simulation_parameters=simulation_parameters)
 
         self.mask = self.process_parameter("mask", mask)
 
-    def get_transmission_function(self) -> torch.Tensor:
+    @property
+    def transmission_function(self) -> torch.Tensor:
         return self.simulation_parameters.cast(self.mask, "y", "x")
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
@@ -90,25 +85,22 @@ class Aperture(MulElement):
         ]
 
 
-# TODO" check docstring
-class RectangularAperture(MulElement):
-    """A rectangle-shaped aperture with a transmission function taking either
-    a value of 0 or 1
-    """
-
+class RectangularAperture(AbstractMulElement):
     def __init__(
         self, simulation_parameters: SimulationParameters, height: float, width: float
     ):
-        """Constructor method
+        """Rectangular aperture.
+        Through the rectangular area of defined height and width located in the
+        center the light is allowed to pass, otherwise blocked.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            Class exemplar, that describes optical system
+            Simulation parameters.
         height : float
-            aperture height
+            Aperture height.
         width : float
-            aperture width
+            Aperture width.
         """
         super().__init__(simulation_parameters=simulation_parameters)
 
@@ -126,7 +118,8 @@ class RectangularAperture(MulElement):
         )
         self._mask = self.make_buffer("_mask", _mask)
 
-    def get_transmission_function(self) -> torch.Tensor:
+    @property
+    def transmission_function(self) -> torch.Tensor:
         return self._mask
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
@@ -136,21 +129,18 @@ class RectangularAperture(MulElement):
         ]
 
 
-# TODO: check docstrings
-class RoundAperture(MulElement):
-    """A round-shaped aperture with a transmission function taking either
-    a value of 0 or 1
-    """
-
+class RoundAperture(AbstractMulElement):
     def __init__(self, simulation_parameters: SimulationParameters, radius: float):
-        """Constructor method
+        """Round-shaped aperture.
+        Through the round area of defined radius located in the center
+        the light is allowed to pass, otherwise blocked.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            Class exemplar, that describes optical system
+            Simulation parameters.
         radius : float
-            Radius of the round-shaped aperture
+            Radius of the round-shaped aperture.
         """
         super().__init__(simulation_parameters=simulation_parameters)
 
@@ -166,7 +156,8 @@ class RoundAperture(MulElement):
         )
         self._mask = self.make_buffer("_mask", _mask)
 
-    def get_transmission_function(self) -> torch.Tensor:
+    @property
+    def transmission_function(self) -> torch.Tensor:
         return self._mask
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
