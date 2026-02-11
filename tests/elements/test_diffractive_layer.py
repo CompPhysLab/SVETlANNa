@@ -76,3 +76,18 @@ def test_reverse():
     assert torch.allclose(
         diffractive_layer.reverse(diffractive_layer.forward(wavefront)), wavefront
     )
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    diffractive_layer = elements.DiffractiveLayer(
+        simulation_parameters=sim_params,
+        mask=torch.zeros(sim_params.axes_size(("y", "x"))),
+    )
+
+    assert diffractive_layer.to_specs()
+    assert isinstance(diffractive_layer._widget_html_(0, "", None, []), str)

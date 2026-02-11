@@ -128,3 +128,22 @@ def test_device(device_simple: str):
     )
 
     assert reservoir(wavefront).device.type == device_simple
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    reservoir = SimpleReservoir(
+        sim_params,
+        nonlinear_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
+        delay_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
+        delay=2,
+        feedback_gain=1,
+        input_gain=1,
+    )
+
+    assert reservoir.to_specs()
+    assert isinstance(reservoir._widget_html_(0, "", None, []), str)

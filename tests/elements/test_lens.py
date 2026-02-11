@@ -104,3 +104,19 @@ def test_reverse():
     # Validate that reverse(forward(x)) returns the original wavefront.
     wavefront = svetlanna.Wavefront.plane_wave(params)
     assert torch.allclose(lens.reverse(lens.forward(wavefront)), wavefront)
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    lens = elements.ThinLens(
+        simulation_parameters=sim_params,
+        focal_length=1.0,
+        radius=5.0,
+    )
+
+    assert lens.to_specs()
+    assert isinstance(lens._widget_html_(0, "", None, []), str)
