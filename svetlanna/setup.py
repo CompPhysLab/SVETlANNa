@@ -29,7 +29,7 @@ class LinearOpticalSetup(nn.Module):
             first_sim_params = elements[0].simulation_parameters
 
             def check_sim_params(element: Element) -> bool:
-                return element.simulation_parameters is first_sim_params
+                return first_sim_params.equal(element.simulation_parameters)
 
             if not all(map(check_sim_params, self.elements)):
                 warn(
