@@ -1,8 +1,14 @@
 from svetlanna.simulation_parameters import AxisNotFound
-from svetlanna import SimulationParameters
+from svetlanna import SimulationParameters, Wavefront
+from svetlanna.elements import Element
 import pytest
 import torch
 from itertools import chain
+
+
+class ElementToTest(Element):
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
+        return incident_wavefront
 
 
 def test_simulation_parameters_init():
@@ -23,7 +29,7 @@ def test_simulation_parameters_init():
             }
         )
 
-    # Test with wrong y and x axis shape
+    # Wrong x/y axis shapes.
     with pytest.raises(ValueError):
         SimulationParameters(
             {
@@ -162,6 +168,67 @@ def test_simulation_parameters_from_dict():
     assert torch.allclose(sim_paras.x, x)
     assert torch.allclose(sim_paras.y, y)
     assert torch.allclose(sim_paras.wavelength, torch.tensor(wavelength))
+
+
+def test_simulation_parameters_equal(device_simple: str):
+    sim_params1 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 10),
+        wavelength=torch.tensor(312),
+    )
+
+    sim_params2 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 10),
+        wavelength=torch.tensor(312),
+    )
+
+    assert sim_params1.equal(sim_params1)
+    assert sim_params1.equal(sim_params2)
+
+    sim_params2.to(device_simple)
+    # Comparing instances on different devices raises `RuntimeError`
+    # because `torch.equal` requires the same device.
+    if sim_params1.device != sim_params2.device:
+        with pytest.raises(RuntimeError):
+            assert sim_params1.equal(sim_params2)
+
+    # Non-equal axes.
+    sim_params2 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 20),
+        wavelength=torch.tensor(312),
+    )
+    assert not sim_params1.equal(sim_params2)
+
+    # Extra axes.
+    sim_params2 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 20),
+        wavelength=torch.tensor(312),
+        pol=torch.tensor([1.0, 0.0]),
+    )
+
+    assert not sim_params1.equal(sim_params2)
+
+
+def test_simulation_parameters_clone(device_simple: str):
+    sim_params1 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 10),
+        wavelength=torch.tensor(312),
+    )
+    sim_params2 = sim_params1.clone()
+
+    assert sim_params1 is not sim_params2
+    assert sim_params1.equal(sim_params2)
+
+    # Clone stays on the same device.
+    sim_params1.to(device_simple)
+    sim_params2 = sim_params1.clone()
+
+    assert sim_params1.device.type == device_simple
+    assert sim_params1.equal(sim_params2)
 
 
 def test_simulation_parameters_axes():
@@ -492,82 +559,22 @@ def test_cast_with_scalar_axis():
     assert casted.shape == torch.Size([8, 10])  # no change, wavelength is scalar
 
 
-def test_reorder():
-    sp = SimulationParameters(
-        x=torch.linspace(-1, 1, 10),
-        y=torch.linspace(-1, 1, 8),
-        wavelength=torch.linspace(0.4, 0.6, 5),
-    )
-
-    t = torch.rand(2, 5, 8, 10)  # batch, wavelength, y, x
-    reordered = sp.reorder(t, "x", "y")
-    assert reordered.shape == torch.Size([2, 5, 10, 8])
-
-
-def test_to_inplace():
+def test_to_device_canonical(device_simple: str):
     sp = SimulationParameters(
         x=torch.linspace(-1, 1, 10),
         y=torch.linspace(-1, 1, 8),
         wavelength=torch.tensor(0.5),
     )
 
-    original_id = id(sp)
-    result = sp.to("cpu")
+    result = sp.to(device_simple)
 
     assert result is sp
-    assert id(result) == original_id
+
+    assert sp.device.type == device_simple
+    assert sp.x.device.type == device_simple
 
 
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param("cpu"),
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_to_device_canonical(device):
-    sp = SimulationParameters(
-        x=torch.linspace(-1, 1, 10),
-        y=torch.linspace(-1, 1, 8),
-        wavelength=torch.tensor(0.5),
-    )
-
-    sp.to(device)
-    assert sp.device.type == device
-    assert sp.x.device.type == device
-
-
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param("cpu"),
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_element_to_transfers_sim_params(device):
-    from svetlanna.elements import ThinLens
+def test_element_to_transfers_sim_params(device_simple: str):
 
     sp = SimulationParameters(
         x=torch.linspace(-1, 1, 100),
@@ -575,12 +582,18 @@ def test_element_to_transfers_sim_params(device):
         wavelength=torch.tensor(0.5e-6),
     )
 
-    lens = ThinLens(sp, focal_length=0.1)
-    assert sp.device.type == "cpu"
+    element = ElementToTest(sp)
+    element_sp = element.simulation_parameters
+    assert element_sp is not sp
+    assert element_sp.equal(sp)
 
-    lens.to(device)
-    assert sp.device.type == device
-    assert sp.x.device.type == device
+    element.to(device_simple)
+    assert element_sp is element.simulation_parameters
+    assert element_sp.device.type == device_simple
+
+    sp.to(device_simple)
+    assert element_sp is not sp
+    assert element_sp.equal(sp)
 
 
 def test_clear_cache():

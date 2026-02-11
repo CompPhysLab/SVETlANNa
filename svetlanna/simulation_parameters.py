@@ -290,6 +290,7 @@ class SimulationParameters:
         """Check equality with another SimulationParameters instance.
         The comparison between tensor axes is based on `torch.equal`,
         see [documentation](https://docs.pytorch.org/docs/2.10/generated/torch.equal.html) for more details.
+        Comparing instances on diffrent devices will raise `RuntimeError` because `torch.equal` requires tensors to be on the same device.
 
         Parameters
         ----------
