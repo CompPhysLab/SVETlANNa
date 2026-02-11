@@ -38,7 +38,7 @@ def test_types(default_type: torch.dtype):
         default_complex_dtype = torch.complex64
 
     params = SimulationParameters(
-        axes={
+        {
             "x": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
             "y": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
             "wavelength": wavelength,

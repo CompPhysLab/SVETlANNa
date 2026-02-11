@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING, Self
+from typing import Any, TYPE_CHECKING, Self, overload
 import torch
 import warnings
 from collections.abc import Mapping
@@ -31,87 +31,107 @@ def legacy_axis_support(name: str) -> str:
 
 
 class SimulationParameters:
-    """
-    Simulation parameters.
 
-    Manages coordinate systems and physical parameters for optical simulations.
-    Required axes: x, y, wavelength.
-    Additional axes can be added dynamically.
+    @overload
+    def __init__(
+        self,
+        axes: Mapping[str, torch.Tensor | float],
+        /,
+    ) -> None: ...
 
-    Examples
-    --------
-    >>> from svetlanna.units import ureg
-    >>>
-    >>> # Basic setup with units
-    >>> params = SimulationParameters(
-    ...     x=torch.linspace(-0.5*ureg.mm, 0.5*ureg.mm, 512),
-    ...     y=torch.linspace(-0.5*ureg.mm, 0.5*ureg.mm, 512),
-    ...     wavelength=632.8*ureg.nm
-    ... )
-    >>>
-    >>> # Convenient constructor
-    >>> params = SimulationParameters.from_ranges(
-    ...     x_range=(-0.5*ureg.mm, 0.5*ureg.mm), x_points=512,
-    ...     y_range=(-0.5*ureg.mm, 0.5*ureg.mm), y_points=512,
-    ...     wavelength=632.8*ureg.nm
-    ... )
-    >>>
-    >>> # Add polarization
-    >>> params.pol = torch.tensor([1., 0.])  # x-polarized
-    """
+    @overload
+    def __init__(
+        self,
+        /,
+        *,
+        x: torch.Tensor | float,
+        y: torch.Tensor | float,
+        wavelength: torch.Tensor | float,
+        **additional_axes: torch.Tensor | float,
+    ) -> None: ...
 
     def __init__(
         self,
         axes: Mapping[str, torch.Tensor | float] | None = None,
-        *,
-        x: torch.Tensor | float | None = None,
-        y: torch.Tensor | float | None = None,
-        wavelength: torch.Tensor | float | None = None,
-        **additional_axes: torch.Tensor | float,
+        /,
+        **kwaxes: torch.Tensor | float,
     ) -> None:
         """
-        Initialize simulation parameters with coordinate axes.
+        Simulation parameters.
+        Manages coordinate systems and physical parameters for optical simulations.
+        Required axes: `x`, `y`, `wavelength`.
+        Additional axes can be added.
 
-        Parameters
-        ----------
-        axes : Mapping[str, torch.Tensor | float] | None, optional
-            Dictionary mapping axis names to values (legacy API).
-            Cannot be used together with keyword arguments.
-        x : torch.Tensor | float | None, optional
-            Width/x-axis coordinates in meters. Required if `axes` not provided.
-        y : torch.Tensor | float | None, optional
-            Height/y-axis coordinates in meters. Required if `axes` not provided.
-        wavelength : torch.Tensor | float | None, optional
-            Optical wavelength in meters. Required if `axes` not provided.
-        **additional_axes : torch.Tensor | float
-            Additional axes (e.g., pol=torch.tensor([1., 0.])).
+        Examples
+        --------
+        Let's define simalation grid of width and height of 1 mm with 512 points for both axes (`Nx=Ny=512`) and wavelength of 632.8 nm:
+        ```python
+        import svetlanna as sv
+        from svetlanna.units import ureg
+        import torch
 
-        Raises
-        ------
-        ValueError
-            If both `axes` and keyword arguments are provided, or if required
-            axes are missing, or if axes are on different devices.
+        sim_params = sv.SimulationParameters(
+            x=torch.linspace(-0.5, 0.5, 512) * ureg.mm,
+            y=torch.linspace(-0.5, 0.5, 512) * ureg.mm,
+            wavelength=632.8 * ureg.nm,
+        )
+        ```
+        You can make `wavelength` an array for polychromatic simulations:
+        ```python hl_lines="4"
+        sim_params = sv.SimulationParameters(
+            x=torch.linspace(-0.5, 0.5, 512) * ureg.mm,
+            y=torch.linspace(-0.5, 0.5, 512) * ureg.mm,
+            wavelength=torch.linspace(600, 800, 10) * ureg.nm,
+        )
+        ```
+
+        **The order of axes matters!** It defines the order of dimensions in wavefront tensors.
+        In first case above, all optical elements will expect wavefront tensors with shape `(..., Ny, Nx)`,
+        while in the second case, the expected shape will be `(..., Nwavelength, Ny, Nx)`.
+        `...` means any number of leading dimensions (e.g., for batch).
+
+        If you change the order:
+        ```python hl_lines="3 4"
+        sim_params = sv.SimulationParameters(
+            x=torch.linspace(-0.5, 0.5, 512) * ureg.mm,
+            wavelength=torch.linspace(600, 800, 10) * ureg.nm,
+            y=torch.linspace(-0.5, 0.5, 512) * ureg.mm,
+        )
+        ```
+        the expected order of axes is `('y', 'wavelength', 'x')`, so all optical elements will expect wavefront tensors with shape `(..., Ny, Nwavelength, Nx)`.
+
+        You can add custom axes as needed:
+        ```python hl_lines="2 4"
+        sim_params = sv.SimulationParameters(
+            t=torch.linspace(0, 1, 5) * ureg.s,  # time axis
+            x=torch.linspace(-0.5, 0.5, 512) * ureg.mm,
+            wavelength=632.8 * ureg.nm,
+            y=torch.linspace(-0.5, 0.5, 512) * ureg.mm,
+        )
+        ```
+        In this case, the expected order of axes is `('y', 'x', 't')` as wavelength is scalar, so all optical elements will expect wavefront tensors with shape `(..., Ny, Nx, Nt)`.
+
+
         """
         # Handle backward compatibility
         if axes is not None:
-            if (
-                x is not None
-                or y is not None
-                or wavelength is not None
-                or additional_axes
-            ):
+            if kwaxes:
                 raise ValueError(
-                    "Cannot use both 'axes' dict and keyword arguments. "
-                    "Use either axes={...} or x=..., y=..., wavelength=..."
+                    'Cannot use both "axes" dict and keyword arguments. '
+                    'Use either {"x": ..., "y": ..., "wavelength": ...} or x=..., y=..., wavelength=...'
                 )
             all_axes = dict(axes)
         else:
             # New style initialization
-            if x is None or y is None or wavelength is None:
+            if (
+                ("x" not in kwaxes)
+                or ("y" not in kwaxes)
+                or ("wavelength" not in kwaxes)
+            ):
                 raise ValueError(
                     "x, y, and wavelength are required when not using 'axes' dict"
                 )
-            all_axes = {"x": x, "y": y, "wavelength": wavelength, **additional_axes}
+            all_axes = kwaxes
 
         all_axes = {
             legacy_axis_support(name): value for name, value in all_axes.items()
@@ -248,7 +268,6 @@ class SimulationParameters:
         ... )
         """
         return cls(
-            axes=None,
             x=torch.linspace(x_range[0], x_range[1], x_points),
             y=torch.linspace(y_range[0], y_range[1], y_points),
             wavelength=wavelength,
@@ -268,7 +287,7 @@ class SimulationParameters:
         axes_dict : Mapping[str, torch.Tensor | float]
             Dictionary with axis names as keys and tensor/scalar values.
         """
-        return cls(axes=dict(axes_dict))
+        return cls(dict(axes_dict))
 
     def clone(self) -> "SimulationParameters":
         """

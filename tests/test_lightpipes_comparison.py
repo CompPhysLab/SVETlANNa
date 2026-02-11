@@ -68,7 +68,7 @@ def test_circular_aperture(
     y_length = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes, dtype=torch.float64)
 
     simulation_parameters = sv.SimulationParameters(
-        axes={
+        {
             "x": x_length,
             "y": y_length,
             "wavelength": torch.tensor(wavelength, dtype=torch.float64),

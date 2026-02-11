@@ -76,7 +76,7 @@ def test_forward_logging_hook(input, output, capfd):
 
     element = ElementLike(
         simulation_parameters=svetlanna.SimulationParameters(
-            axes={
+            {
                 "y": torch.linspace(-1, 1, 10),
                 "x": torch.linspace(-1, 1, 10),
                 "wavelength": 1.0,
@@ -119,7 +119,7 @@ def test_register_logging_hook(input, type_, capfd):
 
     element = ElementLike(
         simulation_parameters=svetlanna.SimulationParameters(
-            axes={
+            {
                 "y": torch.linspace(-1, 1, 10),
                 "x": torch.linspace(-1, 1, 10),
                 "wavelength": 1.0,
@@ -163,7 +163,7 @@ def test_set_debug_logging(input, output, capfd, caplog):
     def run_element():
         element = ElementLike(
             simulation_parameters=svetlanna.SimulationParameters(
-                axes={
+                {
                     "y": torch.linspace(-1, 1, 10),
                     "x": torch.linspace(-1, 1, 10),
                     "wavelength": 1.0,

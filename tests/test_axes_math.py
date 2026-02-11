@@ -258,7 +258,7 @@ def test_mul():
 
     # test non default axes
     sim_params1 = SimulationParameters(
-        axes={
+        {
             "y": torch.linspace(-1, 1, 2),
             "x": torch.linspace(-1, 1, 2),
             "wavelength": torch.tensor([1]),
@@ -272,7 +272,7 @@ def test_mul():
 
     # test the same product but with other simulation parameters
     sim_params2 = SimulationParameters(
-        axes={
+        {
             "wavelength": torch.tensor([1]),
             "x": torch.linspace(-1, 1, 2),
             "y": torch.linspace(-1, 1, 2),

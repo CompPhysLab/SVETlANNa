@@ -82,11 +82,11 @@ def test_simulation_parameters_init():
 
     # Test required axes are actually required
     with pytest.raises(ValueError):
-        SimulationParameters(
+        SimulationParameters(  # type: ignore
             x=torch.linspace(-1, 1, 10),
         )
     with pytest.raises(ValueError):
-        SimulationParameters(
+        SimulationParameters(  # type: ignore
             x=torch.linspace(-1, 1, 10),
             y=torch.linspace(-1, 1, 10),
         )
@@ -123,7 +123,7 @@ def test_simulation_parameters_init():
 
     # Test with both API types
     with pytest.raises(ValueError):
-        SimulationParameters(
+        SimulationParameters(  # type: ignore
             {
                 "x": torch.linspace(-1, 1, 10),
                 "wavelength": torch.tensor(312),

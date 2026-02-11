@@ -57,7 +57,7 @@ def test_init_warning():
     sim_params2 = SimulationParameters(
         {
             "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 20),
             "wavelength": 1,
         }
     )

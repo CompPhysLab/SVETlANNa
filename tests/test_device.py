@@ -39,7 +39,7 @@ def test_devices(device_type: torch.device):
     tensors = []
 
     params = SimulationParameters(
-        axes={
+        {
             "x": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes).to(
                 device_type
             ),  # noqa: E501
@@ -165,7 +165,7 @@ def test_device_setup(device_type: torch.device):
     width = 3.0
 
     params = SimulationParameters(
-        axes={
+        {
             "x": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
             "y": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
             "wavelength": wavelength,
