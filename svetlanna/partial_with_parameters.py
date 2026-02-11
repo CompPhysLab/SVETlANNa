@@ -48,20 +48,26 @@ class PartialWithParameters(torch.nn.Module, Generic[_I, _O]):
             )
 
         self.__function_args = args  # for typing purposes
-        self.__function_kwargs = kwargs  # for typing purposes
+        self.__function_kwargs_keys = list(kwargs.keys())  # for typing purposes
 
         for name, value in dict(kwargs).items():
-            # SVETlANNa's Parameter is handled by pointing auxiliary attribute on
-            # their inner_storage with a name plus _svtlnn_inner_storage suffix:
             if isinstance(value, Parameter):
+                # SVETlANNa's Parameter is handled by pointing auxiliary attribute on
+                # their inner_storage with a name plus _svtlnn_inner_storage suffix:
                 setattr(self, name + "_svtlnn_inner_storage", value.inner_storage)
+                setattr(self, name, value)
 
-            setattr(self, name, value)
+            elif isinstance(value, torch.nn.Parameter):
+                self.register_parameter(name, value)
+            elif isinstance(value, torch.Tensor):
+                self.register_buffer(name, value)
+            else:
+                setattr(self, name, value)
 
     def forward(self, function_argument: _I) -> _O:
-        return self.function(
-            function_argument, *self.__function_args, **self.__function_kwargs
-        )
+        # The function is called with the current values of the parameters.
+        kwargs = {name: getattr(self, name) for name in self.__function_kwargs_keys}
+        return self.function(function_argument, *self.__function_args, **kwargs)
 
     if TYPE_CHECKING:
 
