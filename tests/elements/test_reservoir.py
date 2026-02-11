@@ -97,7 +97,6 @@ def test_device(device_simple: str):
     )
     wavefront = Wavefront.plane_wave(sim_params).to(device=device_simple)
 
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     reservoir = SimpleReservoir(
         sim_params,
@@ -108,5 +107,24 @@ def test_device(device_simple: str):
         input_gain=1,
     )
     reservoir.to(device=device_simple)
+
+    assert reservoir(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    assert sim_params.device.type == device_simple
+    reservoir = SimpleReservoir(
+        sim_params,
+        nonlinear_element=DiffractiveLayer(
+            sim_params, mask=torch.tensor([[0.0]]).to(device=device_simple)
+        ),
+        delay_element=DiffractiveLayer(
+            sim_params, mask=torch.tensor([[0.0]]).to(device=device_simple)
+        ),
+        delay=2,
+        feedback_gain=1,
+        input_gain=1,
+    )
 
     assert reservoir(wavefront).device.type == device_simple

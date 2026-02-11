@@ -55,11 +55,20 @@ def test_nonlinear_element_device(device_simple: str):
     )
     wavefront = Wavefront.plane_wave(sim_params).to(device=device_simple)
 
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     nle = elements.NonlinearElement(
         simulation_parameters=sim_params, response_function=lambda x: x
     )
     nle.to(device=device_simple)
+
+    assert nle(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    assert sim_params.device.type == device_simple
+    nle = elements.NonlinearElement(
+        simulation_parameters=sim_params, response_function=lambda x: x
+    )
 
     assert nle(wavefront).device.type == device_simple

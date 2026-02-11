@@ -38,13 +38,23 @@ def test_diffractive_layer_device(device_simple: str):
     )
     wavefront = svetlanna.Wavefront.plane_wave(sim_params).to(device=device_simple)
 
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=sim_params,
         mask=torch.rand(sim_params.axes_size(("y", "x"))),
     )
     diffractive_layer.to(device=device_simple)
+
+    assert diffractive_layer(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    assert sim_params.device.type == device_simple
+    diffractive_layer = elements.DiffractiveLayer(
+        simulation_parameters=sim_params,
+        mask=torch.rand(sim_params.axes_size(("y", "x"))).to(device=device_simple),
+    )
 
     assert diffractive_layer(wavefront).device.type == device_simple
 

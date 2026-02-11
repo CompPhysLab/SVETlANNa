@@ -260,7 +260,9 @@ class SpatialLightModulator(Element, Generic[_F]):
         self._slm_slice = (slm_y_slice, slm_x_slice)
         self._slm_size = (slm_y_N, slm_x_N)
 
-        _aperture = torch.zeros((y_nodes, x_nodes))
+        _aperture = torch.zeros(
+            (y_nodes, x_nodes), device=self.simulation_parameters.device
+        )
         _aperture = self.simulation_parameters.cast(_aperture, "y", "x")
         _aperture[self._mesh_slice] = 1
         self._aperture = self.make_buffer("_aperture", _aperture)

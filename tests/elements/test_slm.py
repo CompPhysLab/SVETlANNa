@@ -225,7 +225,6 @@ def test_slm_device(device_simple: str):
     )
     wavefront = Wavefront.plane_wave(sim_params).to(device=device_simple)
 
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     slm = elements.SpatialLightModulator(
         simulation_parameters=sim_params,
@@ -236,6 +235,21 @@ def test_slm_device(device_simple: str):
         height=1.0,
     )
     slm.to(device=device_simple)
+
+    assert slm(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    assert sim_params.device.type == device_simple
+    slm = elements.SpatialLightModulator(
+        simulation_parameters=sim_params,
+        mask=torch.ones(1, 1).to(device=device_simple),
+        mode="nearest",
+        center=(0, 0),
+        width=1.0,
+        height=1.0,
+    )
 
     assert slm(wavefront).device.type == device_simple
 
