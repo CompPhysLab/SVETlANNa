@@ -47,7 +47,7 @@ class Element(nn.Module, metaclass=ABCMeta):
 
         super().__init__()
 
-        self.simulation_parameters = simulation_parameters
+        self.simulation_parameters = simulation_parameters.clone()
 
     @abstractmethod
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
@@ -58,8 +58,6 @@ class Element(nn.Module, metaclass=ABCMeta):
         Move element to a different device/dtype.
 
         Overrides `torch.nn.Module.to()` to also transfer simulation_parameters.
-        Since this method is inplace and idempotent,
-        multiple Elements sharing the same instance will work correctly.
 
         Returns
         -------

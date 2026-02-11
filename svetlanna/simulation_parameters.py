@@ -62,7 +62,7 @@ class SimulationParameters:
 
     def __init__(
         self,
-        axes: dict[str, torch.Tensor | float] | None = None,
+        axes: Mapping[str, torch.Tensor | float] | None = None,
         *,
         x: torch.Tensor | float | None = None,
         y: torch.Tensor | float | None = None,
@@ -74,7 +74,7 @@ class SimulationParameters:
 
         Parameters
         ----------
-        axes : dict[str, torch.Tensor | float] | None, optional
+        axes : Mapping[str, torch.Tensor | float] | None, optional
             Dictionary mapping axis names to values (legacy API).
             Cannot be used together with keyword arguments.
         x : torch.Tensor | float | None, optional
@@ -269,6 +269,47 @@ class SimulationParameters:
             Dictionary with axis names as keys and tensor/scalar values.
         """
         return cls(axes=dict(axes_dict))
+
+    def clone(self) -> "SimulationParameters":
+        """
+        Create a deep copy of the SimulationParameters instance.
+
+        Returns
+        -------
+        SimulationParameters
+            A new instance with cloned axes.
+        """
+        cloned_axes = {name: value.clone() for name, value in self.__axes_dict.items()}
+        return SimulationParameters(cloned_axes)
+
+    ###########################################################################
+    # Equality
+    ###########################################################################
+
+    def equal(self, value: SimulationParameters) -> bool:
+        """Check equality with another SimulationParameters instance.
+        The comparison between tensor axes is based on `torch.equal`,
+        see [documentation](https://docs.pytorch.org/docs/2.10/generated/torch.equal.html) for more details.
+
+        Parameters
+        ----------
+        value : SimulationParameters
+            SimulationParameters instance to compare with.
+
+        Returns
+        -------
+        bool
+            `True` if all axes are equal, `False` otherwise.
+        """
+
+        if set(self.__axes_dict.keys()) != set(value.__axes_dict.keys()):
+            return False
+
+        for name in self.__axes_dict.keys():
+            if not torch.equal(self.__axes_dict[name], value.__axes_dict[name]):
+                return False
+
+        return True
 
     ###########################################################################
     # Axes related properties and methods
