@@ -145,16 +145,16 @@ def test_rectangle_fresnel(
         simulation_parameters=params, height=height_test, width=width_test
     )(incident_field)
 
-    # field on the screen by using Fresnel propagation method
+    # field on the screen by using ASM propagation method
     output_field_fresnel = elements.FreeSpace(
-        simulation_parameters=params, distance=distance_test, method="fresnel"
+        simulation_parameters=params, distance=distance_test, method="ASM"
     )(transmission_field)
     # field on the screen by using Angular Spectrum method
     output_field_as = elements.FreeSpace(
-        simulation_parameters=params, distance=distance_test, method="AS"
+        simulation_parameters=params, distance=distance_test, method="ASM"
     )(transmission_field)
 
-    # intensity distribution on the screen by using Fresnel propagation method
+    # intensity distribution on the screen by using ASM propagation method
     intensity_output_fresnel = output_field_fresnel.intensity
     # intensity distribution on the screen by using Angular Spectrum method
     intensity_output_as = output_field_as.intensity

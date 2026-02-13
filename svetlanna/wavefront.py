@@ -1,7 +1,7 @@
 import torch
 from enum import Enum
 from .simulation_parameters import SimulationParameters
-from typing import Any, Self, Iterable, cast, TYPE_CHECKING
+from typing import Any, Self, Iterable, cast, TYPE_CHECKING, overload
 
 
 class PolarizationComponent(Enum):
@@ -12,6 +12,7 @@ class PolarizationComponent(Enum):
     Enum : _type_
         _description_
     """
+
     X = "x"
     Y = "y"
     ALL = "all"
@@ -86,7 +87,6 @@ class Wavefront(torch.Tensor):
 
         return fwhm_x.item(), fwhm_y.item()
 
-    @overload
     @classmethod
     def plane_wave(
         cls,
@@ -145,7 +145,6 @@ class Wavefront(torch.Tensor):
 
         return cls(field)
 
-    @overload
     @classmethod
     def gaussian_beam(
         cls,
