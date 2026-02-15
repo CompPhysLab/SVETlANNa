@@ -5,38 +5,41 @@ from typing import ParamSpec, Concatenate, Callable
 from .parameters import Parameter
 
 
-_I = TypeVar("_I")
-_O = TypeVar("_O")
-_P = ParamSpec("_P")
+_Input = TypeVar("_Input")
+_Output = TypeVar("_Output")
+_Params = ParamSpec("_Params")
 
 
-class PartialWithParameters(torch.nn.Module, Generic[_I, _O]):
+class PartialWithParameters(torch.nn.Module, Generic[_Input, _Output]):
     def __init__(
         self,
-        function: Callable[Concatenate[_I, _P], _O],
-        *args: _P.args,
-        **kwargs: _P.kwargs,
+        function: Callable[Concatenate[_Input, _Params], _Output],
+        *args: _Params.args,
+        **kwargs: _Params.kwargs,
     ) -> None:
-        """This class wraps an arbitrary function with trainable keyword arguments.
-        It works similarly to `functools.partial`, but only keyword arguments are supported.
+        """Wrap an arbitrary function with trainable keyword arguments.
 
-        Example:
-        > sv.elements.NonlinearElement(
-        >     simulation_parameters,
-        >     sv.PartialWithParameters(
-        >         lambda x, alpha: torch.polar(x.abs()**alpha, x.angle()),
-        >         alpha=torch.nn.Parameter(torch.tensor(1.0)),
-        >     )
-        > )
+        This behaves like `functools.partial`, but only keyword arguments are
+        supported. Use this wrapper when you want keyword arguments to be
+        registered as trainable parameters or as buffers (for tensor-valued
+        constants). This is especially useful for multi-device workflows, since
+        parameters and buffers move with the module.
 
         Parameters
         ----------
-        function : Callable[Concatenate[_I, _P], _O]
-            Arbitrary function with parameters
-        *args : _P.args
-            Positional arguments for the function (not supported, should be empty)
-        **kwargs : _P.kwargs
-            Keyword arguments for the function, these will be trainable parameters of the module
+        function : Callable[Concatenate[_Input, _Params], _Output]
+            Arbitrary function with parameters.
+        *args : _Params.args
+            Positional arguments (not supported; must be empty).
+        **kwargs : _Params.kwargs
+            Keyword arguments for the function. Values are registered as
+            parameters, buffers, or plain attributes depending on their type.
+
+        Examples
+        --------
+        Suppose you have a function that describes a nonlinear response and has
+        trainable parameters. See the example in
+        [NonlinearElement][svetlanna.elements.NonlinearElement].
         """
         super().__init__()
         self.function = function
@@ -64,11 +67,11 @@ class PartialWithParameters(torch.nn.Module, Generic[_I, _O]):
             else:
                 setattr(self, name, value)
 
-    def forward(self, function_argument: _I) -> _O:
+    def forward(self, function_argument: _Input) -> _Output:
         # The function is called with the current values of the parameters.
         kwargs = {name: getattr(self, name) for name in self.__function_kwargs_keys}
         return self.function(function_argument, *self.__function_args, **kwargs)
 
     if TYPE_CHECKING:
 
-        def __call__(self, function_argument: _I) -> _O: ...
+        def __call__(self, function_argument: _Input) -> _Output: ...
