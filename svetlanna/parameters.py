@@ -12,12 +12,15 @@ class InnerParameterStorageModule(torch.nn.Module):
         self.expand(params_to_store)
 
     def expand(self, params_to_store: Mapping[str, Any]):
-        """Add more parameters to the storage
+        """Add items to the storage module.
 
         Parameters
         ----------
         params_to_store : Mapping[str, Any]
-            parameters to store
+            Parameters, buffers, or attributes to store. Values that are
+            `Parameter` are linked to their inner storage; `torch.nn.Parameter`
+            are registered as parameters; `torch.Tensor` are registered as
+            buffers; everything else is stored as a plain attribute.
         """
         for name, value in params_to_store.items():
             if isinstance(value, Parameter):
@@ -38,8 +41,10 @@ class InnerParameterStorageModule(torch.nn.Module):
 
 
 class Parameter(torch.Tensor):
-    """`torch.Parameter` replacement.
-    Added for further feature enrichment.
+    """`torch.Parameter`-like tensor with an internal storage module.
+
+    This class is used to keep a trainable `torch.nn.Parameter` inside a
+    `torch.nn.Module` while presenting a `torch.Tensor`-like interface.
     """
 
     @staticmethod
@@ -52,9 +57,28 @@ class Parameter(torch.Tensor):
         Parameters
         ----------
         data : Any
-            parameter tensor
+            Initial value, should be a tensor or convertible to a tensor.
         requires_grad : bool, optional
-            if the parameter requires gradient, by default True
+            Whether the parameter requires gradients, by default True.
+
+        Examples
+        --------
+        You can use `Parameter` as a trainable parameter in any SVETlANNa
+        element when it is typed as
+        [OptimizableFloat][svetlanna.parameters.OptimizableFloat] or
+        [OptimizableTensor][svetlanna.parameters.OptimizableTensor]:
+        ```python
+        import svetlanna as sv
+        import torch
+
+        sim_params = sv.SimulationParameters(...)
+
+        diffractive_layer = sv.elements.DiffractiveLayer(
+            simulation_parameters=sim_params,
+            mask=sv.Parameter(2 * torch.pi * torch.rand(Ny, Nx)),
+        )
+        ```
+
         """
         super().__init__()
 
@@ -94,7 +118,12 @@ class Parameter(torch.Tensor):
 
 
 class ConstrainedParameter(Parameter):
-    """Constrained parameter"""
+    """Parameter constrained to a bounded range.
+
+    The constraint is implemented by applying `bound_func` to the inner
+    parameter, mapping it to $[0, 1]$, and then scaling and shifting it to
+    `(min_value, max_value)`.
+    """
 
     @staticmethod
     def __new__(cls, *args, **kwargs):
@@ -113,17 +142,40 @@ class ConstrainedParameter(Parameter):
         Parameters
         ----------
         data : Any
-            parameter tensor
+            Initial parameter value.
         min_value : Any
-            minimum value tensor
+            Minimum allowed value.
         max_value : Any
-            maximum value tensor
+            Maximum allowed value.
         bound_func : Callable[[torch.Tensor], torch.Tensor], optional
-            function that map $\\mathbb{R}\to[0,1]$, by default `torch.sigmoid`
+            Function that maps $\mathbb{R}\to[0,1]$, by default `torch.sigmoid`.
         inv_bound_func : Callable[[torch.Tensor], torch.Tensor], optional
-            inverse function of `bound_func`, by default `torch.logit`
+            Inverse of `bound_func`, by default `torch.logit`. It is used once
+            to compute the initial inner parameter value from `data`.
         requires_grad : bool, optional
-            if the parameter requires gradient, by default True
+            Whether the parameter requires gradients, by default True.
+
+        Examples
+        --------
+        You can use `ConstrainedParameter` as a trainable parameter in any
+        SVETlANNa element when it is typed as
+        [OptimizableFloat][svetlanna.parameters.OptimizableFloat] or
+        [OptimizableTensor][svetlanna.parameters.OptimizableTensor]:
+        ```python
+        import svetlanna as sv
+        import torch
+
+        sim_params = sv.SimulationParameters(...)
+
+        diffractive_layer = sv.elements.DiffractiveLayer(
+            simulation_parameters=sim_params,
+            mask=sv.ConstrainedParameter(
+                2 * torch.pi * torch.rand(Ny, Nx),
+                min_value=0,
+                max_value=2 * torch.pi,
+            )
+        )
+        ```
         """
         if not isinstance(data, torch.Tensor):
             data = torch.tensor(data)
@@ -172,12 +224,12 @@ class ConstrainedParameter(Parameter):
 
     @property
     def value(self) -> torch.Tensor:
-        """Parameter value
+        """Constrained parameter value.
 
         Returns
         -------
         torch.Tensor
-            Constrained parameter value computed with bound_func
+            Constrained value computed with `bound_func`.
         """
         # for inner parameter value y:
         # x = (M-m) * bound_function( y ) + m = a * bound_function( y ) + b
@@ -200,6 +252,13 @@ class ConstrainedParameter(Parameter):
 
 
 OptimizableFloat: TypeAlias = float | torch.Tensor | torch.nn.Parameter | Parameter
+"""Union type for scalar values that can be optimized.
+Accepts Python floats, scalar tensors, `torch.nn.Parameter`, or
+[Parameter][svetlanna.Parameter] instances.
+"""
 OptimizableTensor: TypeAlias = torch.Tensor | torch.nn.Parameter | Parameter
+"""Union type for tensor values that can be optimized.
+Accepts tensor values, `torch.nn.Parameter`, or [Parameter][svetlanna.Parameter] instances.
+"""
 
 BoundedParameter = ConstrainedParameter
