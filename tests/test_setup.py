@@ -70,24 +70,7 @@ def test_init_warning():
         LinearOpticalSetup(elements=[el1, el2])
 
 
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_to_device(device):
+def test_to_device(device_simple: str):
     sim_params = SimulationParameters(
         {
             "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
@@ -104,13 +87,21 @@ def test_to_device(device):
 
     setup = LinearOpticalSetup([el1, el2])
 
-    setup.net.to(device)
+    setup.net.to(device_simple)
 
-    assert el1.a.device.type == device
-    assert el1.a.inner_parameter.device.type == device
+    assert el1.a.device.type == device_simple
+    assert el1.a.inner_parameter.device.type == device_simple
 
-    assert el2.a.device.type == device
-    assert el2.a.inner_parameter.device.type == device
+    assert el2.a.device.type == device_simple
+    assert el2.a.inner_parameter.device.type == device_simple
+
+    # test warning when elements have different devices
+    el3 = SimpleElement(
+        a=torch.tensor(123), simulation_parameters=sim_params.to(device=device_simple)
+    )
+    if el1.a.device.type != el3.a.device.type:
+        with pytest.warns(UserWarning):
+            LinearOpticalSetup(elements=[el1, el3])
 
 
 def test_reverse():
@@ -140,3 +131,23 @@ def test_reverse():
     el = ReversableSimpleElement(a=a, simulation_parameters=sim_params)
     setup = LinearOpticalSetup(elements=[el])
     torch.testing.assert_close(setup.reverse(wf), wf * a)
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        {
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
+        }
+    )
+
+    a = torch.tensor(2)
+    el1 = SimpleElement(a=a, simulation_parameters=sim_params)
+    el2 = SimpleElement(a=a, simulation_parameters=sim_params)
+    el3 = SimpleElement(a=a, simulation_parameters=sim_params)
+
+    setup = LinearOpticalSetup(elements=[el1, el2, el3])
+    assert setup.to_specs()
+    assert isinstance(setup._widget_html_(0, "", None, []), str)

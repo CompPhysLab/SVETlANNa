@@ -8,51 +8,53 @@ from .visualization import jinja_env, ElementHTML
 
 
 class LinearOpticalSetup(nn.Module):
-    """
-    A linear optical network composed of Element's
-    """
+    """Linear optical network composed of [`Element`][svetlanna.elements.Element] instances."""
 
     def __init__(self, elements: Iterable[Element]) -> None:
-        """
+        """Create a linear optical setup from elements.
+
         Parameters
         ----------
         elements : Iterable[Element]
-            A set of optical elements which make up a setup.
+            Optical elements that make up the setup. Elements are evaluated in
+            the provided order.
         """
         super().__init__()
 
-        elements = list(elements)
-        self.elements = elements
-        self.net = nn.Sequential(*elements)  # torch network
+        self.elements = list(elements)
+        self.net = nn.Sequential(*self.elements)  # torch network
 
-        if len(elements) > 0:
-            first_sim_params = elements[0].simulation_parameters
+        if len(self.elements) > 0:
+            first_sim_params = self.elements[0].simulation_parameters
 
-            def check_sim_params(element: Element) -> bool:
+            def check_sim_params_diveces(element: Element) -> bool:
+                return first_sim_params.device == element.simulation_parameters.device
+
+            def check_sim_params_equal(element: Element) -> bool:
                 return first_sim_params.equal(element.simulation_parameters)
 
-            if not all(map(check_sim_params, self.elements)):
-                warn(
-                    "Some elements have different SimulationParameters "
-                    "instance. It is more convenient to use "
-                    "the same SimulationParameters instance."
-                )
+            if not all(map(check_sim_params_diveces, self.elements)):
+                warn("Some elements have SimulationParameters on different devices.")
+            else:
+                # run the equality check only if all elements are on the same device, otherwise it will raise RuntimeError
+                if not all(map(check_sim_params_equal, self.elements)):
+                    warn("Some elements have different SimulationParameters.")
 
         if all((hasattr(el, "reverse") for el in self.elements)):
 
             class ReverseNet(nn.Module):
-                def forward(self, Ein: Tensor) -> Tensor:
-                    for el in reversed(elements):
-                        Ein = el.reverse(Ein)
+                def forward(_self, Ein: Tensor) -> Tensor:
+
+                    for el in reversed(self.elements):
+                        Ein = el.reverse(Ein)  # type: ignore
                     return Ein
 
-            self._reverse_net = ReverseNet()
+            self._reverse_net: ReverseNet | None = ReverseNet()
         else:
             self._reverse_net = None
 
     def forward(self, input_wavefront: Tensor) -> Tensor:
-        """
-        A forward function for a network assembled from elements.
+        """Apply all elements to the input wavefront.
 
         Parameters
         ----------
@@ -68,9 +70,7 @@ class LinearOpticalSetup(nn.Module):
         return self.net(input_wavefront)
 
     def stepwise_forward(self, input_wavefront: Tensor):
-        """
-        Function that consistently applies forward method of each element
-        to an input wavefront.
+        """Apply elements step-by-step and collect intermediate wavefronts.
 
         Parameters
         ----------
@@ -82,8 +82,7 @@ class LinearOpticalSetup(nn.Module):
         str
             A string that represents a scheme of a propagation through a setup.
         list(torch.Tensor)
-            A list of an input wavefront evolution
-            during a propagation through a setup.
+            A list of wavefronts showing the propagation through the setup.
         """
         this_wavefront = input_wavefront
         # list of wavefronts while propagation of an initial wavefront through the system
@@ -106,6 +105,23 @@ class LinearOpticalSetup(nn.Module):
         return optical_scheme, steps_wavefront
 
     def reverse(self, Ein: Tensor) -> Tensor:
+        """Reverse propagation through the setup.
+
+        Parameters
+        ----------
+        Ein : Tensor
+            Input wavefront to reverse propagate.
+
+        Returns
+        -------
+        Tensor
+            Output wavefront after reverse propagation.
+
+        Raises
+        ------
+        TypeError
+            If reverse propagation is not supported by all elements in the setup.
+        """
         if self._reverse_net is not None:
             return self._reverse_net(Ein)
         raise TypeError(
