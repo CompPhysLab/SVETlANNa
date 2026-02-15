@@ -76,17 +76,52 @@ def register_logging_hook(
 
 
 def set_debug_logging(mode: bool, type: Literal["logging", "print"] = "print"):
-    """Enables and disables debug logging.
-    If type is `'print'`, then messages are printed using `print`,
-    if type is `'logging'` the messages are written in the logger
-    named `svetlanna.logging`.
+    """Enable or disable debug logging for elements.
+
+    Logs information about element registration (parameters, buffers, submodules)
+    and forward pass execution.
+    This helps debug and trace data flow through the optical setup.
 
     Parameters
     ----------
     mode : bool
-        flag whether to enable debug logging
-    type: Literal['logging', 'print']
-        type of logging messages output
+        Whether to enable debug logging.
+    type : Literal['logging', 'print'], optional
+        Output method: `'print'` uses `print()`, `'logging'` writes to the
+        `svetlanna.logging` logger at DEBUG level, by default `'print'`.
+
+    Raises
+    ------
+    ValueError
+        If `type` is not `'logging'` or `'print'`.
+
+    Examples
+    --------
+    ```python
+    import svetlanna as sv
+    import torch
+    from svetlanna.logging import set_debug_logging
+
+    set_debug_logging(True)
+
+    sim_params = sv.SimulationParameters(...)
+
+    diffractive_layer = sv.elements.DiffractiveLayer(
+        simulation_parameters=sim_params,
+        mask=torch.rand(Ny, Nx),
+    )
+    input_wavefront = sv.Wavefront.plane_wave(sim_params)
+    diffractive_layer(input_wavefront)
+    ```
+
+    Output:
+    ```linenums="0"
+    Buffer of DiffractiveLayer was registered with name mask:
+       <class 'torch.Tensor'> shape=torch.Size([512, 512]), dtype=torch.float32, device=cpu
+    The forward method of DiffractiveLayer was computed
+       input 0: <class 'svetlanna.wavefront.Wavefront'> shape=torch.Size([512, 512]), dtype=torch.complex64, device=cpu
+       output 0: <class 'svetlanna.wavefront.Wavefront'> shape=torch.Size([512, 512]), dtype=torch.complex64, device=cpu
+    ```
     """
     global __handles
     global __logging_type
