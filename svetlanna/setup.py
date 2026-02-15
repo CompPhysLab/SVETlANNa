@@ -8,16 +8,31 @@ from .visualization import jinja_env, ElementHTML
 
 
 class LinearOpticalSetup(nn.Module):
-    """Linear optical network composed of [`Element`][svetlanna.elements.Element] instances."""
+    """Linear optical network composed of [`Element`][svetlanna.elements.Element] instances.
+    It works the same way as a `torch.nn.Sequential` module, but with some additional features.
+    """
 
     def __init__(self, elements: Iterable[Element]) -> None:
-        """Create a linear optical setup from elements.
-
+        """
         Parameters
         ----------
         elements : Iterable[Element]
             Optical elements that make up the setup. Elements are evaluated in
             the provided order.
+
+        Examples
+        --------
+        ```python
+        setup = LinearOpticalSetup(
+            elements=[
+                element1,
+                element2,
+                element3,
+            ]
+        )
+
+        output_wavefront = setup(input_wavefront)
+        ```
         """
         super().__init__()
 
@@ -54,19 +69,6 @@ class LinearOpticalSetup(nn.Module):
             self._reverse_net = None
 
     def forward(self, input_wavefront: Tensor) -> Tensor:
-        """Apply all elements to the input wavefront.
-
-        Parameters
-        ----------
-        input_wavefront : torch.Tensor
-            A wavefront that enters the optical network.
-
-        Returns
-        -------
-        torch.Tensor
-            A wavefront after the last element of
-            the network (output of the network).
-        """
         return self.net(input_wavefront)
 
     def stepwise_forward(self, input_wavefront: Tensor):
@@ -106,6 +108,8 @@ class LinearOpticalSetup(nn.Module):
 
     def reverse(self, Ein: Tensor) -> Tensor:
         """Reverse propagation through the setup.
+        All elements in the setup must have a `reverse` method. If any element
+        lacks this method, a `TypeError` is raised.
 
         Parameters
         ----------
