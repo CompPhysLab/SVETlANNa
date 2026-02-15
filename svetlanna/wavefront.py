@@ -4,7 +4,9 @@ from typing import Any, Self, Iterable, cast, TYPE_CHECKING
 
 
 class Wavefront(torch.Tensor):
-    """Class that represents wavefront"""
+    """Class that represents wavefront.
+    It is a subclass of `torch.Tensor` with additional properties and methods for wavefront analysis and generation.
+    """
 
     @staticmethod
     def __new__(cls, data, *args, **kwargs):
@@ -14,46 +16,51 @@ class Wavefront(torch.Tensor):
 
     @property
     def intensity(self) -> torch.Tensor:
-        """Calculates intensity of the wavefront
+        """Intensity of the wavefront.
 
         Returns
         -------
         torch.Tensor
-            intensity
+            Intensity ($|E|^2$).
         """
         return torch.abs(torch.Tensor(self)) ** 2
 
     @property
     def max_intensity(self) -> float:
-        """Calculates maximum intensity of the wavefront
+        """Maximum intensity of the wavefront.
 
         Returns
         -------
         float
-            maximum intensity
+            Maximum intensity value.
         """
         return self.intensity.max().item()
 
     @property
     def phase(self) -> torch.Tensor:
-        """Calculates phase of the wavefront
+        r"""Phase of the wavefront.
 
         Returns
         -------
         torch.Tensor
-            phase from $-\\pi$ to $\\pi$
+            Phase angle in the range $[-\pi, \pi]$.
         """
         # HOTFIX: problem with phase of -0. in visualization
         res = torch.angle(torch.Tensor(self) + 0.0)
         return res
 
     def fwhm(self, simulation_parameters: SimulationParameters) -> tuple[float, float]:
-        """Calculates full width at half maximum of the wavefront
+        """Full width at half maximum (FWHM) of the wavefront intensity.
+
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Simulation parameters.
 
         Returns
         -------
         tuple[float, float]
-            full width at half maximum along x and y axes
+            FWHM along x and y axes.
         """
 
         x_step = torch.diff(simulation_parameters.axes.x)[0].item()
@@ -80,25 +87,29 @@ class Wavefront(torch.Tensor):
         wave_direction: Any = None,
         initial_phase: float = 0.0,
     ) -> Self:
-        """Generate wavefront of the plane wave
+        r"""Create a plane wave wavefront defind by the formula
+        $$
+        E(x, y) = \exp\left( i \left( k_x x + k_y y + k_z z + \phi_0 \right) \right)
+        $$
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            simulation parameters
+            Simulation parameters.
         distance : float, optional
-            free wave propagation distance, by default 0.
+            Free wave propagation distance $z$, by default 0.
         wave_direction : Any, optional
-            three component tensor-like vector with x,y,z coordinates.
+            Three component tensor-like vector with ($d_x$, $d_y$, $d_z$) coordinates,
+            so $\vec{k} = k \frac{\vec{d}}{||\vec{d}||}$
             The resulting field propagates along the vector, by default
             the wave propagates along z direction.
         initial_phase : float, optional
-            additional phase to the resulting field, by default 0.
+            Additional phase offset ($\phi_0$), by default 0.
 
         Returns
         -------
         Wavefront
-            plane wave field.
+            Plane wave field.
         """
         # by default the wave propagates along z direction
         if wave_direction is None:
@@ -138,25 +149,32 @@ class Wavefront(torch.Tensor):
         dx: float = 0.0,
         dy: float = 0.0,
     ) -> Self:
-        """Generates the Gaussian beam.
+        r"""Generates the Gaussian beam wavefront defined by the formula
+        $$
+        E(x, y) = \frac{w_0}{w(z)} \exp\left( -\frac{(x - d_x)^2 + (y - d_y)^2}{w(z)^2} \right) \exp\left( i \left( k z + k\frac{(x - d_x)^2 + (y - d_y)^2}{2 R(z)} - \zeta(z) \right) \right)
+        $$
+        where $w(z) = w_0 \sqrt{1 + \left( \frac{z}{z_R} \right)^2}$,
+        $R(z) = z \left( 1 + \left( \frac{z_R}{z} \right)^2 \right)$,
+        $\zeta(z) = \arctan\left( \frac{z}{z_R} \right)$,
+        and $z_R = \frac{\pi w_0^2}{\lambda}$ is the Rayleigh range.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            simulation parameters
+            Simulation parameters.
         waist_radius : float
-            Waist radius of the beam
+            Beam waist radius ($w_0$).
         distance : float, optional
-            free wave propagation distance, by default 0.
+            Free wave propagation distance $z$, by default 0.
         dx : float, optional
-            Horizontal position of the beam center, by default 0.
+            Horizontal offset of the beam center ($d_x$), by default 0.
         dy : float, optional
-            Horizontal position of the beam center, by default 0.
+            Vertical offset of the beam center ($d_y$), by default 0.
 
         Returns
         -------
         Wavefront
-            Beam field in the plane oXY propagated over the distance
+            Gaussian beam field in the oXY plane.
         """
 
         # Cast axes
@@ -196,25 +214,29 @@ class Wavefront(torch.Tensor):
         dx: float = 0.0,
         dy: float = 0.0,
     ) -> Self:
-        """Generate wavefront of the spherical wave
+        r"""Generate wavefront of the spherical wave
+        $$
+        E(x, y) = \frac{1}{r} \exp\left( i \left( k r + \phi_0 \right) \right)
+        $$
+        where $r = \sqrt{(x - d_x)^2 + (y - d_y)^2 + z^2}$ is the distance from the point source to the point $(x, y)$ in the oXY plane.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            simulation parameters
+            Simulation parameters.
         distance : float
-            distance between the source and the oXY plane.
+            Distance from the point source to the oXY plane ($z$).
         initial_phase : float, optional
-            additional phase to the resulting field, by default 0.
+            Phase offset at the source ($\phi_0$), by default 0.
         dx : float, optional
-            Horizontal position of the spherical wave center, by default 0.
+            Horizontal position of the point source ($d_x$), by default 0.
         dy : float, optional
-            Horizontal position of the spherical wave center, by default 0.
+            Vertical position of the point source ($d_y$), by default 0.
 
         Returns
         -------
         Wavefront
-            Beam field
+            Spherical wave field in the oXY plane.
         """
         # Cast axes
         sim_params = simulation_parameters
