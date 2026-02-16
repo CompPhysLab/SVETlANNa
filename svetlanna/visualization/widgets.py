@@ -185,7 +185,7 @@ def show_structure(*specsable: Specsable):
     ```
     Output (in IPython environment):
     <iframe
-    src="/reference/visualization/show_structure.html"
+    src="show_structure.html"
     style="width:100%; height:150px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
     """
     try:
@@ -237,7 +237,7 @@ def show_specs(*specsable: Specsable) -> SpecsWidget:
     ```
     Output (in IPython environment):
     <iframe
-    src="/reference/visualization/show_specs.html"
+    src="show_specs.html"
     style="width:100%; height:500px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
 
     """
@@ -452,7 +452,7 @@ def show_stepwise_forward(
     ```
     Output (in IPython environment):
     <iframe
-    src="/reference/visualization/show_stepwise_forward.html"
+    src="show_stepwise_forward.html"
     style="width:100%; height:500px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
 
     """
