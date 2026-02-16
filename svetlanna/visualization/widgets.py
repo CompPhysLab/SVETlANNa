@@ -32,7 +32,7 @@ class StepwiseForwardWidget(anywidget.AnyWidget):
     _esm = STATIC_FOLDER / "stepwise_forward_widget.js"
     _css = STATIC_FOLDER / "setup_widget.css"
 
-    elements = traitlets.List([]).tag(sync=True)
+    elements: traitlets.List[dict] = traitlets.List([]).tag(sync=True)
     structure_html = traitlets.Unicode("").tag(sync=True)
 
 
@@ -40,7 +40,7 @@ class SpecsWidget(anywidget.AnyWidget):
     _esm = STATIC_FOLDER / "specs_widget.js"
     _css = STATIC_FOLDER / "setup_widget.css"
 
-    elements = traitlets.List([]).tag(sync=True)
+    elements: traitlets.List[dict] = traitlets.List([]).tag(sync=True)
     structure_html = traitlets.Unicode("").tag(sync=True)
 
 
@@ -152,6 +152,41 @@ def generate_structure_html(subelements: list[_ElementInTree]) -> str:
 def show_structure(*specsable: Specsable):
     """Display a setup structure using IPython's HTML display.
     Useful for previewing specs hierarchies in notebooks.
+
+    Parameters
+    ----------
+    *specsable : Specsable
+        One or more specsable elements to display
+
+    Examples
+    --------
+    ```python
+    import svetlanna as sv
+    import torch
+    from svetlanna.visualization import show_structure
+
+    Nx = Ny = 128
+    sim_params = sv.SimulationParameters(
+        x=torch.linspace(-1, 1, Nx),
+        y=torch.linspace(-1, 1, Ny),
+        wavelength=0.1,
+    )
+
+    setup = sv.LinearOpticalSetup(
+        [
+            sv.elements.RectangularAperture(sim_params, width=0.5, height=0.5),
+            sv.elements.FreeSpace(sim_params, distance=0.2, method="AS"),
+            sv.elements.DiffractiveLayer(sim_params, mask=torch.rand(Ny, Nx), mask_norm=1),
+            sv.elements.FreeSpace(sim_params, distance=0.2, method="AS"),
+        ]
+    )
+
+    show_structure(setup)
+    ```
+    Output (in IPython environment):
+    <iframe
+    src="/reference/visualization/show_structure.html"
+    style="width:100%; height:150px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
     """
     try:
         from IPython.display import HTML, display
@@ -174,6 +209,37 @@ def show_specs(*specsable: Specsable) -> SpecsWidget:
     -------
     SpecsWidget
         The widget
+
+    Examples
+    --------
+    ```python
+    import svetlanna as sv
+    import torch
+    from svetlanna.visualization import show_specs
+
+    Nx = Ny = 128
+    sim_params = sv.SimulationParameters(
+        x=torch.linspace(-1, 1, Nx),
+        y=torch.linspace(-1, 1, Ny),
+        wavelength=0.1,
+    )
+
+    setup = sv.LinearOpticalSetup(
+        [
+            sv.elements.RectangularAperture(sim_params, width=0.5, height=0.5),
+            sv.elements.FreeSpace(sim_params, distance=0.2, method="AS"),
+            sv.elements.DiffractiveLayer(sim_params, mask=torch.rand(Ny, Nx), mask_norm=1),
+            sv.elements.FreeSpace(sim_params, distance=0.2, method="AS"),
+        ]
+    )
+
+    show_specs(setup)
+    ```
+    Output (in IPython environment):
+    <iframe
+    src="/reference/visualization/show_specs.html"
+    style="width:100%; height:500px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
+
     """
 
     elements = _ElementsIterator(*specsable, directory="")
@@ -226,15 +292,32 @@ def draw_wavefront(
     """
     import matplotlib.pyplot as plt
     from matplotlib.axes import Axes
+    import numpy as np
 
     stream = BytesIO()
 
-    width = simulation_parameters.axes.x.cpu()
-    height = simulation_parameters.axes.y.cpu()
+    x = simulation_parameters.x.numpy(force=True)
+    y = simulation_parameters.y.numpy(force=True)
+
+    X = np.empty(len(x) + 1, dtype=x.dtype)
+    dx = np.diff(x)
+
+    X[1:-1] = x[:-1] + dx / 2
+    X[0] = x[0] - dx[0] / 2
+    X[-1] = x[-1] + dx[-1] / 2
+
+    Y = np.empty(len(y) + 1, dtype=y.dtype)
+    dy = np.diff(y)
+
+    Y[1:-1] = y[:-1] + dy / 2
+    Y[0] = y[0] - dy[0] / 2
+    Y[-1] = y[-1] + dy[-1] / 2
 
     n_plots = len(types_to_plot)
 
-    width_to_height = (width.max() - width.min()) / (height.max() - height.min())
+    width_to_height = (X.max() - X.min()) / (Y.max() - Y.min())
+    vmax = wavefront.abs().max().item()
+    vmin = -vmax
 
     figure, ax = plt.subplots(
         1, n_plots, figsize=(2 + 3 * n_plots * width_to_height, 3), dpi=120
@@ -249,40 +332,57 @@ def draw_wavefront(
 
         if plot_type == "A":
             # Plot the wavefront amplitude
-            axes.pcolorfast(width, height, wavefront.abs().numpy(force=True))
+            axes.pcolorfast(
+                X,
+                Y,
+                wavefront.abs().numpy(force=True),
+                cmap="viridis",
+            )
             axes.set_title("Amplitude")
 
         elif plot_type == "I":
             # Plot the wavefront intensity
-            axes.pcolorfast(width, height, (wavefront.abs() ** 2).numpy(force=True))
+            axes.pcolorfast(
+                X,
+                Y,
+                (wavefront.abs() ** 2).numpy(force=True),
+                cmap="magma",
+            )
             axes.set_title("Intensity")
 
         elif plot_type == "phase":
             # Plot the wavefront phase
             axes.pcolorfast(
-                width,
-                height,
+                X,
+                Y,
                 wavefront.angle().numpy(force=True),
                 vmin=-torch.pi,
                 vmax=torch.pi,
+                cmap="twilight",
             )
             axes.set_title("Phase")
 
         elif plot_type == "Re":
             # Plot the wavefront real part
             axes.pcolorfast(
-                width,
-                height,
+                X,
+                Y,
                 wavefront.real.numpy(force=True),
+                vmax=vmax,
+                vmin=vmin,
+                cmap="seismic",
             )
             axes.set_title("Real part")
 
         elif plot_type == "Im":
             # Plot the wavefront imaginary part
             axes.pcolorfast(
-                width,
-                height,
+                X,
+                Y,
                 wavefront.imag.numpy(force=True),
+                vmax=vmax,
+                vmin=vmin,
+                cmap="seismic",
             )
             axes.set_title("Imaginary part")
 
@@ -318,6 +418,43 @@ def show_stepwise_forward(
     -------
     StepwiseForwardWidget
         The widget
+
+    Examples
+    --------
+    ```python
+    import svetlanna as sv
+    import torch
+    from svetlanna.visualization import show_stepwise_forward
+
+    Nx = Ny = 128
+    sim_params = sv.SimulationParameters(
+        x=torch.linspace(-1, 1, Nx),
+        y=torch.linspace(-1, 1, Ny),
+        wavelength=0.1,
+    )
+
+    setup = sv.LinearOpticalSetup(
+        [
+            sv.elements.RectangularAperture(sim_params, width=0.5, height=0.5),
+            sv.elements.FreeSpace(sim_params, distance=0.2, method="AS"),
+            sv.elements.DiffractiveLayer(sim_params, mask=torch.rand(Ny, Nx), mask_norm=1),
+            sv.elements.FreeSpace(sim_params, distance=0.2, method="AS"),
+        ]
+    )
+
+    input_wavefront = sv.Wavefront.plane_wave(sim_params)
+    show_stepwise_forward(
+        setup,
+        input=input_wavefront,
+        simulation_parameters=sim_params,
+        types_to_plot=("I", "phase", "Re"),
+    )
+    ```
+    Output (in IPython environment):
+    <iframe
+    src="/reference/visualization/show_stepwise_forward.html"
+    style="width:100%; height:500px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
+
     """
 
     elements_to_call = tuple(s for s in specsable)
@@ -352,7 +489,7 @@ def show_stepwise_forward(
                     element(input)
 
         # Prepare elements data for widget
-        elements_json = []
+        elements_json: list[dict] = []
         for element_index, element, context_generator in elements:
             for _ in context_generator:
                 pass
