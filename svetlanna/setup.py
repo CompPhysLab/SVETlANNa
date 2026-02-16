@@ -23,7 +23,9 @@ class LinearOpticalSetup(nn.Module):
         Examples
         --------
         ```python
-        setup = LinearOpticalSetup(
+        import svetlanna as sv
+
+        setup = sv.LinearOpticalSetup(
             elements=[
                 element1,
                 element2,
