@@ -440,36 +440,6 @@ def test_axes_names_scalar():
     assert len(sp.names_scalar) == 2
 
 
-def test_axes_reorder():
-    Nx = 10
-    Ny = 8
-    Nwl = 5
-    sp = SimulationParameters(
-        {
-            "x": torch.linspace(-1, 1, Nx),
-            "y": torch.linspace(-1, 1, Ny),
-            "wavelength": torch.linspace(0.4, 0.6, Nwl),
-        }
-    )
-
-    t = torch.rand(2, Nwl, Ny, Nx)  # batch, wavelength, H, W
-
-    # No change when already in correct order
-    t_same = sp.reorder(t, "y", "x")
-    assert t_same.shape == torch.Size([2, Nwl, Ny, Nx])
-    # Swap y and x
-    t_swapped = sp.reorder(t, "x", "y")
-    assert t_swapped.shape == torch.Size([2, Nwl, Nx, Ny])
-
-    # Move wavelength to end
-    t_wl_end = sp.reorder(t, "wavelength")
-    assert t_wl_end.shape == torch.Size([2, Ny, Nx, Nwl])
-
-    # Error on non-existent axis
-    with pytest.raises(AxisNotFound):
-        sp.reorder(t, "nonexistent")
-
-
 def test_cast():
     Nx = 10
     Ny = 8

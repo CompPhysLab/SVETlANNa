@@ -570,46 +570,6 @@ class SimulationParameters:
 
         return cast_tensor(tensor, tensor_axes, self.names)
 
-    def reorder(self, tensor: torch.Tensor, *trailing_axes: str) -> torch.Tensor:
-        """
-        Permute tensor so that specified axes are last, in the given order.
-
-        Parameters
-        ----------
-        tensor : torch.Tensor
-            Input tensor whose trailing dimensions correspond to axes.names.
-        *trailing_axes : str
-            Axis names that should become the last dimensions (in order).
-
-        Returns
-        -------
-        torch.Tensor
-            Permuted tensor with trailing_axes as the last dimensions.
-
-        Examples
-        --------
-        >>> # axes: (wavelength, H, W), tensor shape: (batch, wavelength, H, W)
-        >>> t = sim_params.reorder(tensor, "H", "W")      # no change
-        >>> t = sim_params.reorder(tensor, "W", "H")      # -> (batch, wavelength, W, H)
-        >>> t = sim_params.reorder(tensor, "wavelength")  # -> (batch, H, W, wavelength)
-        """
-        current = self.__names  # physical order in tensor (left to right)
-        n_batch = tensor.ndim - len(current)
-
-        trailing_set = set(trailing_axes)
-        missing = trailing_set - set(current)
-        if missing:
-            raise AxisNotFound(f"Axes not found: {missing}")
-
-        other = tuple(n for n in current if n not in trailing_set)
-        target = other + trailing_axes
-
-        if current == target:
-            return tensor
-
-        perm = [*range(n_batch), *(n_batch + current.index(n) for n in target)]
-        return tensor.permute(perm)
-
     ###########################################################################
     # Device management
     ###########################################################################
