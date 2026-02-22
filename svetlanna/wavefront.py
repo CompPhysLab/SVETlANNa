@@ -63,8 +63,8 @@ class Wavefront(torch.Tensor):
             FWHM along x and y axes.
         """
 
-        x_step = torch.diff(simulation_parameters.axes.x)[0].item()
-        y_step = torch.diff(simulation_parameters.axes.y)[0].item()
+        x_step = torch.diff(simulation_parameters.x)[0].item()
+        y_step = torch.diff(simulation_parameters.y)[0].item()
 
         max_intensity = self.max_intensity
         half_max_intensity = max_intensity / 2
@@ -311,7 +311,7 @@ def mul(
     if sim_params is None:
         wf_axes = DEFAULT_LAST_AXES_NAMES
     else:
-        wf_axes = sim_params.axes.names
+        wf_axes = sim_params.axis_names
 
     from .axes_math import tensor_dot
 

@@ -8,7 +8,7 @@ from svetlanna import SimulationParameters
 def test_aperture(sim_params_simple: SimulationParameters):
     """Test aperture transmission with an arbitrary mask."""
 
-    mask = torch.rand(sim_params_simple.axes_size(("y", "x")))
+    mask = torch.rand(sim_params_simple.axis_sizes(("y", "x")))
     aperture = elements.Aperture(simulation_parameters=sim_params_simple, mask=mask)
 
     transmission_function_expected = sim_params_simple.cast(mask, "y", "x")
@@ -97,7 +97,7 @@ def test_aperture_device(device_simple: str):
     assert sim_params.device == torch.get_default_device()
     aperture = elements.Aperture(
         simulation_parameters=sim_params,
-        mask=torch.zeros(sim_params.axes_size(("y", "x"))),
+        mask=torch.zeros(sim_params.axis_sizes(("y", "x"))),
     )
     aperture.to(device=device_simple)
 
@@ -126,7 +126,7 @@ def test_aperture_device(device_simple: str):
     assert sim_params.device.type == device_simple
     aperture = elements.Aperture(
         simulation_parameters=sim_params,
-        mask=torch.zeros(sim_params.axes_size(("y", "x"))).to(device=device_simple),
+        mask=torch.zeros(sim_params.axis_sizes(("y", "x"))).to(device=device_simple),
     )
 
     assert aperture(wavefront).device.type == device_simple
@@ -154,7 +154,7 @@ def test_to_specs():
 
     aperture = elements.Aperture(
         simulation_parameters=sim_params,
-        mask=torch.zeros(sim_params.axes_size(("y", "x"))),
+        mask=torch.zeros(sim_params.axis_sizes(("y", "x"))),
     )
 
     assert aperture.to_specs()

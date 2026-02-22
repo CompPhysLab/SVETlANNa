@@ -8,7 +8,7 @@ def test_diffractive_layer(
     sim_params_simple: SimulationParameters,
 ):
     """Test diffractive layer transmission."""
-    mask = torch.rand(sim_params_simple.axes_size(("y", "x")))
+    mask = torch.rand(sim_params_simple.axis_sizes(("y", "x")))
 
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=sim_params_simple,
@@ -41,7 +41,7 @@ def test_diffractive_layer_device(device_simple: str):
     assert sim_params.device == torch.get_default_device()
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=sim_params,
-        mask=torch.rand(sim_params.axes_size(("y", "x"))),
+        mask=torch.rand(sim_params.axis_sizes(("y", "x"))),
     )
     diffractive_layer.to(device=device_simple)
 
@@ -53,7 +53,7 @@ def test_diffractive_layer_device(device_simple: str):
     assert sim_params.device.type == device_simple
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=sim_params,
-        mask=torch.rand(sim_params.axes_size(("y", "x"))).to(device=device_simple),
+        mask=torch.rand(sim_params.axis_sizes(("y", "x"))).to(device=device_simple),
     )
 
     assert diffractive_layer(wavefront).device.type == device_simple
@@ -68,7 +68,7 @@ def test_reverse():
 
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=params,
-        mask=torch.rand(params.axes_size(("y", "x"))),
+        mask=torch.rand(params.axis_sizes(("y", "x"))),
     )
 
     # Validate that reverse(forward(x)) returns the original wavefront.
@@ -86,7 +86,7 @@ def test_to_specs():
 
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=sim_params,
-        mask=torch.zeros(sim_params.axes_size(("y", "x"))),
+        mask=torch.zeros(sim_params.axis_sizes(("y", "x"))),
     )
 
     assert diffractive_layer.to_specs()

@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import Any, TYPE_CHECKING, Self, overload
+from typing_extensions import deprecated
 import torch
 import warnings
 from collections.abc import Mapping
@@ -220,8 +221,8 @@ class SimulationParameters:
     def _clear_caches(self) -> None:
         """Clear all cached method results when axes change."""
         # Clear LRU caches
-        if hasattr(self.axes_size, "cache_clear"):
-            self.axes_size.cache_clear()
+        if hasattr(self.axis_sizes, "cache_clear"):
+            self.axis_sizes.cache_clear()
         if hasattr(self._cast_info, "cache_clear"):
             self._cast_info.cache_clear()
 
@@ -336,12 +337,12 @@ class SimulationParameters:
     ###########################################################################
 
     @property
-    def names(self) -> tuple[str, ...]:
+    def axis_names(self) -> tuple[str, ...]:
         """Get names of non-scalar axes (those with length > 1)."""
         return self.__names
 
     @property
-    def names_scalar(self) -> tuple[str, ...]:
+    def _axis_names_scalar(self) -> tuple[str, ...]:
         """Get names of scalar (0-dimensional) axes."""
         return self.__names_scalar
 
@@ -435,7 +436,7 @@ class SimulationParameters:
         return X, Y
 
     @lru_cache(maxsize=CACHE_SIZE)
-    def axes_size(self, axs: tuple[str, ...] | None = None) -> torch.Size:
+    def axis_sizes(self, axs: tuple[str, ...] | None = None) -> torch.Size:
         """
         Get the size of specified axes in order (cached for performance).
 
@@ -509,9 +510,9 @@ class SimulationParameters:
         tensor_axes: list[str] = []
         tensor_sizes: list[int] = []
 
-        for axis_name, axis_size in zip(axes, self.axes_size(axes)):
+        for axis_name, axis_size in zip(axes, self.axis_sizes(axes)):
             # Skip scalar axes - they don't correspond to tensor dimensions
-            if axis_name in self.names_scalar:
+            if axis_name in self._axis_names_scalar:
                 continue
 
             # You do't need to check axis existence here because
@@ -568,7 +569,7 @@ class SimulationParameters:
                 f"expected shape {tensor_sizes} for axes {tensor_axes}."
             )
 
-        return cast_tensor(tensor, tensor_axes, self.names)
+        return cast_tensor(tensor, tensor_axes, self.axis_names)
 
     ###########################################################################
     # Device management
@@ -640,5 +641,32 @@ class SimulationParameters:
     # LEGACY SUPPORT
     ###########################################################################
     @property
+    @deprecated(
+        "axes is deprecated, use SimulationParameters instance directly for axis access instead"
+    )
     def axes(self):
+        warnings.warn(
+            "axes is deprecated, use SimulationParameters instance directly for axis access instead",
+            DeprecationWarning,
+            stacklevel=1,
+        )
         return self
+
+    @property
+    @deprecated("names is deprecated, use axis_names instead")
+    def names(self) -> tuple[str, ...]:
+        warnings.warn(
+            "names is deprecated, use axis_names instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.axis_names
+
+    @deprecated("axes_size() is deprecated, use axis_sizes() instead")
+    def axes_size(self, *args, **kwargs):
+        warnings.warn(
+            "axes_size() is deprecated, use axis_sizes() instead",
+            DeprecationWarning,
+            stacklevel=2,
+        )
+        return self.axis_sizes(*args, **kwargs)

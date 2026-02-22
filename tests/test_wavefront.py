@@ -127,7 +127,7 @@ def test_plane_wave(distance, wavelength, initial_phase):
             "wavelength": wavelength,
         }
     )
-    k = 2 * torch.pi / sim_params.axes.wavelength
+    k = 2 * torch.pi / sim_params.wavelength
 
     # z propagation
     wf = Wavefront.plane_wave(
@@ -145,8 +145,8 @@ def test_plane_wave(distance, wavelength, initial_phase):
     dir_y = 0.5231432
     kx = k * dir_x / torch.linalg.norm(torch.tensor([dir_x, dir_y]))
     ky = k * dir_x / torch.linalg.norm(torch.tensor([dir_x, dir_y]))
-    x = sim_params.axes.x[None, :]
-    y = sim_params.axes.y[:, None]
+    x = sim_params.x[None, :]
+    y = sim_params.y[:, None]
     wf = Wavefront.plane_wave(
         sim_params,
         distance=distance,

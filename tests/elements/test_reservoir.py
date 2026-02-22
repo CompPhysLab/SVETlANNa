@@ -45,10 +45,10 @@ def test_queue():
 def test_forward(sim_params_simple: SimulationParameters):
     # Elements are placeholders; only queueing matters here.
     nonlinear_element = DiffractiveLayer(
-        sim_params_simple, mask=torch.zeros(sim_params_simple.axes_size(("y", "x")))
+        sim_params_simple, mask=torch.zeros(sim_params_simple.axis_sizes(("y", "x")))
     )
     delay_element = DiffractiveLayer(
-        sim_params_simple, mask=torch.zeros(sim_params_simple.axes_size(("y", "x")))
+        sim_params_simple, mask=torch.zeros(sim_params_simple.axis_sizes(("y", "x")))
     )
     feedback_gain = 0.8
     input_gain = 0.6

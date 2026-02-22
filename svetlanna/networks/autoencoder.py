@@ -46,7 +46,7 @@ class LinearAutoencoder(nn.Module):
         super().__init__()
 
         self.sim_params = sim_params
-        self.h, self.w = self.sim_params.axes_size(
+        self.h, self.w = self.sim_params.axis_sizes(
             axs=("y", "x")
         )  # height and width for a Wavefronts
 

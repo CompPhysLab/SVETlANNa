@@ -12,7 +12,7 @@ from tests.test_drnn import sim_params
 @pytest.fixture()
 def some_elements_list(sim_params):
     """Returns list with a zero distance FreeSpace, i.e. empty network"""
-    y, x = sim_params.axes_size(axs=("y", "x"))
+    y, x = sim_params.axis_sizes(axs=("y", "x"))
 
     elements_list = [
         elements.DiffractiveLayer(
@@ -41,7 +41,7 @@ def test_conv4f_net_forward(
     sim_params, some_elements_list, wf_real, wf_imag, focal_length  # fixtures
 ):
     """Test forward function for a single Wavefront sequence."""
-    h, w = sim_params.axes_size(
+    h, w = sim_params.axis_sizes(
         axs=("y", "x")
     )  # size of a wavefront according to SimulationParameters
     test_wavefront = Wavefront(
@@ -82,7 +82,7 @@ def test_conv4f_net_forward(
 
 def test_conv4f_net_device(sim_params, some_elements_list):
     """Test .to(device) function for a Convolutional Network."""
-    h, w = sim_params.axes_size(
+    h, w = sim_params.axis_sizes(
         axs=("y", "x")
     )  # size of a wavefront according to SimulationParameters
     random_diffractive_mask = torch.rand(h, w)  # random mask for a convolution

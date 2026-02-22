@@ -27,7 +27,7 @@ def test_nonlinear_element(
     response_function: Callable[Concatenate[Wavefront, ...], Wavefront],
     response_parameters: Dict,
 ):
-    incident_field = Wavefront(torch.rand(sim_params_simple.axes_size(("y", "x"))))
+    incident_field = Wavefront(torch.rand(sim_params_simple.axis_sizes(("y", "x"))))
 
     nle = elements.NonlinearElement(
         simulation_parameters=sim_params_simple,

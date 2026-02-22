@@ -50,11 +50,11 @@ def test_devices(device_type: torch.device):
         }
     ).to(device=device_type)
 
-    x_linear = params.axes.x
-    y_linear = params.axes.y
+    x_linear = params.x
+    y_linear = params.y
     tensors.append(x_linear)
     tensors.append(y_linear)
-    wavelength = params.axes.wavelength
+    wavelength = params.wavelength
     tensors.append(wavelength)
 
     x_grid, y_grid = params.meshgrid(x_axis="x", y_axis="y")

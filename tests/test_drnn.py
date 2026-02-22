@@ -56,7 +56,7 @@ def test_drnn_forward(
     sequence_amplitudes,
 ):
     """Test forward function for a single Wavefront sequence."""
-    h, w = sim_params.axes_size(
+    h, w = sim_params.axis_sizes(
         axs=("y", "x")
     )  # size of a wavefront according to SimulationParameters
     wavefront_seq = Wavefront(
@@ -137,7 +137,7 @@ def test_drnn_batch_forward(
     sequence_amplitudes,
 ):
     """Test forward function for a batch of Wavefront sequences."""
-    h, w = sim_params.axes_size(
+    h, w = sim_params.axis_sizes(
         axs=("y", "x")
     )  # size of a wavefront according to SimulationParameters
     wavefront_seq_batch = Wavefront(

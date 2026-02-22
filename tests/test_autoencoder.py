@@ -25,7 +25,7 @@ def test_autoencoder_forward(
     sim_params, empty_encoder_or_decoder, wf_real, wf_imag  # fixtures
 ):
     """Test forward function for a single Wavefront sequence."""
-    h, w = sim_params.axes_size(
+    h, w = sim_params.axis_sizes(
         axs=("y", "x")
     )  # size of a wavefront according to SimulationParameters
     test_wavefront = Wavefront(

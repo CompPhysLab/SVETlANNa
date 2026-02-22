@@ -245,8 +245,8 @@ def test_simulation_parameters_axes():
     )
 
     # Test names of non-scalar axes
-    assert sim_params.names == ("pol", "y", "x")
-    assert sim_params.names_scalar == ("wavelength",)
+    assert sim_params.axis_names == ("pol", "y", "x")
+    assert sim_params._axis_names_scalar == ("wavelength",)
 
     # Test indices
     assert sim_params.index("pol") == -3
@@ -338,17 +338,17 @@ def test_simulation_parameters_axes_size():
     )
 
     # Test axes_size
-    assert sim_params.axes_size(("x",)) == torch.Size((Nx,))
-    assert sim_params.axes_size(("wavelength", "y")) == torch.Size((1, Ny))
-    assert sim_params.axes_size(("y",)) == torch.Size((Ny,))
+    assert sim_params.axis_sizes(("x",)) == torch.Size((Nx,))
+    assert sim_params.axis_sizes(("wavelength", "y")) == torch.Size((1, Ny))
+    assert sim_params.axis_sizes(("y",)) == torch.Size((Ny,))
 
     # Test axes_size with no arguments
     # Order is important here!
-    assert sim_params.axes_size() == torch.Size((Npol, Ny, Nx))
+    assert sim_params.axis_sizes() == torch.Size((Npol, Ny, Nx))
 
     with pytest.raises(AxisNotFound):
         # non existing axis
-        assert sim_params.axes_size(("a", "y")) == torch.Size((0, Ny))
+        assert sim_params.axis_sizes(("a", "y")) == torch.Size((0, Ny))
 
 
 @pytest.fixture(
@@ -410,14 +410,14 @@ def test_device(default_device: torch.device):
     transferred_sim_params = sim_params.to("cpu")
     assert transferred_sim_params.device.type == "cpu"  # type: ignore
 
-    for axis_name in chain(sim_params.names, sim_params.names_scalar):
+    for axis_name in chain(sim_params.axis_names, sim_params._axis_names_scalar):
         assert transferred_sim_params[axis_name].device.type == "cpu"
 
     # And back
     transferred_sim_params = transferred_sim_params.to(default_device)
     assert transferred_sim_params.device == default_device
 
-    for axis_name in chain(sim_params.names, sim_params.names_scalar):
+    for axis_name in chain(sim_params.axis_names, sim_params._axis_names_scalar):
         assert transferred_sim_params[axis_name].device == default_device
 
 
@@ -432,12 +432,12 @@ def test_axes_names_scalar():
         }
     )
 
-    assert "wavelength" in sp.names_scalar
-    assert "time" in sp.names_scalar
-    assert "x" not in sp.names_scalar
-    assert "y" not in sp.names_scalar
-    assert "pol" not in sp.names_scalar
-    assert len(sp.names_scalar) == 2
+    assert "wavelength" in sp._axis_names_scalar
+    assert "time" in sp._axis_names_scalar
+    assert "x" not in sp._axis_names_scalar
+    assert "y" not in sp._axis_names_scalar
+    assert "pol" not in sp._axis_names_scalar
+    assert len(sp._axis_names_scalar) == 2
 
 
 def test_cast():
@@ -574,15 +574,15 @@ def test_clear_cache():
     )
 
     # Test axes_size cache
-    sp.axes_size.cache_clear()
-    sp.axes_size(("x", "y"))
-    assert sp.axes_size.cache_info().hits == 0
-    sp.axes_size(("x", "y"))
-    assert sp.axes_size.cache_info().hits == 1
+    sp.axis_sizes.cache_clear()
+    sp.axis_sizes(("x", "y"))
+    assert sp.axis_sizes.cache_info().hits == 0
+    sp.axis_sizes(("x", "y"))
+    assert sp.axis_sizes.cache_info().hits == 1
 
     sp._clear_caches()
-    sp.axes_size(("x", "y"))
-    assert sp.axes_size.cache_info().hits == 0
+    sp.axis_sizes(("x", "y"))
+    assert sp.axis_sizes.cache_info().hits == 0
 
     # Test _cast_info cache
     sp._cast_info.cache_clear()
@@ -623,7 +623,8 @@ def test_legacy():
     )
 
     # Test legacy axes object
-    assert sp is sp.axes
+    with pytest.warns(DeprecationWarning):
+        assert sp is sp.axes
 
     # Test legacy axis names (W, H)
     with pytest.warns(DeprecationWarning):
@@ -639,7 +640,7 @@ def test_legacy():
     with pytest.warns(DeprecationWarning):
         assert torch.allclose(sp.meshgrid("x", "y")[1], sp.meshgrid("W", "H")[1])
     with pytest.warns(DeprecationWarning):
-        assert sp.axes_size(("x",)) == sp.axes_size(("W",))
+        assert sp.axis_sizes(("x",)) == sp.axis_sizes(("W",))
     with pytest.warns(DeprecationWarning):
         assert sp.index("x") == sp.index("W")
 

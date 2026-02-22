@@ -45,9 +45,9 @@ def test_types(default_type: torch.dtype):
         }
     )
 
-    x_linear = params.axes.x
-    y_linear = params.axes.y
-    wavelength = params.axes.wavelength
+    x_linear = params.x
+    y_linear = params.y
+    wavelength = params.wavelength
 
     x_grid, y_grid = params.meshgrid(x_axis="x", y_axis="y")
 

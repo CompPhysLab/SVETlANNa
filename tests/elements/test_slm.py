@@ -11,7 +11,7 @@ from svetlanna.elements.slm import QuantizerFromStepFunction
 
 def test_slm(sim_params_simple: SimulationParameters):
     """Test SLM transmission with a mask aligned to the simulation grid."""
-    Ny, Nx = sim_params_simple.axes_size(("y", "x"))
+    Ny, Nx = sim_params_simple.axis_sizes(("y", "x"))
     mask = torch.rand(Ny, Nx)
 
     slm = elements.SpatialLightModulator(
@@ -64,7 +64,7 @@ def test_reverse():
 
     slm = elements.SpatialLightModulator(
         simulation_parameters=params,
-        mask=torch.rand(params.axes_size(("y", "x"))),
+        mask=torch.rand(params.axis_sizes(("y", "x"))),
         width=2 * float(params.x[-1] - params.x[0]),
         height=1.5 * float(params.y[-1] - params.y[0]),
     )
@@ -361,7 +361,7 @@ def test_to_specs():
 
     slm = elements.SpatialLightModulator(
         sim_params,
-        mask=torch.rand(sim_params.axes_size(("y", "x"))),
+        mask=torch.rand(sim_params.axis_sizes(("y", "x"))),
         mode="nearest",
         width=20.0,
         height=20.0,
