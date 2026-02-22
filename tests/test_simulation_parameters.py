@@ -626,6 +626,15 @@ def test_legacy():
     with pytest.warns(DeprecationWarning):
         assert sp is sp.axes
 
+    # Test legacy names property
+    with pytest.warns(DeprecationWarning):
+        assert sp.axis_names is sp.names
+
+    # Test legacy axes_size method
+    with pytest.warns(DeprecationWarning):
+        # is used, not ==, because of caching
+        assert sp.axis_sizes(("x", "y")) is sp.axes_size(("x", "y"))
+
     # Test legacy axis names (W, H)
     with pytest.warns(DeprecationWarning):
         assert sp.W is sp.x
