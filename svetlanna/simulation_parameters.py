@@ -405,8 +405,24 @@ class SimulationParameters:
 
         Returns
         -------
-        x_grid, y_grid : tuple[torch.Tensor, torch.Tensor]
+        tuple[torch.Tensor, torch.Tensor]
             2D coordinate grids with 'xy' indexing convention.
+
+        Examples
+        --------
+        ```python
+        import svetlanna as sv
+        import torch
+
+        sim_params = sv.SimulationParameters(
+            x=torch.linspace(-0.5, 0.5, 10),
+            y=torch.linspace(-0.5, 0.5, 12),
+            wavelength=1,
+        )
+
+        X, Y = sim_params.meshgrid("x", "y")
+        print(X.shape)  # torch.Size([12, 10])
+        ```
         """
 
         x_axis = legacy_axis_support(x_axis)
@@ -444,7 +460,6 @@ class SimulationParameters:
         ----------
         axs : tuple[str, ...] | None
             Tuple of axis names in the desired order.
-            For legacy compatibility, also accepts axs=(...) keyword argument.
 
         Returns
         -------
@@ -453,8 +468,18 @@ class SimulationParameters:
 
         Examples
         --------
-        >>> size = params.axes_size(('y', 'x'))  # New API (cached)
-        >>> size = params.axes_size(axs=('y', 'x'))  # Legacy API
+        ```python
+        import svetlanna as sv
+        import torch
+
+        sim_params = sv.SimulationParameters(
+            x=torch.linspace(-0.5, 0.5, 10),
+            y=torch.linspace(-0.5, 0.5, 12),
+            wavelength=1,
+        )
+
+        print(sim_params.axis_sizes(('y', 'x')))  # torch.Size([12, 10])
+        ```
         """
 
         if axs is None:
