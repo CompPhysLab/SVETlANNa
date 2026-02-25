@@ -95,11 +95,16 @@ def test_to_device(device_simple: str):
     assert el2.a.device.type == device_simple
     assert el2.a.inner_parameter.device.type == device_simple
 
-    # test warning when elements have different devices
-    el3 = SimpleElement(
-        a=torch.tensor(123), simulation_parameters=sim_params.to(device=device_simple)
+    # test warning when elements have different simulation_parameters devices
+    sim_params_cpu = SimulationParameters(
+        {
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
+        }
     )
-    if el1.a.device.type != el3.a.device.type:
+    el3 = SimpleElement(a=torch.tensor(123), simulation_parameters=sim_params_cpu)
+    if el1.simulation_parameters.device != el3.simulation_parameters.device:
         with pytest.warns(UserWarning):
             LinearOpticalSetup(elements=[el1, el3])
 

@@ -53,20 +53,6 @@ class Element(nn.Module, metaclass=ABCMeta):
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Forward propagation through the optical element."""
 
-    def to(self, *args, **kwargs) -> Self:
-        """
-        Move element to a different device/dtype.
-
-        Overrides `torch.nn.Module.to()` to also transfer simulation_parameters.
-
-        Returns
-        -------
-        Self
-            The element itself, not a copy.
-        """
-        self.simulation_parameters.to(*args, **kwargs)
-        return super().to(*args, **kwargs)
-
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
         for name, parameter in self.named_parameters():
 

@@ -172,6 +172,10 @@ def test_set_debug_logging(input, output, capfd, caplog):
         )
         element(*input)
 
+    expected_output_sim_params = (
+        "Module of ElementLike was registered with name simulation_parameters:\n"
+        "   <class 'svetlanna.simulation_parameters.SimulationParameters'>"
+    )
     expected_output_1 = (
         "Module of ElementLike was registered with name a:\n"
         "   <class 'torch.nn.modules.module.Module'>"
@@ -191,6 +195,7 @@ def test_set_debug_logging(input, output, capfd, caplog):
         expected_output_4 += f"\n   output {i}: {type(_output)}"
 
     expected_outputs = [
+        expected_output_sim_params,
         expected_output_1,
         expected_output_2,
         expected_output_3,
