@@ -573,28 +573,31 @@ def test_clear_cache():
         wavelength=torch.tensor(0.5e-6),
     )
 
-    # Test axes_size cache
-    sp.axis_sizes.cache_clear()
+    # Test axis_sizes cache
+    assert len(sp._cache_axis_sizes) == 0
     sp.axis_sizes(("x", "y"))
-    assert sp.axis_sizes.cache_info().hits == 0
+    assert len(sp._cache_axis_sizes) == 1
     sp.axis_sizes(("x", "y"))
-    assert sp.axis_sizes.cache_info().hits == 1
+    assert len(sp._cache_axis_sizes) == 1  # cache hit, no new entry
 
     sp._clear_caches()
+    assert len(sp._cache_axis_sizes) == 0
     sp.axis_sizes(("x", "y"))
-    assert sp.axis_sizes.cache_info().hits == 0
+    assert len(sp._cache_axis_sizes) == 1
 
     # Test _cast_info cache
-    sp._cast_info.cache_clear()
+    sp._clear_caches()
+    assert len(sp._cache_cast_info) == 0
     t = torch.rand(100)
     sp.cast(t, "x")
-    assert sp._cast_info.cache_info().hits == 0
+    assert len(sp._cache_cast_info) == 1
     sp.cast(t, "x")
-    assert sp._cast_info.cache_info().hits == 1
+    assert len(sp._cache_cast_info) == 1  # cache hit, no new entry
 
     sp._clear_caches()
+    assert len(sp._cache_cast_info) == 0
     sp.cast(t, "x")
-    assert sp._cast_info.cache_info().hits == 0
+    assert len(sp._cache_cast_info) == 1
 
 
 def test_repr():
@@ -664,3 +667,65 @@ def test_legacy():
         )
     assert torch.allclose(sp_old.x, x)
     assert torch.allclose(sp_old.y, y)
+
+
+def test_delattr_blocked():
+    sp = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 10),
+        wavelength=1.0,
+    )
+    with pytest.raises(AttributeError, match="read-only"):
+        del sp.x
+    with pytest.raises(AttributeError, match="read-only"):
+        del sp.wavelength
+    # Non-axis attributes can still be deleted
+    sp._custom_attr = 42
+    del sp._custom_attr
+
+
+def test_reserved_axis_names():
+    with pytest.raises(ValueError, match="conflicts with nn.Module"):
+        SimulationParameters(
+            x=torch.linspace(-1, 1, 10),
+            y=torch.linspace(-1, 1, 10),
+            wavelength=1.0,
+            training=torch.tensor([1.0, 2.0]),
+        )
+    with pytest.raises(ValueError, match="cannot start with underscore"):
+        SimulationParameters(
+            x=torch.linspace(-1, 1, 10),
+            y=torch.linspace(-1, 1, 10),
+            wavelength=1.0,
+            _hidden=torch.tensor([1.0]),
+        )
+
+
+def test_equal_checks_axis_order():
+    sp1 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        wavelength=torch.linspace(0.4, 0.6, 5),
+        y=torch.linspace(-1, 1, 8),
+    )
+    sp2 = SimulationParameters(
+        wavelength=torch.linspace(0.4, 0.6, 5),
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 8),
+    )
+    # Same values but different axis ordering → not equal
+    assert not sp1.equal(sp2)
+
+    # Same ordering → equal
+    sp3 = sp1.clone()
+    assert sp1.equal(sp3)
+
+
+def test_clone_preserves_axis_order():
+    sp = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        wavelength=torch.linspace(0.4, 0.6, 5),
+        y=torch.linspace(-1, 1, 8),
+    )
+    sp2 = sp.clone()
+    assert sp.axis_names == sp2.axis_names
+    assert sp._axis_names_scalar == sp2._axis_names_scalar
