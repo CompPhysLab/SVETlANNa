@@ -666,49 +666,6 @@ class SimulationParameters(nn.Module):
 
         return cast_tensor(tensor, tensor_axes, self.axis_names)
 
-    def precompute_cast(self, *axes: str) -> tuple[tuple, tuple[tuple[int, int], ...]]:
-        """Precompute cast operations for ``torch.compile``-friendly forward passes.
-
-        Returns indexing tuple and swap pairs that replicate what
-        :meth:`cast` does, but without any Python-level cache lookups
-        at execution time.
-
-        Example usage in an Element::
-
-            # __init__:
-            self._cast_idx, self._cast_swaps = \\
-                self.simulation_parameters.precompute_cast("y", "x")
-
-            # forward (compile-safe):
-            t = t[self._cast_idx]
-            for i, j in self._cast_swaps:
-                t = t.swapaxes(i, j)
-
-        Parameters
-        ----------
-        *axes : str
-            Axis names corresponding to the tensor's trailing dimensions.
-
-        Returns
-        -------
-        tuple[tuple, tuple[tuple[int, int], ...]]
-            ``(indexing_tuple, swaps)`` — precomputed constants.
-        """
-        from svetlanna.axes_math import (
-            _append_slice,
-            _axes_indices_to_sort,
-            _swaps,
-            _check_new_axes,
-        )
-
-        tensor_axes, _ = self._cast_info(axes)
-        axis_names = self.axis_names
-
-        _check_new_axes(tensor_axes, axis_names)
-        indexing = _append_slice(tensor_axes, axis_names)
-        swaps = _swaps(_axes_indices_to_sort(tensor_axes, axis_names))
-        return indexing, swaps
-
     ###########################################################################
     # Device management — nn.Module.to() handles buffer transfer automatically
     ###########################################################################
@@ -716,10 +673,8 @@ class SimulationParameters(nn.Module):
     @property
     def device(self) -> torch.device:
         """Get the device where all axes are stored."""
-        buf = self._buffers.get("x")
-        if buf is not None:
-            return buf.device
-        return torch.get_default_device()
+        x = self.x
+        return x.device
 
     ###########################################################################
     # Sugar
