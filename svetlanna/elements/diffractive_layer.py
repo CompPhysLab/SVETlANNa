@@ -38,11 +38,6 @@ class DiffractiveLayer(Element):
         self.mask = self.process_parameter("mask", mask)
         self.mask_norm = self.process_parameter("mask_norm", mask_norm)
 
-        # Precompute cast operations so that forward() uses only
-        # tensor ops (no Python dict/cache lookups → torch.compile-safe)
-        self._cast_idx, self._cast_swaps = \
-            self.simulation_parameters.precompute_cast("y", "x")
-
     @property
     def transmission_function(self) -> torch.Tensor:
         r"""
@@ -50,11 +45,9 @@ class DiffractiveLayer(Element):
         $\exp\left(2\pi i \dfrac{\text{mask}}{\text{mask\_norm}}\right)$.
         The shape of the tensor is broadcastable to the incident wavefront's shape.
         """
-        t = torch.exp((2j * torch.pi / self.mask_norm) * self.mask)
-        t = t[self._cast_idx]
-        for i, j in self._cast_swaps:
-            t = t.swapaxes(i, j)
-        return t
+        return self.simulation_parameters.cast(
+            torch.exp((2j * torch.pi / self.mask_norm) * self.mask), "y", "x"
+        )
 
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         return incident_wavefront * self.transmission_function

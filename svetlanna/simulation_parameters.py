@@ -16,16 +16,38 @@ class AxisNotFound(Exception):
 REQUIRED_AXES = ("x", "y", "wavelength")
 
 # nn.Module attributes that would break if used as axis names
-_RESERVED_AXIS_NAMES = frozenset({
-    "training", "forward", "extra_repr",
-    "children", "modules", "named_modules",
-    "parameters", "named_parameters", "buffers", "named_buffers",
-    "state_dict", "load_state_dict",
-    "register_buffer", "register_parameter", "register_module",
-    "add_module", "apply", "zero_grad",
-    "train", "eval", "requires_grad_",
-    "to", "cpu", "cuda", "half", "float", "double", "bfloat16",
-})
+_RESERVED_AXIS_NAMES = frozenset(
+    {
+        "training",
+        "forward",
+        "extra_repr",
+        "children",
+        "modules",
+        "named_modules",
+        "parameters",
+        "named_parameters",
+        "buffers",
+        "named_buffers",
+        "state_dict",
+        "load_state_dict",
+        "register_buffer",
+        "register_parameter",
+        "register_module",
+        "add_module",
+        "apply",
+        "zero_grad",
+        "train",
+        "eval",
+        "requires_grad_",
+        "to",
+        "cpu",
+        "cuda",
+        "half",
+        "float",
+        "double",
+        "bfloat16",
+    }
+)
 
 
 def legacy_axis_support(name: str) -> str:
@@ -78,12 +100,13 @@ class SimulationParameters(nn.Module):
         participate in automatic device management when used as submodules of
         Elements.
 
-        .. note::
-            Axes are registered as **non-persistent** buffers (``persistent=False``).
-            This means they are **not included** in ``state_dict()`` and will not
-            be saved during checkpointing. The simulation grid must be provided
-            when constructing the model; it does not need to be restored from
-            a checkpoint.
+        Note
+        ----
+        Axes are registered as **non-persistent** buffers (``persistent=False``).
+        This means they are **not included** in ``state_dict()`` and will not
+        be saved during checkpointing. The simulation grid must be provided
+        when constructing the model; it does not need to be restored from
+        a checkpoint.
 
         Examples
         --------
@@ -243,7 +266,9 @@ class SimulationParameters(nn.Module):
             self.register_buffer(name, tensor, persistent=False)
 
         # Track axis names in plain instance attributes
-        self._non_scalar_names_insertion_order: tuple[str, ...] = tuple(non_scalar_names)
+        self._non_scalar_names_insertion_order: tuple[str, ...] = tuple(
+            non_scalar_names
+        )
         self._non_scalar_names: tuple[str, ...] = tuple(reversed(non_scalar_names))
         self._scalar_names: tuple[str, ...] = tuple(scalar_names)
 
@@ -408,7 +433,10 @@ class SimulationParameters(nn.Module):
 
     def __setattr__(self, name: str, value: Any) -> None:
         """Block writes to axis names, delegate rest to nn.Module."""
-        if hasattr(self, "_all_axis_names") and legacy_axis_support(name) in self._all_axis_names:
+        if (
+            hasattr(self, "_all_axis_names")
+            and legacy_axis_support(name) in self._all_axis_names
+        ):
             warnings.warn(f"Axis '{name}' is read-only")
             return
         super().__setattr__(name, value)
@@ -638,9 +666,7 @@ class SimulationParameters(nn.Module):
 
         return cast_tensor(tensor, tensor_axes, self.axis_names)
 
-    def precompute_cast(
-        self, *axes: str
-    ) -> tuple[tuple, tuple[tuple[int, int], ...]]:
+    def precompute_cast(self, *axes: str) -> tuple[tuple, tuple[tuple[int, int], ...]]:
         """Precompute cast operations for ``torch.compile``-friendly forward passes.
 
         Returns indexing tuple and swap pairs that replicate what

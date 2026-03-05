@@ -5,7 +5,7 @@ from ..simulation_parameters import SimulationParameters
 from ..specs import PrettyReprRepr, ParameterSpecs, SubelementSpecs, Specsable
 from ..specs.specs_writer import write_specs_to_html, context_generator
 from io import StringIO
-from typing import Iterable, TypeVar, TYPE_CHECKING, Self
+from typing import Iterable, TypeVar, TYPE_CHECKING
 from ..parameters import Parameter
 from ..wavefront import Wavefront
 from warnings import warn
