@@ -646,11 +646,23 @@ class SimulationParameters(nn.Module):
 
         Examples
         --------
-        >>> # axes: (wavelength, H, W), shapes: (5, 2, 3)
-        >>> a = torch.rand(2, 3)  # H, W
-        >>> a = sim_params.cast(a, "H", "W")
-        >>> a.shape
-        torch.Size([1, 2, 3])  # ready to broadcast with (5, 2, 3)
+        ```python
+        import svetlanna as sv
+        import torch
+
+        sim_params = sv.SimulationParameters(
+            x=torch.linspace(-0.5, 0.5, 3),
+            y=torch.linspace(-0.5, 0.5, 2),
+            wavelength=torch.linspace(1, 2, 5),
+        )
+        # axes: (wavelength, y, x)
+        print(sim_params.axis_sizes(("wavelength", "y", "x")))  # torch.Size([5, 2, 3])
+
+        a = torch.rand(2, 3)  # y, x
+        a = sim_params.cast(a, "y", "x")
+        print(a.shape)  # torch.Size([1, 2, 3])
+        # a is now ready to broadcast with tensor of shape (5, 2, 3)
+        ```
         """
         # avoid circular import
         from svetlanna.axes_math import cast_tensor
