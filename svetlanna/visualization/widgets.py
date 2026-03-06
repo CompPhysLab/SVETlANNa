@@ -8,7 +8,8 @@ from ..specs.specs_writer import _ElementInTree, _ElementsIterator
 from ..specs.specs_writer import write_specs_to_html
 from io import StringIO, BytesIO
 from warnings import warn
-from typing import cast, Literal, Union, Callable
+from typing import Mapping, Sequence, cast, Literal, Union, Protocol, SupportsIndex
+from types import EllipsisType
 import torch
 from torch.utils.hooks import RemovableHandle
 from ..simulation_parameters import SimulationParameters
@@ -32,16 +33,16 @@ class StepwiseForwardWidget(anywidget.AnyWidget):
     _esm = STATIC_FOLDER / "stepwise_forward_widget.js"
     _css = STATIC_FOLDER / "setup_widget.css"
 
-    elements: traitlets.List[dict] = traitlets.List([]).tag(sync=True)
-    structure_html = traitlets.Unicode("").tag(sync=True)
+    elements: traitlets.List[dict] = traitlets.List([]).tag(sync=True)  # type: ignore
+    structure_html = traitlets.Unicode("").tag(sync=True)  # type: ignore
 
 
 class SpecsWidget(anywidget.AnyWidget):
     _esm = STATIC_FOLDER / "specs_widget.js"
     _css = STATIC_FOLDER / "setup_widget.css"
 
-    elements: traitlets.List[dict] = traitlets.List([]).tag(sync=True)
-    structure_html = traitlets.Unicode("").tag(sync=True)
+    elements: traitlets.List[dict] = traitlets.List([]).tag(sync=True)  # type: ignore
+    structure_html = traitlets.Unicode("").tag(sync=True)  # type: ignore
 
 
 @dataclass(frozen=True, slots=True)
@@ -52,35 +53,53 @@ class ElementHTML:
     html: str
 
 
-def default_widget_html_method(
-    index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
-) -> str:
-    """Default `_widget_html_` method used for rendering `Specsable` elements.
+class WidngetHTMLMethod(Protocol):
+    def __call__(
+        self,
+        index: int,
+        name: str,
+        element_type: str | None,
+        subelements: list[ElementHTML],
+    ) -> str: ...
+
+    """Render an element as HTML for widget display.
 
     Parameters
     ----------
     index : int
-        The unique index of the element.
-        Should be used as an id of HTML element containing the element.
+        Unique element index.
+        Should be used as the id of an HTML element containing the element.
     name : str
-        Human readable name of the element
+        Human-readable element name.
     element_type : str | None
-        Human readable type of the element as a subelement, if any
+        Human-readable subelement type, if any.
     subelements : list[ElementHTML]
-        Subelements of the element.
+        Already rendered child elements.
 
     Returns
     -------
     str
-        rendered HTML
+        Rendered HTML representation of the element.
+    """
+
+
+def default_widget_html_method(
+    index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
+) -> str:
+    """Render a `Specsable` element with the default widget template.
+
+    See `WidngetHTMLMethod` for parameter details.
     """
     return jinja_env.get_template("widget_default.html.jinja").render(
         index=index, name=name, subelements=subelements
     )
 
 
-def _get_widget_html_method(element: Specsable) -> Callable[..., str]:
-    """Returns `_widget_html_` method based on type of element.
+def _get_widget_html_method(element: Specsable) -> WidngetHTMLMethod:
+    """Return a widget HTML renderer for an element.
+
+    If the element defines `_widget_html_`, that method is returned.
+    Otherwise, `default_widget_html_method` is used.
 
     Parameters
     ----------
@@ -89,7 +108,7 @@ def _get_widget_html_method(element: Specsable) -> Callable[..., str]:
 
     Returns
     -------
-    Any
+    WidngetHTMLMethod
         `_widget_html_` method
     """
     if hasattr(element, "_widget_html_"):
@@ -99,7 +118,7 @@ def _get_widget_html_method(element: Specsable) -> Callable[..., str]:
 
 
 def _subelements_html(subelements: list[_ElementInTree]) -> list[ElementHTML]:
-    """Generate rendered HTML for all elements of provided list.
+    """Generate rendered HTML for all provided tree nodes.
 
     Parameters
     ----------
@@ -129,7 +148,7 @@ def _subelements_html(subelements: list[_ElementInTree]) -> list[ElementHTML]:
 
 
 def generate_structure_html(subelements: list[_ElementInTree]) -> str:
-    """Generate HTML for a setup structure.
+    """Generate HTML for the setup structure tree.
 
     Parameters
     ----------
@@ -150,13 +169,15 @@ def generate_structure_html(subelements: list[_ElementInTree]) -> str:
 
 
 def show_structure(*specsable: Specsable):
-    """Display a setup structure using IPython's HTML display.
-    Useful for previewing specs hierarchies in notebooks.
+    """Display setup structure in an IPython environment.
+
+    This helper renders only the hierarchy of elements (without parameter specs)
+    and is useful for quick notebook previews.
 
     Parameters
     ----------
     *specsable : Specsable
-        One or more specsable elements to display
+        One or more `Specsable` objects to display.
 
     Examples
     --------
@@ -203,12 +224,12 @@ def show_structure(*specsable: Specsable):
 
 
 def show_specs(*specsable: Specsable) -> SpecsWidget:
-    """Display a setup structure with interactive specs preview
+    """Display setup structure with interactive specs preview.
 
     Returns
     -------
     SpecsWidget
-        The widget
+        Widget with element tree and per-element specs HTML.
 
     Examples
     --------
@@ -268,131 +289,201 @@ def show_specs(*specsable: Specsable) -> SpecsWidget:
     return widget
 
 
+Index = Union[SupportsIndex | slice | EllipsisType | int | Sequence[int]]
+
+
 def draw_wavefront(
     wavefront: torch.Tensor,
     simulation_parameters: SimulationParameters,
     types_to_plot: tuple[StepwisePlotTypes, ...] = ("I", "phase"),
+    slices_to_plot: Mapping[str, Index | tuple[Index, ...]] | None = None,
 ) -> bytes:
-    """Show field propagation in the setup via widget.
-    Currently only wavefronts of shape `(x, y)` are supported.
+    """Render wavefront slices into a JPEG image.
+
+    The function applies optional axis slicing and draws one or more field
+    representations (`"A"`, `"I"`, `"phase"`, `"Re"`, `"Im"`).
+    Only a 2D result (`x`, `y`) can be plotted after slicing.
 
     Parameters
     ----------
     wavefront : Tensor
-        The Input wavefront
+        Input wavefront tensor.
     simulation_parameters : SimulationParameters
         Simulation parameters
     types_to_plot : tuple[StepwisePlotTypes, ...], optional
-        Field properties to plot, by default ('I', 'phase')
+        Field properties to plot, by default (`"I"`, `"phase"`).
+    slices_to_plot : Mapping[str, Index | tuple[Index, ...]] | None, optional
+        Axis slices to apply before plotting. Use `"_"` for unnamed axes.
+        Default is `None` (plot the full wavefront).
 
     Returns
     -------
     bytes
-        byte-coded image
+        JPEG bytes of the rendered figure.
+
     """
     import matplotlib.pyplot as plt
     from matplotlib.axes import Axes
     import numpy as np
 
-    stream = BytesIO()
+    slices: list[Index] = [slice(None)] * wavefront.ndim
 
-    x = simulation_parameters.x.numpy(force=True)
-    y = simulation_parameters.y.numpy(force=True)
+    if axes_slices := (slices_to_plot or {}).get("_", None):
+        if not isinstance(axes_slices, tuple):
+            raise ValueError(
+                f"For axes with no name ('_'), the value should be a tuple of slices, but got {type(axes_slices)}."
+            )
+        for i, axis_slice in enumerate(axes_slices):
+            slices[i] = axis_slice
 
-    X = np.empty(len(x) + 1, dtype=x.dtype)
-    dx = np.diff(x)
+    for axis_name, axis_slice in (slices_to_plot or {}).items():
+        if axis_name == "_":
+            continue
 
-    X[1:-1] = x[:-1] + dx / 2
-    X[0] = x[0] - dx[0] / 2
-    X[-1] = x[-1] + dx[-1] / 2
+        axis_slice = cast(Index, axis_slice)
+        idx = simulation_parameters.index(axis_name)
+        slices[idx] = axis_slice
 
-    Y = np.empty(len(y) + 1, dtype=y.dtype)
-    dy = np.diff(y)
+    for i, slice_ in enumerate(reversed(slices)):
+        additional_slice = (slice(None),) * i
+        wavefront = wavefront[..., slice_, *additional_slice]
 
-    Y[1:-1] = y[:-1] + dy / 2
-    Y[0] = y[0] - dy[0] / 2
-    Y[-1] = y[-1] + dy[-1] / 2
+    wf = wavefront.numpy(force=True)
+
+    x_slice = slices[simulation_parameters.index("x")]
+    y_slice = slices[simulation_parameters.index("y")]
+    x = simulation_parameters.x[x_slice].numpy(force=True)
+    y = simulation_parameters.y[y_slice].numpy(force=True)
+
+    if simulation_parameters.index("x") < simulation_parameters.index("y"):
+        wf = wf.T
+
+    if not len(wf.shape) == 2:
+        raise ValueError(
+            f"Currently only wavefronts of shape (Ny, Nx) are supported for plotting, but got {wf.shape}."
+        )
+
+    if len(x) > 1:
+        X = np.empty(len(x) + 1, dtype=x.dtype)
+        dx = np.diff(x)
+
+        X[1:-1] = x[:-1] + dx / 2
+        X[0] = x[0] - dx[0] / 2
+        X[-1] = x[-1] + dx[-1] / 2
+    else:
+        X = np.empty(len(x) + 1, dtype=x.dtype)
+
+        dy = y[-1] - y[0]
+        if dy == 0:
+            dy = 1
+        X[0] = x[0] - dy / 2
+        X[1] = x[0] + dy / 2
+
+    if len(y) > 1:
+        Y = np.empty(len(y) + 1, dtype=y.dtype)
+        dy = np.diff(y)
+
+        Y[1:-1] = y[:-1] + dy / 2
+        Y[0] = y[0] - dy[0] / 2
+        Y[-1] = y[-1] + dy[-1] / 2
+    else:
+        Y = np.empty(len(y) + 1, dtype=y.dtype)
+
+        dy = y[-1] - y[0]
+        if dy == 0:
+            dy = 1
+        Y[0] = y[0] - dy / 2
+        Y[1] = y[0] + dy / 2
 
     n_plots = len(types_to_plot)
 
-    width_to_height = (X.max() - X.min()) / (Y.max() - Y.min())
-    vmax = wavefront.abs().max().item()
+    vmax = np.abs(wf).max()
     vmin = -vmax
 
-    figure, ax = plt.subplots(
-        1, n_plots, figsize=(2 + 3 * n_plots * width_to_height, 3), dpi=120
-    )
+    figure, ax = plt.subplots(1, n_plots, figsize=(2 + 3 * n_plots, 3), dpi=120)
 
-    for i, plot_type in enumerate(types_to_plot):
-        if isinstance(ax, Axes):
-            axes = ax
-        else:
-            axes = ax[i]
-            axes = cast(Axes, axes)
+    try:
+        for i, plot_type in enumerate(types_to_plot):
+            if isinstance(ax, Axes):
+                axes = ax
+            else:
+                axes = ax[i]
+                axes = cast(Axes, axes)
 
-        if plot_type == "A":
-            # Plot the wavefront amplitude
-            axes.pcolorfast(
-                X,
-                Y,
-                wavefront.abs().numpy(force=True),
-                cmap="viridis",
-            )
-            axes.set_title("Amplitude")
+            if plot_type == "A":
+                # Plot the wavefront amplitude
+                axes.pcolorfast(
+                    X,
+                    Y,
+                    np.abs(wf),
+                    cmap="viridis",
+                )
+                axes.set_title("Amplitude")
 
-        elif plot_type == "I":
-            # Plot the wavefront intensity
-            axes.pcolorfast(
-                X,
-                Y,
-                (wavefront.abs() ** 2).numpy(force=True),
-                cmap="magma",
-            )
-            axes.set_title("Intensity")
+            elif plot_type == "I":
+                # Plot the wavefront intensity
+                axes.pcolorfast(
+                    X,
+                    Y,
+                    (np.abs(wf) ** 2),
+                    cmap="magma",
+                )
+                axes.set_title("Intensity")
 
-        elif plot_type == "phase":
-            # Plot the wavefront phase
-            axes.pcolorfast(
-                X,
-                Y,
-                wavefront.angle().numpy(force=True),
-                vmin=-torch.pi,
-                vmax=torch.pi,
-                cmap="twilight",
-            )
-            axes.set_title("Phase")
+            elif plot_type == "phase":
+                # Plot the wavefront phase
+                axes.pcolorfast(
+                    X,
+                    Y,
+                    np.angle(wf),
+                    vmin=-np.pi,
+                    vmax=np.pi,
+                    cmap="twilight",
+                )
+                axes.set_title("Phase")
 
-        elif plot_type == "Re":
-            # Plot the wavefront real part
-            axes.pcolorfast(
-                X,
-                Y,
-                wavefront.real.numpy(force=True),
-                vmax=vmax,
-                vmin=vmin,
-                cmap="seismic",
-            )
-            axes.set_title("Real part")
+            elif plot_type == "Re":
+                # Plot the wavefront real part
+                axes.pcolorfast(
+                    X,
+                    Y,
+                    wf.real,
+                    vmax=vmax,
+                    vmin=vmin,
+                    cmap="seismic",
+                )
+                axes.set_title("Real part")
 
-        elif plot_type == "Im":
-            # Plot the wavefront imaginary part
-            axes.pcolorfast(
-                X,
-                Y,
-                wavefront.imag.numpy(force=True),
-                vmax=vmax,
-                vmin=vmin,
-                cmap="seismic",
-            )
-            axes.set_title("Imaginary part")
+            elif plot_type == "Im":
+                # Plot the wavefront imaginary part
+                axes.pcolorfast(
+                    X,
+                    Y,
+                    wf.imag,
+                    vmax=vmax,
+                    vmin=vmin,
+                    cmap="seismic",
+                )
+                axes.set_title("Imaginary part")
 
-        axes.set_aspect("equal")
+            axes.set_box_aspect(1)
+            axes.set_aspect("equal")
+            if len(x) == 1:
+                axes.set_xticks([x[0]])
+            if len(y) == 1:
+                axes.set_yticks([y[0]])
 
-    plt.tight_layout()
-    figure.savefig(stream)
-    plt.close(figure)
+        stream = BytesIO()
 
-    return stream.getvalue()
+        plt.tight_layout()
+        figure.savefig(stream, format="jpeg")
+        plt.close(figure)
+
+        return stream.getvalue()
+
+    except Exception as e:
+        plt.close(figure)
+        raise e
 
 
 def show_stepwise_forward(
@@ -400,24 +491,30 @@ def show_stepwise_forward(
     input: torch.Tensor,
     simulation_parameters: SimulationParameters,
     types_to_plot: tuple[StepwisePlotTypes, ...] = ("I", "phase"),
+    slices_to_plot: Mapping[str, Index | tuple[Index, ...]] | None = None,
 ) -> StepwiseForwardWidget:
-    """Display the wavefront propagation through a setup structure
-    using a widget interface. Currently only wavefronts
-    of shape `(x, y)` are supported.
+    """Display stepwise wavefront propagation for setup elements.
+
+    The function registers forward hooks on `torch.nn.Module` elements,
+    runs a forward pass for each provided root element, captures intermediate
+    outputs, renders them as images, and returns an interactive widget.
 
     Parameters
     ----------
     input : torch.Tensor
-        The Input wavefront
+        Input wavefront.
     simulation_parameters : SimulationParameters
         Simulation parameters
     types_to_plot : tuple[StepwisePlotTypes, ...], optional
-        Field properties to plot, by default ('I', 'phase')
+        Field properties to plot, by default (`"I"`, `"phase"`).
+    slices_to_plot : Mapping[str, Index | tuple[Index, ...]] | None, optional
+        Axis slices to apply before plotting each captured output.
+        Default is `None`.
 
     Returns
     -------
     StepwiseForwardWidget
-        The widget
+        Widget containing setup structure and captured per-element outputs.
 
     Examples
     --------
@@ -454,6 +551,66 @@ def show_stepwise_forward(
     <iframe
     src="show_stepwise_forward.html"
     style="width:100%; height:500px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
+
+    ---
+
+    Plot only the central area:
+    ```python
+    show_stepwise_forward(
+        setup,
+        input=input_wavefront,
+        simulation_parameters=sim_params,
+        types_to_plot=("I", "phase", "Re"),
+        slices_to_plot={
+            "x": (sim_params.x > -0.5) & (sim_params.x < 0.5),
+            "y": (sim_params.y > -0.5) & (sim_params.y < 0.5),
+        },
+    )
+    ```
+
+    Equivalent tensor indexing:
+    ```python linenums="0"
+    wavefront[(sim_params.y > -0.5) & (sim_params.y < 0.5), (sim_params.x > -0.5) & (sim_params.x < 0.5)]
+    ```
+
+    ---
+
+    Slice additional named axes:
+    ```python
+    show_stepwise_forward(
+        setup,
+        input=input_wavefront,
+        simulation_parameters=sim_params,
+        types_to_plot=("I", "phase", "Re"),
+        slices_to_plot={"wavelength": 0},
+    )
+    ```
+
+    Equivalent tensor indexing:
+    ```python linenums="0"
+    wavefront[0, :, :]
+    ```
+
+    ---
+
+    Slice unnamed axes (for example, batch):
+    ```python
+    show_stepwise_forward(
+        setup,
+        input=input_wavefront,
+        simulation_parameters=sim_params,
+        types_to_plot=("I", "phase", "Re"),
+        slices_to_plot={
+            "_": (0, 0),
+        },
+    )
+    ```
+
+    The `"_"` value must be a tuple in the order of unnamed axes.
+    Equivalent tensor indexing:
+    ```python linenums="0"
+    wavefront[0, 0, :, :]
+    ```
 
     """
 
@@ -502,6 +659,7 @@ def show_stepwise_forward(
                             wavefront=outputs[element],
                             simulation_parameters=simulation_parameters,
                             types_to_plot=types_to_plot,
+                            slices_to_plot=slices_to_plot,
                         )
                     ).decode()
                 except Exception as e:

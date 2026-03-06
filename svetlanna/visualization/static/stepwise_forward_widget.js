@@ -28,7 +28,7 @@ function render({ model, el }) {
         } else if (element.output_image.startsWith('\n')) {
             html += `<p>During the calculations or plotting exception has been raised:${element.output_image}</p>`
         } else {
-            html += `<img src="data:image/png;base64,${element.output_image}" style="object-fit: contain; max-width: 100%; height: auto; width: auto; display: block;">`
+            html += `<img src="data:image/jpeg;base64,${element.output_image}" style="object-fit: contain; max-width: 100%; height: auto; width: auto; display: block;">`
         }
 
         el.querySelector('#img-container').innerHTML = html
