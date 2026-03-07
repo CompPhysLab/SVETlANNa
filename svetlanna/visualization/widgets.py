@@ -292,6 +292,105 @@ def show_specs(*specsable: Specsable) -> SpecsWidget:
 Index = Union[SupportsIndex | slice | EllipsisType | int | Sequence[int]]
 
 
+def _apply_slices(
+    tensor: torch.Tensor,
+    slices: Mapping[str, Index | tuple[Index, ...]],
+    simulation_parameters: SimulationParameters,
+) -> tuple[torch.Tensor, list[Index]]:
+    """Apply named and unnamed axis slices to a tensor.
+
+    This helper function processes slicing specifications that can reference axes
+    by name (via `simulation_parameters`) or by position (via the special `"_"` key).
+    Named axis slices override positional slices when both are provided for the same
+    dimension.
+
+    Parameters
+    ----------
+    tensor : torch.Tensor
+        Input tensor to slice.
+    slices : Mapping[str, Index | tuple[Index, ...]]
+        Slicing specification. Keys can be axis names from `simulation_parameters`
+        or the special key `"_"` for unnamed axes. The `"_"` value must be a tuple
+        of slices/indices in positional order. Values can be indices, slices,
+        boolean masks, or sequences of integers.
+    simulation_parameters : SimulationParameters
+        Simulation parameters.
+
+    Returns
+    -------
+    torch.Tensor
+        Sliced tensor with selected dimensions reduced or indexed.
+    list[Index]
+        List of slices applied to each dimension of the input tensor, in order.
+        Dimensions without explicit slicing have `slice(None)` (select all).
+
+    Raises
+    ------
+    ValueError
+        If the `"_"` key is not mapped to a tuple.
+
+    Examples
+    --------
+    ```python
+    # Slice named axes
+    sliced, _ = _apply_slices(
+        wf,
+        {"x": slice(10, 20), "wavelength": 0},
+        sim_params
+    )
+
+    # Slice unnamed axes (e.g., batch dimensions)
+    sliced, _ = _apply_slices(
+        batched_wf,
+        {"_": (0, slice(None))},  # First batch, all channels
+        sim_params
+    )
+
+    # Combine both
+    sliced, _ = _apply_slices(
+        batched_wf,
+        {"_": (0, 0), "wavelength": 1},  # Override second position
+        sim_params
+    )
+    ```
+    """
+    slices_list: list[Index] = [slice(None)] * tensor.ndim
+
+    axes_slices = slices.get("_", None)
+    if axes_slices is not None:
+        if not isinstance(axes_slices, tuple):
+            raise ValueError(
+                f"For axes with no name ('_'), the value should be a tuple of slices, but got {type(axes_slices)}."
+            )
+        for i, axis_slice in enumerate(axes_slices):
+            if i >= len(slices_list):
+                break
+            slices_list[i] = axis_slice
+
+    for axis_name, axis_slice in slices.items():
+        if axis_name == "_":
+            continue
+
+        axis_slice = cast(Index, axis_slice)
+        idx = simulation_parameters.index(axis_name)
+        slices_list[idx] = axis_slice
+
+    not_reduced_dims = 0
+    for slice_ in reversed(slices_list):
+        additional_slice = (slice(None),) * not_reduced_dims
+
+        ndim = tensor.ndim
+        tensor = tensor[..., slice_, *additional_slice]
+        new_ndim = tensor.ndim
+
+        # if the dimension is not reduced (e.g., by integer indexing),
+        # we need to add slice(None) to the end of the slices list for the next iterations
+        if new_ndim == ndim:
+            not_reduced_dims += 1
+
+    return tensor, slices_list
+
+
 def draw_wavefront(
     wavefront: torch.Tensor,
     simulation_parameters: SimulationParameters,
@@ -309,9 +408,11 @@ def draw_wavefront(
     wavefront : Tensor
         Input wavefront tensor.
     simulation_parameters : SimulationParameters
-        Simulation parameters
+        Simulation parameters.
     types_to_plot : tuple[StepwisePlotTypes, ...], optional
-        Field properties to plot, by default (`"I"`, `"phase"`).
+        Field properties to plot. Options: `"A"` (amplitude), `"I"` (intensity),
+        `"phase"`, `"Re"` (real part), `"Im"` (imaginary part).
+        Default is (`"I"`, `"phase"`).
     slices_to_plot : Mapping[str, Index | tuple[Index, ...]] | None, optional
         Axis slices to apply before plotting. Use `"_"` for unnamed axes.
         Default is `None` (plot the full wavefront).
@@ -326,32 +427,17 @@ def draw_wavefront(
     from matplotlib.axes import Axes
     import numpy as np
 
-    slices: list[Index] = [slice(None)] * wavefront.ndim
+    if slices_to_plot is None:
+        slices_to_plot = {}
 
-    if axes_slices := (slices_to_plot or {}).get("_", None):
-        if not isinstance(axes_slices, tuple):
-            raise ValueError(
-                f"For axes with no name ('_'), the value should be a tuple of slices, but got {type(axes_slices)}."
-            )
-        for i, axis_slice in enumerate(axes_slices):
-            slices[i] = axis_slice
-
-    for axis_name, axis_slice in (slices_to_plot or {}).items():
-        if axis_name == "_":
-            continue
-
-        axis_slice = cast(Index, axis_slice)
-        idx = simulation_parameters.index(axis_name)
-        slices[idx] = axis_slice
-
-    for i, slice_ in enumerate(reversed(slices)):
-        additional_slice = (slice(None),) * i
-        wavefront = wavefront[..., slice_, *additional_slice]
+    wavefront, slices_list = _apply_slices(
+        wavefront, slices_to_plot, simulation_parameters
+    )
 
     wf = wavefront.numpy(force=True)
 
-    x_slice = slices[simulation_parameters.index("x")]
-    y_slice = slices[simulation_parameters.index("y")]
+    x_slice = slices_list[simulation_parameters.index("x")]
+    y_slice = slices_list[simulation_parameters.index("y")]
     x = simulation_parameters.x[x_slice].numpy(force=True)
     y = simulation_parameters.y[y_slice].numpy(force=True)
 
@@ -518,6 +604,9 @@ def show_stepwise_forward(
 
     Examples
     --------
+
+    **Basic usage:**
+
     ```python
     import svetlanna as sv
     import torch
@@ -552,65 +641,74 @@ def show_stepwise_forward(
     src="show_stepwise_forward.html"
     style="width:100%; height:500px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
 
-    ---
+    **Spatial slicing with boolean masks:**
 
+    Use named axis slicing to focus on a region of interest.
     Plot only the central area:
     ```python
     show_stepwise_forward(
         setup,
         input=input_wavefront,
         simulation_parameters=sim_params,
-        types_to_plot=("I", "phase", "Re"),
         slices_to_plot={
-            "x": (sim_params.x > -0.5) & (sim_params.x < 0.5),
-            "y": (sim_params.y > -0.5) & (sim_params.y < 0.5),
+            "x": (sim_params.x > -0.5) & (sim_params.x < 0.5),  # x_mask
+            "y": (sim_params.y > -0.5) & (sim_params.y < 0.5),  # y_mask
         },
     )
+    # Equivalent to: wavefront[y_mask, x_mask] (axis order depends on sim_params)
     ```
 
-    Equivalent tensor indexing:
-    ```python linenums="0"
-    wavefront[(sim_params.y > -0.5) & (sim_params.y < 0.5), (sim_params.x > -0.5) & (sim_params.x < 0.5)]
-    ```
+    **Integer indexing for named axes:**
 
-    ---
-
-    Slice additional named axes:
+    Select a specific value from a named axis (e.g., wavelength channel).
     ```python
+    # Suppose sim_params has multiple wavelengths,
+    # so input has shape (wavelength, y, x)
     show_stepwise_forward(
         setup,
         input=input_wavefront,
         simulation_parameters=sim_params,
-        types_to_plot=("I", "phase", "Re"),
-        slices_to_plot={"wavelength": 0},
-    )
-    ```
-
-    Equivalent tensor indexing:
-    ```python linenums="0"
-    wavefront[0, :, :]
-    ```
-
-    ---
-
-    Slice unnamed axes (for example, batch):
-    ```python
-    show_stepwise_forward(
-        setup,
-        input=input_wavefront,
-        simulation_parameters=sim_params,
-        types_to_plot=("I", "phase", "Re"),
         slices_to_plot={
-            "_": (0, 0),
+            "wavelength": 0,
         },
     )
+    # Equivalent to: wavefront[0, :, :]
     ```
 
-    The `"_"` value must be a tuple in the order of unnamed axes.
-    Equivalent tensor indexing:
-    ```python linenums="0"
-    wavefront[0, 0, :, :]
+    **Slicing unnamed axes (batch dimensions):**
+
+    Use the special key `"_"` with a **tuple** of slices for unnamed leading axes.
+    ```python
+    # If input has shape (batch, channel, y, x)
+    show_stepwise_forward(
+        setup,
+        input=batched_wavefront,
+        simulation_parameters=sim_params,
+        slices_to_plot={
+            "_": (0, 2),  # First batch, third channel
+        },
+    )
+    # Equivalent to: wavefront[0, 2, :, :]
     ```
+
+    **Combining named and unnamed slicing:**
+
+    You can mix both approaches.
+    Named axes override positional slices from `"_"`.
+    ```python
+    # If input has shape (batch, wavelength, y, x) where wavelength is named axes in sim_params
+    show_stepwise_forward(
+        setup,
+        input=batched_wavefront,
+        simulation_parameters=sim_params,
+        slices_to_plot={
+            "_": (0, 0),        # First batch, first wavelength (from position)
+            "wavelength": 1,    # Override wavelength to second
+        },
+    )
+    # Result: wavefront[0, 1, :, :]
+    ```
+
 
     """
 
