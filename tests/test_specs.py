@@ -1,5 +1,3 @@
-from statistics import mode
-
 from svetlanna.specs import ParameterSaveContext, ParameterSpecs
 from svetlanna.specs import SubelementSpecs
 from svetlanna.specs import ImageRepr, ReprRepr, NpyFileRepr, PrettyReprRepr
