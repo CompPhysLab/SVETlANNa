@@ -1,23 +1,22 @@
-from svetlanna.specs import ParameterSpecs, SubelementSpecs, PrettyReprRepr
+from svetlanna.specs import ParameterSpecs, SubelementSpecs, PrettyReprRepr, Specsable
 from svetlanna import Wavefront
-from svetlanna.elements import Element
 from collections import deque
-from typing import TYPE_CHECKING, Iterable, Union
+from typing import TYPE_CHECKING, Iterable, cast
 from svetlanna.visualization import ElementHTML, jinja_env
 import torch
-from svetlanna.setup import LinearOpticalSetup
+from .base import LinearOpticalSetupLike
 
 
 class SimpleReservoir(torch.nn.Module):
     def __init__(
         self,
-        nonlinear_element: Union[Element, LinearOpticalSetup],
-        delay_element: Union[Element, LinearOpticalSetup],
+        nonlinear_element: LinearOpticalSetupLike,
+        delay_element: LinearOpticalSetupLike,
         feedback_gain: float,
         input_gain: float,
         delay: int,
     ) -> None:
-        r"""Reservoir element.
+        r"""Reservoir network.
         The main idea is explained in [the work](https://doi.org/10.1364/OE.20.022783).
         The governing formula is:
         $$
@@ -31,9 +30,9 @@ class SimpleReservoir(torch.nn.Module):
 
         Parameters
         ----------
-        nonlinear_element : Element | LinearOpticalSetup
+        nonlinear_element : LinearOpticalSetupLike
             The nonlinear element the light passes through.
-        delay_element : Element | LinearOpticalSetup
+        delay_element : LinearOpticalSetupLike
             The delay line element.
         feedback_gain : float
             The feedback (delay line) gain $\alpha$.
@@ -91,11 +90,11 @@ class SimpleReservoir(torch.nn.Module):
         """Retrieve and remove the first element from the feedback queue
         if available.
 
-        Parameters
-        ----------
-        field : Wavefront
-            The first wavefront in the queue, or None if the queue is empty
-            or not full yet.
+        Returns
+        -------
+        None | Wavefront
+            The first wavefront in the queue if the queue is not empty;
+            otherwise, None.
         """
         if len(self.feedback_queue) < self.delay:
             return None
@@ -105,31 +104,37 @@ class SimpleReservoir(torch.nn.Module):
         """Clear all elements from the feedback queue."""
         self.feedback_queue.clear()
 
-    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
+    def forward(self, input_wavefront: Wavefront) -> Wavefront:
         # get an element from feedback line queue
         delayed = self.pop_feedback_queue()
 
         if delayed is not None:
             delay_output = self.feedback_gain * self.delay_element(delayed)
             output = self.nonlinear_element(
-                incident_wavefront * self.input_gain + delay_output
+                input_wavefront * self.input_gain + delay_output
             )
         else:
             # if the delay line is empty
-            output = self.nonlinear_element(incident_wavefront * self.input_gain)
+            output = self.nonlinear_element(input_wavefront * self.input_gain)
 
         # add output to the delay line
         self.append_feedback_queue(output)
         return output
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
-        return (
+        specs: list[ParameterSpecs | SubelementSpecs] = [
             ParameterSpecs("feedback_gain", (PrettyReprRepr(self.feedback_gain),)),
             ParameterSpecs("input_gain", (PrettyReprRepr(self.input_gain),)),
             ParameterSpecs("delay", (PrettyReprRepr(self.delay),)),
-            SubelementSpecs("Nonlinear element", self.nonlinear_element),
-            SubelementSpecs("Delay element", self.delay_element),
-        )
+        ]
+
+        if hasattr(self.nonlinear_element, "to_specs"):
+            nonlinear_element = cast(Specsable, self.nonlinear_element)
+            specs.append(SubelementSpecs("Nonlinear element", nonlinear_element))
+        if hasattr(self.delay_element, "to_specs"):
+            delay_element = cast(Specsable, self.delay_element)
+            specs.append(SubelementSpecs("Delay element", delay_element))
+        return specs
 
     @staticmethod
     def _widget_html_(
