@@ -41,9 +41,10 @@ def test_init():
 
     assert isinstance(setup.net, torch.nn.Module)
 
-    x = torch.tensor(123)
+    x = Wavefront(torch.tensor(123))
     assert setup.net(x) == x * a**3
     assert setup.forward(x) == x * a**3
+    assert setup(x) == x * a**3
 
 
 def test_init_warning():
@@ -136,6 +137,30 @@ def test_reverse():
     el = ReversableSimpleElement(a=a, simulation_parameters=sim_params)
     setup = LinearOpticalSetup(elements=[el])
     torch.testing.assert_close(setup.reverse(wf), wf * a)
+
+
+def test_stepwise_forward():
+    sim_params = SimulationParameters(
+        {
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
+        }
+    )
+
+    a = torch.tensor(2)
+    el1 = SimpleElement(a=a, simulation_parameters=sim_params)
+    el2 = SimpleElement(a=a, simulation_parameters=sim_params)
+    el3 = SimpleElement(a=a, simulation_parameters=sim_params)
+
+    setup = LinearOpticalSetup(elements=[el1, el2, el3])
+
+    x = Wavefront(torch.tensor(1.0))
+    wavefronts = setup.stepwise_forward(x)
+    assert wavefronts[0] == x
+    assert wavefronts[1] == x * a
+    assert wavefronts[2] == x * a**2
+    assert wavefronts[3] == x * a**3
 
 
 def test_to_specs():

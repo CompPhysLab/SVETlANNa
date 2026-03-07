@@ -1,10 +1,12 @@
-from typing import Iterable
+import torch
 from .elements import Element
 from .specs import ParameterSpecs, SubelementSpecs
 from torch import nn
 from torch import Tensor
 from warnings import warn
 from .visualization import jinja_env, ElementHTML
+from .wavefront import Wavefront
+from typing import Iterable, TYPE_CHECKING
 
 
 class LinearOpticalSetup(nn.Module):
@@ -70,43 +72,36 @@ class LinearOpticalSetup(nn.Module):
         else:
             self._reverse_net = None
 
-    def forward(self, input_wavefront: Tensor) -> Tensor:
+    def forward(self, input_wavefront: Wavefront) -> Wavefront:
         return self.net(input_wavefront)
 
-    def stepwise_forward(self, input_wavefront: Tensor):
+    def stepwise_forward(self, input_wavefront: Wavefront) -> tuple[Wavefront, ...]:
         """Apply elements step-by-step and collect intermediate wavefronts.
 
         Parameters
         ----------
-        input_wavefront : torch.Tensor
+        input_wavefront : Wavefront
             A wavefront that enters the optical network.
 
         Returns
         -------
-        str
-            A string that represents a scheme of a propagation through a setup.
-        list(torch.Tensor)
-            A list of wavefronts showing the propagation through the setup.
+        tuple[Wavefront, ...]
+            A tuple of wavefronts showing the propagation through the setup.
+            The first wavefront is the input wavefront, and the last one is the output wavefront after propagation through all elements.
         """
         this_wavefront = input_wavefront
         # list of wavefronts while propagation of an initial wavefront through the system
         steps_wavefront = [this_wavefront]  # input wavefront is a zeroth step
 
-        optical_scheme = ""  # string that represents a linear optical setup (schematic)
+        with torch.no_grad():
 
-        self.net.eval()
-        for ind_element, element in enumerate(self.net):
-            # for visualization in a console
-            element_name = type(element).__name__
-            optical_scheme += f"-({ind_element})-> [{ind_element + 1}. {element_name}] "
-            # TODO: Replace len(...) with something for Iterable?
-            if ind_element == len(self.net) - 1:
-                optical_scheme += f"-({ind_element + 1})->"
-            # element forward
-            this_wavefront = element.forward(this_wavefront)
-            steps_wavefront.append(this_wavefront)  # add a wavefront to list of steps
+            for element in self.net:
+                this_wavefront = element.forward(this_wavefront)
+                steps_wavefront.append(
+                    this_wavefront
+                )  # add a wavefront to list of steps
 
-        return optical_scheme, steps_wavefront
+        return tuple(steps_wavefront)
 
     def reverse(self, Ein: Tensor) -> Tensor:
         """Reverse propagation through the setup.
@@ -147,3 +142,7 @@ class LinearOpticalSetup(nn.Module):
         return jinja_env.get_template("widget_linear_setup.html.jinja").render(
             index=index, name=name, subelements=subelements
         )
+
+    if TYPE_CHECKING:
+
+        def __call__(self, input_wavefront: Wavefront) -> Wavefront: ...
