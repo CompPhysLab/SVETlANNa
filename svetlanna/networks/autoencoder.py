@@ -1,129 +1,74 @@
-from typing import Iterable, Literal
-import torch
+from typing import TYPE_CHECKING, Iterable, cast
 from torch import nn
-from svetlanna import Wavefront, SimulationParameters
-from svetlanna.elements import Element
-
-# for visualisation:
-from svetlanna import LinearOpticalSetup
-from svetlanna.specs import ParameterSpecs, SubelementSpecs
+from svetlanna.specs import ParameterSpecs, SubelementSpecs, Specsable
+from .base import LinearOpticalSetupLike
+from svetlanna import Wavefront
 
 
 class LinearAutoencoder(nn.Module):
     """
     A simple autoencoder network consisting of consistent encoder and decoder
     for a simultaneous training.
-        .encode() - forward propagation through encoder elements
-        .decode() - forward propagation through decoder elements
-
-    Comment: Works only for a single wavelength, input wavefront ['y', 'x']
     """
 
     def __init__(
         self,
-        sim_params: SimulationParameters,
-        encoder_elements_list: list[Element] | Iterable[Element],
-        decoder_elements_list: list[Element] | Iterable[Element],
-        to_return: Literal["wf", "amps"] = "wf",
-        device: str | torch.device = torch.get_default_device(),
+        encoder_element: LinearOpticalSetupLike,
+        decoder_element: LinearOpticalSetupLike,
     ):
         """
         Parameters
         ----------
-        sim_params : SimulationParameters
-            Simulation parameters for the task.
-        encoder_elements_list : list[Element] | Iterable[Element]
-            List of elements to compose an encoder.
-        decoder_elements_list : list[Element] | Iterable[Element]
-            List of elements to compose a decoder.
-        to_return : Literal['wf', 'amps']
-            Specifies what to return in .encode() and .decode().
-            (1) 'wf' – just a wavefront as it is
-            (2) 'amps' – a wavefront without phases
-        device : torch.device
-            Device.
+        encoder_element : LinearOpticalSetupLike
+            The encoder element.
+        decoder_element : LinearOpticalSetupLike
+            The decoder element.
         """
         super().__init__()
 
-        self.sim_params = sim_params
-        self.h, self.w = self.sim_params.axis_sizes(
-            axs=("y", "x")
-        )  # height and width for a Wavefronts
+        self.encoder_element = encoder_element
+        self.decoder_element = decoder_element
 
-        self.__device = torch.device(device)
-        self.to_return = to_return
-
-        # ENCODER
-        self.encoder_elements = encoder_elements_list
-        self.encoder = nn.Sequential(*encoder_elements_list).to(self.__device)
-        # DECODER
-        self.decoder_elements = decoder_elements_list
-        self.decoder = nn.Sequential(*decoder_elements_list).to(self.__device)
-
-    def encode(self, wavefront_in):
+    def encode(self, input_wavefront: Wavefront) -> Wavefront:
         """
-        Propagation through the encoder part – encode an image wavefront (input).
+        Propagation through the encoder part - encode a wavefront (input).
 
         Returns
         -------
-        wavefront_encoded : Wavefront
+        Wavefront
             An encoded input wavefront.
         """
-        if self.to_return == "wf":
-            return self.encoder(wavefront_in)
-        if self.to_return == "amps":
-            return self.encoder(wavefront_in).abs() + 0j
+        return self.encoder_element(input_wavefront)
 
-    def decode(self, wavefront_encoded):
+    def decode(self, wavefront_encoded: Wavefront) -> Wavefront:
         """
-        Propagation through the decoder part – decode an encoded image.
+        Propagation through the decoder part - decode an encoded wavefront.
 
         Returns
         -------
-        wavefront_decoded : Wavefront
+        Wavefront
             A decoded wavefront.
         """
-        if self.to_return == "wf":
-            return self.decoder(wavefront_encoded)
-        if self.to_return == "amps":
-            return self.decoder(wavefront_encoded).abs() + 0j
+        return self.decoder_element(wavefront_encoded)
 
-    def forward(self, wavefront_in):
-        """
-        Parameters
-        ----------
-        wavefront_in: Wavefront('bs', 'y', 'x')
-
-        Returns
-        -------
-        wavefront_encoded, wavefront_decoded : torch.Wavefront
-            Encoded and decoded wavefronts.
-        """
-        # encode
-        wavefront_encoded = self.encode(wavefront_in)
-        # decode from encoded
+    def forward(self, input_wavefront: Wavefront) -> Wavefront:
+        wavefront_encoded = self.encode(input_wavefront)
         wavefront_decoded = self.decode(wavefront_encoded)
-        # results to calculate loss
-        return wavefront_encoded, wavefront_decoded
+        return wavefront_decoded
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
-        return (
-            SubelementSpecs("Encoder", LinearOpticalSetup(self.encoder_elements)),
-            SubelementSpecs("Decoder", LinearOpticalSetup(self.decoder_elements)),
-        )
+        specs = []
 
-    def to(self, device: str | torch.device | int) -> "LinearAutoencoder":
-        if self.__device == torch.device(device):
-            return self
+        if hasattr(self.encoder_element, "to_specs"):
+            encoder_element = cast(Specsable, self.encoder_element)
+            specs.append(SubelementSpecs("Encoder", encoder_element))
 
-        return LinearAutoencoder(
-            sim_params=self.sim_params,
-            encoder_elements_list=self.encoder_elements,
-            decoder_elements_list=self.decoder_elements,
-            to_return=self.to_return,
-            device=device,
-        )
+        if hasattr(self.decoder_element, "to_specs"):
+            decoder_element = cast(Specsable, self.decoder_element)
+            specs.append(SubelementSpecs("Decoder", decoder_element))
 
-    @property
-    def device(self) -> str | torch.device | int:
-        return self.__device
+        return specs
+
+    if TYPE_CHECKING:
+
+        def __call__(self, input_wavefront: Wavefront) -> Wavefront: ...

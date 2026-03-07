@@ -1,76 +1,101 @@
-import pytest
 import torch
-
-from svetlanna.wavefront import Wavefront
-from svetlanna.networks.autoencoder import LinearAutoencoder
-
-from test_drnn import sim_params, zero_free_space
+from svetlanna.wavefront import Wavefront, SimulationParameters
+from svetlanna.networks import LinearAutoencoder
+from svetlanna.elements import DiffractiveLayer
 
 
-@pytest.fixture()
-def empty_encoder_or_decoder(zero_free_space):
-    """Returns list with a zero distance FreeSpace, i.e. empty encoder/decoder"""
-    return [zero_free_space]
-
-
-@pytest.mark.parametrize(
-    "wf_real, wf_imag",
-    [
-        (1.00, 0.00),
-        (0.00, 1.00),
-        (2.50, 1.25),
-    ],
-)
-def test_autoencoder_forward(
-    sim_params, empty_encoder_or_decoder, wf_real, wf_imag  # fixtures
-):
+def test_autoencoder_forward(sim_params_simple: SimulationParameters):
     """Test forward function for a single Wavefront sequence."""
-    h, w = sim_params.axis_sizes(
-        axs=("y", "x")
-    )  # size of a wavefront according to SimulationParameters
-    test_wavefront = Wavefront(
-        torch.ones(size=(h, w), dtype=torch.float64) * wf_real
-        + torch.ones(size=(h, w), dtype=torch.float64) * wf_imag * 1j
+    random_tensor = sim_params_simple.cast(
+        torch.rand(sim_params_simple.axis_sizes(("y", "x"))), "y", "x"
     )
+    test_wavefront = Wavefront(random_tensor)
 
-    for to_return in ["wf", "amps"]:
-        autoencoder = LinearAutoencoder(
-            sim_params,
-            encoder_elements_list=empty_encoder_or_decoder,
-            decoder_elements_list=empty_encoder_or_decoder,
-            to_return=to_return,
-            device=torch.get_default_device(),
-        )  # empty Autoencoder
-
-        wf_encoded, wf_decoded = autoencoder(test_wavefront)  # forward for Autoencoder
-
-        for wf in [wf_encoded, wf_decoded]:
-            assert isinstance(wf, Wavefront)
-
-            if to_return == "wf":
-                assert torch.allclose(wf, test_wavefront)
-            if to_return == "amps":
-                assert torch.allclose(wf, test_wavefront.abs() + 0j)
-
-
-def test_autoencoder_device(sim_params, empty_encoder_or_decoder):
-    """Test .to(device) function for a D-RNN."""
-    # empty D-RNN
+    encoder = DiffractiveLayer(
+        sim_params_simple, mask=torch.rand(sim_params_simple.axis_sizes(("y", "x")))
+    )
+    decoder = DiffractiveLayer(
+        sim_params_simple, mask=torch.rand(sim_params_simple.axis_sizes(("y", "x")))
+    )
     autoencoder = LinearAutoencoder(
-        sim_params,
-        encoder_elements_list=empty_encoder_or_decoder,
-        decoder_elements_list=empty_encoder_or_decoder,
-        device="cpu",
+        encoder_element=encoder,
+        decoder_element=decoder,
     )
-    assert autoencoder.device == torch.device("cpu")
 
-    new_device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    if new_device == torch.device(
-        "cpu"
-    ):  # if cuda is not available - check if `mps` is
-        new_device = torch.device("mps" if torch.backends.mps.is_available() else "cpu")
+    wf_encoded = autoencoder.encode(test_wavefront)
+    wf_decoded = autoencoder.decode(wf_encoded)
 
-    new_autoencoder = autoencoder.to(new_device)
+    torch.testing.assert_close(wf_decoded, autoencoder(test_wavefront))
 
-    assert isinstance(new_autoencoder, LinearAutoencoder)
-    assert new_autoencoder.device == new_device
+
+def test_device(device_simple: str):
+    """Test reservoir on different devices."""
+
+    sim_params = SimulationParameters(
+        x=torch.tensor([0]), y=torch.tensor([0]), wavelength=1.0
+    )
+    wavefront = Wavefront.plane_wave(sim_params).to(device=device_simple)
+
+    assert sim_params.device == torch.get_default_device()
+    autoencoder = LinearAutoencoder(
+        encoder_element=DiffractiveLayer(
+            sim_params,
+            mask=torch.rand(
+                sim_params.axis_sizes(("y", "x")),
+            ),
+        ),
+        decoder_element=DiffractiveLayer(
+            sim_params,
+            mask=torch.rand(
+                sim_params.axis_sizes(("y", "x")),
+            ),
+        ),
+    )
+    autoencoder.to(device=device_simple)
+
+    assert autoencoder(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    assert sim_params.device.type == device_simple
+    autoencoder = LinearAutoencoder(
+        encoder_element=DiffractiveLayer(
+            sim_params,
+            mask=torch.rand(
+                sim_params.axis_sizes(("y", "x")), device=sim_params.device
+            ),
+        ),
+        decoder_element=DiffractiveLayer(
+            sim_params,
+            mask=torch.rand(
+                sim_params.axis_sizes(("y", "x")), device=sim_params.device
+            ),
+        ),
+    )
+
+    assert autoencoder(wavefront).device.type == device_simple
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    autoencoder = LinearAutoencoder(
+        encoder_element=DiffractiveLayer(
+            sim_params,
+            mask=torch.rand(
+                sim_params.axis_sizes(("y", "x")), device=sim_params.device
+            ),
+        ),
+        decoder_element=DiffractiveLayer(
+            sim_params,
+            mask=torch.rand(
+                sim_params.axis_sizes(("y", "x")), device=sim_params.device
+            ),
+        ),
+    )
+
+    assert autoencoder.to_specs()
