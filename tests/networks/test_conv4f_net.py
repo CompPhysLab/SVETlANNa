@@ -6,7 +6,7 @@ from svetlanna.wavefront import Wavefront
 from svetlanna.networks.diffractive_conv import ConvDiffNetwork4F, ConvLayer4F
 from svetlanna import elements
 
-from tests.test_drnn import sim_params
+from test_drnn import sim_params
 
 
 @pytest.fixture()

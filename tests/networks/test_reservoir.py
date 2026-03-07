@@ -1,4 +1,5 @@
-from svetlanna.elements import SimpleReservoir, DiffractiveLayer
+from svetlanna.elements import DiffractiveLayer
+from svetlanna.networks import SimpleReservoir
 from svetlanna import SimulationParameters, Wavefront
 import torch
 

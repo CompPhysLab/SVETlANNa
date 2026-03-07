@@ -4,7 +4,7 @@ import torch
 from svetlanna.wavefront import Wavefront
 from svetlanna.networks.autoencoder import LinearAutoencoder
 
-from tests.test_drnn import sim_params, zero_free_space
+from test_drnn import sim_params, zero_free_space
 
 
 @pytest.fixture()

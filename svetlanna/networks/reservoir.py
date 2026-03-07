@@ -1,11 +1,11 @@
 from svetlanna.specs import ParameterSpecs, SubelementSpecs, PrettyReprRepr
-from ..parameters import OptimizableFloat
-from ..simulation_parameters import SimulationParameters
-from ..wavefront import Wavefront
-from .element import Element
+from svetlanna.parameters import OptimizableFloat
+from svetlanna import SimulationParameters
+from svetlanna import Wavefront
+from svetlanna.elements import Element
 from collections import deque
 from typing import TYPE_CHECKING, Iterable, Union
-from ..visualization import ElementHTML, jinja_env
+from svetlanna.visualization import ElementHTML, jinja_env
 
 if TYPE_CHECKING:
     from svetlanna.setup import LinearOpticalSetup
