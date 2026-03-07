@@ -13,7 +13,6 @@ def test_queue():
         }
     )
     reservoir = SimpleReservoir(
-        sim_params,
         nonlinear_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
         delay_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
         delay=2,
@@ -56,7 +55,6 @@ def test_forward(sim_params_simple: SimulationParameters):
     delay = 5
 
     reservoir = SimpleReservoir(
-        sim_params_simple,
         nonlinear_element=nonlinear_element,
         delay_element=delay_element,
         delay=delay,
@@ -100,7 +98,6 @@ def test_device(device_simple: str):
 
     assert sim_params.device == torch.get_default_device()
     reservoir = SimpleReservoir(
-        sim_params,
         nonlinear_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
         delay_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
         delay=2,
@@ -116,7 +113,6 @@ def test_device(device_simple: str):
 
     assert sim_params.device.type == device_simple
     reservoir = SimpleReservoir(
-        sim_params,
         nonlinear_element=DiffractiveLayer(
             sim_params, mask=torch.tensor([[0.0]]).to(device=device_simple)
         ),
@@ -138,7 +134,6 @@ def test_to_specs():
     )
 
     reservoir = SimpleReservoir(
-        sim_params,
         nonlinear_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
         delay_element=DiffractiveLayer(sim_params, mask=torch.tensor([[0.0]])),
         delay=2,

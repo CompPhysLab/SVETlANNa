@@ -1,66 +1,80 @@
 from svetlanna.specs import ParameterSpecs, SubelementSpecs, PrettyReprRepr
-from svetlanna.parameters import OptimizableFloat
-from svetlanna import SimulationParameters
 from svetlanna import Wavefront
 from svetlanna.elements import Element
 from collections import deque
 from typing import TYPE_CHECKING, Iterable, Union
 from svetlanna.visualization import ElementHTML, jinja_env
+import torch
+from svetlanna.setup import LinearOpticalSetup
 
-if TYPE_CHECKING:
-    from svetlanna.setup import LinearOpticalSetup
 
-
-class SimpleReservoir(Element):
-    """Reservoir element."""
-
+class SimpleReservoir(torch.nn.Module):
     def __init__(
         self,
-        simulation_parameters: SimulationParameters,
-        nonlinear_element: Union[Element, "LinearOpticalSetup"],
-        delay_element: Union[Element, "LinearOpticalSetup"],
-        feedback_gain: OptimizableFloat,
-        input_gain: OptimizableFloat,
+        nonlinear_element: Union[Element, LinearOpticalSetup],
+        delay_element: Union[Element, LinearOpticalSetup],
+        feedback_gain: float,
+        input_gain: float,
         delay: int,
     ) -> None:
-        """Reservoir element.
-        The main idea is explained in https://doi.org/10.1364/OE.20.022783.
+        r"""Reservoir element.
+        The main idea is explained in [the work](https://doi.org/10.1364/OE.20.022783).
         The governing formula is:
         $$
-        x_{out}[i] = F_{NL}(\beta x_{in}[i] + \alpha F_{D}(x_{out}[i-\tau]))
+        x_\text{out}[i] = F_\text{NL}(\beta x_\text{in}[i] + \alpha F_\text{D}(x_\text{out}[i-\tau]))
         $$
-        where $F_{NL}$ is the nonlinear element, $F_{D}$ is the delay element,
+        where $F_\text{NL}$ is the nonlinear element, $F_\text{D}$ is the delay element,
         $\alpha$ is the feedback_gain, $\beta$ is the input_gain,
         $\tau$ is the delay in samples.
         The user should match the delay in samples with the actual
-        light propagation time in $F_{D}$.
+        light propagation time in $F_\text{D}$.
 
         Parameters
         ----------
-        simulation_parameters : SimulationParameters
-            An instance describing the optical system's simulation parameters.
         nonlinear_element : Element | LinearOpticalSetup
             The nonlinear element the light passes through.
         delay_element : Element | LinearOpticalSetup
             The delay line element.
-        feedback_gain : OptimizableFloat
-            The feedback (delay line) gain ($\alpha$).
-        input_gain : OptimizableFloat
+        feedback_gain : float
+            The feedback (delay line) gain $\alpha$.
+        input_gain : float
             The input gain $\beta$
         delay : int
             The delay time, measured in samples,
             that the light spends in the delay line.
+
+        Examples
+        --------
+        ```python
+        import svetlanna as sv
+
+        ...
+
+        reservoir = sv.networks.SimpleReservoir(
+            nonlinear_element=nonlinear_element,
+            delay_element=delay_element,
+            delay=2,
+            feedback_gain=feedback_gain,
+            input_gain=input_gain,
+        )
+
+        for input_wavefront in input_wavefront_sequence:
+            output = reservoir(input_wavefront)
+
+        # clear the delay line before the next sequence or batch
+        reservoir.drop_feedback_queue()
+        ```
         """
-        super().__init__(simulation_parameters)
+        super().__init__()
 
         self.nonlinear_element = nonlinear_element
         self.delay_element = delay_element
 
-        self.feedback_gain = self.process_parameter("feedback_gain", feedback_gain)
-        self.input_gain = self.process_parameter("input_gain", input_gain)
-        self.delay = self.process_parameter("delay", delay)
+        self.feedback_gain = feedback_gain
+        self.input_gain = input_gain
+        self.delay = delay
 
-        # create FIFI queue for delay line
+        # create FIFO queue for delay line
         self.feedback_queue: deque[Wavefront] = deque(maxlen=self.delay)
 
     def append_feedback_queue(self, field: Wavefront):
@@ -124,3 +138,7 @@ class SimpleReservoir(Element):
         return jinja_env.get_template("widget_reservoir.html.jinja").render(
             index=index, name=name, subelements=subelements
         )
+
+    if TYPE_CHECKING:
+
+        def __call__(self, incident_wavefront: Wavefront) -> Wavefront: ...
