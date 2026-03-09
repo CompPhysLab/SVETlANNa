@@ -169,13 +169,7 @@ class FreeSpace(Element):
 
             self._padding_order = padding_order
 
-            self._nodes = (
-                y_nodes + 2 * self._y_paddings,
-                x_nodes + 2 * self._x_paddings,
-            )
-
-            Lx = torch.abs(self._x[-1] - self._x[0])
-            Ly = torch.abs(self._y[-1] - self._y[0])
+            self._nodes = (y_nodes, x_nodes)
 
             self._size = (self._dy * self._nodes[0], self._dx * self._nodes[1])
 
@@ -300,17 +294,7 @@ class FreeSpace(Element):
             )
         )
 
-        k = distance * wavelength
-            / (
-                2
-                * sampling_interval**2
-                * torch.sqrt(1 - (wavelength / (2 * sampling_interval)) ** 2)
-            )
-
-        print("v:", k
-        )
         num_of_paddings_rounded = torch.ceil(total_num_of_paddings / 2).to(torch.int)
-        print("total_num_of_paddings:", total_num_of_paddings)
         return int(num_of_paddings_rounded.item())
 
     @staticmethod
@@ -327,14 +311,17 @@ class FreeSpace(Element):
         nodes: Tuple[int, int],
         size: Tuple[torch.Tensor, torch.Tensor],
         distance: OptimizableFloat,
-        eps: float = 1e-16,
     ):
         y_nodes, x_nodes = nodes
 
         Ly, Lx = size
 
-        x = torch.linspace(-Lx / 2, Lx / 2, x_nodes)
-        y = torch.linspace(-Ly / 2, Ly / 2, y_nodes)
+        x = torch.linspace(
+            -Lx / 2, Lx / 2, x_nodes, device=simulation_parameters.device
+        )
+        y = torch.linspace(
+            -Ly / 2, Ly / 2, y_nodes, device=simulation_parameters.device
+        )
 
         _x = simulation_parameters.cast(x, "x", shape_check=False)
         _y = simulation_parameters.cast(y, "y", shape_check=False)
@@ -386,11 +373,6 @@ class FreeSpace(Element):
                 distance=self.distance,
                 sampling_interval=self._dy,
             )
-
-            print("x paddings:", x_paddings)
-            print("y paddings:", y_paddings)
-            print("dx:", self._dx)
-            print("dy:", self._dy)
 
             ndim = max(-self._x_index, -self._y_index)
 
@@ -455,7 +437,7 @@ class FreeSpace(Element):
             x_start = x_paddings
             x_end = output_wavefront_padded.shape[self._x_index] - x_paddings
 
-            slices = [slice(None)] * ndim
+            slices = [slice(None)] * output_wavefront_padded.ndim
             slices[self._y_index] = slice(y_start, y_end)
             slices[self._x_index] = slice(x_start, x_end)
 
@@ -488,20 +470,32 @@ class FreeSpace(Element):
             wavefront_padded_fft = torch.fft.fft2(
                 wavefront_padded, dim=(self._y_index, self._x_index)
             )
-
-            transfer_function = self._transfer_function_rsc(
-                simulation_parameters=self.simulation_parameters,
-                wave_number=self._wave_number,
-                nodes=self._nodes,
-                size=self._size,
-                distance=self.distance,
+            print("sim params device:", self.simulation_parameters.device)
+            transfer_function = (
+                self._transfer_function_rsc(
+                    simulation_parameters=self.simulation_parameters,
+                    wave_number=self._wave_number,
+                    nodes=self._nodes,
+                    size=self._size,
+                    distance=self.distance,
+                )
+                * self._dx
+                * self._dy
             )
 
-            impulse_response_fft = torch.fft.fft2(
-                transfer_function, dim=(self._y_index, self._x_index)
+            transfer_function_padded = F.pad(
+                transfer_function, self._padding_order, mode="constant", value=0
             )
 
-            output_wavefront_padded_fft = wavefront_padded_fft * impulse_response_fft
+            # transfer_function_padded = transfer_function
+
+            impulse_response_fft_padded = torch.fft.fft2(
+                transfer_function_padded, dim=(self._y_index, self._x_index)
+            )
+
+            output_wavefront_padded_fft = (
+                wavefront_padded_fft * impulse_response_fft_padded
+            )
 
             output_wavefront_padded = torch.fft.fftshift(
                 torch.fft.ifft2(
@@ -520,9 +514,7 @@ class FreeSpace(Element):
             slices[self._x_index] = slice(x_start, x_end)
 
             # Apply slices to remove paddings
-            output_wavefront = (
-                output_wavefront_padded[tuple(slices)] * self._dx * self._dy
-            )
+            output_wavefront = output_wavefront_padded[tuple(slices)]
 
         elif method == "RSC":
 
@@ -530,12 +522,16 @@ class FreeSpace(Element):
                 wavefront, dim=(self._y_index, self._x_index)
             )
 
-            transfer_function = self._transfer_function_rsc(
-                simulation_parameters=self.simulation_parameters,
-                wave_number=self._wave_number,
-                nodes=self._nodes,
-                size=self._size,
-                distance=self.distance,
+            transfer_function = (
+                self._transfer_function_rsc(
+                    simulation_parameters=self.simulation_parameters,
+                    wave_number=self._wave_number,
+                    nodes=self._nodes,
+                    size=self._size,
+                    distance=self.distance,
+                )
+                * self._dx
+                * self._dy
             )
 
             impulse_response_fft = torch.fft.fft2(
@@ -544,15 +540,11 @@ class FreeSpace(Element):
 
             output_wavefront_fft = wavefront_fft * impulse_response_fft
 
-            output_wavefront = (
-                torch.fft.fftshift(
-                    torch.fft.ifft2(
-                        output_wavefront_fft, dim=(self._y_index, self._x_index)
-                    ),
-                    dim=(self._y_index, self._x_index),
-                )
-                * self._dx
-                * self._dy
+            output_wavefront = torch.fft.fftshift(
+                torch.fft.ifft2(
+                    output_wavefront_fft, dim=(self._y_index, self._x_index)
+                ),
+                dim=(self._y_index, self._x_index),
             )
 
         else:
