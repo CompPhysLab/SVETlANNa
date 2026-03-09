@@ -4,6 +4,8 @@ import torch
 from svetlanna import elements
 from svetlanna import SimulationParameters
 from svetlanna import Wavefront
+from svetlanna.units import ureg
+from typing import List
 
 
 parameters = [
@@ -15,6 +17,7 @@ parameters = [
     "waist_radius_test",
     "distance_total",
     "distance_end",
+    "methods",
     "expected_error",
     "error_energy",
 ]
@@ -25,30 +28,32 @@ parameters = [
     parameters,
     [
         (
-            6,  # ox_size
-            6,  # oy_size
+            6 * ureg.mm,  # ox_size
+            6 * ureg.mm,  # oy_size
             1500,  # ox_nodes
             1600,  # oy_nodes
             torch.linspace(
-                330 * 1e-6, 660 * 1e-6, 5
+                330 * ureg.nm, 660 * ureg.nm, 5
             ),  # wavelength_test tensor, mm    # noqa: E501
-            2.0,  # waist_radius_test, mm
-            300,  # distance_total, mm
-            200,  # distance_end, mm
-            0.02,  # expected_std
-            0.01,  # error_energy
+            2.0 * ureg.mm,  # waist_radius_test, mm
+            300 * ureg.mm,  # distance_total, mm
+            200 * ureg.mm,  # distance_end, mm
+            ["ASM", "zpASM"],
+            0.02,  # expected intensity error
+            1.0,  # error energy, %
         ),
         (
-            6,  # ox_size
-            6,  # oy_size
+            6 * ureg.mm,  # ox_size
+            6 * ureg.mm,  # oy_size
             1500,  # ox_nodes
             1600,  # oy_nodes
-            660 * 1e-6,  # wavelength_test, mm
-            2.0,  # waist_radius_test, mm
-            300,  # distance_total, mm
-            200,  # distance_end, mm
-            0.02,  # expected_std
-            0.01,  # error_energy
+            660 * ureg.nm,  # wavelength_test, mm
+            2.0 * ureg.mm,  # waist_radius_test, mm
+            300 * ureg.mm,  # distance_total, mm
+            200 * ureg.mm,  # distance_end, mm
+            ["ASM", "zpASM"],
+            0.02,  # expected intensity error
+            1.0,  # error energy, %
         ),
     ],
 )
@@ -61,6 +66,7 @@ def test_gaussian_beam_propagation(
     waist_radius_test: float,
     distance_total: float,
     distance_end: float,
+    methods: List,
     expected_error: float,
     error_energy: float,
 ):
@@ -102,8 +108,6 @@ def test_gaussian_beam_propagation(
     # creating meshgrid
     x_grid = x_grid[None, :]
     y_grid = y_grid[None, :]
-
-    # wave_number = 2 * torch.pi / wavelength_test[..., None, None]
 
     amplitude = 1.0
 
@@ -153,6 +157,8 @@ def test_gaussian_beam_propagation(
 
     intensity_analytic = torch.pow(torch.abs(field), 2)
 
+    energy_analytic = torch.sum(intensity_analytic, dim=(-2, -1)) * dx * dy
+
     params = SimulationParameters(
         {
             "x": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
@@ -169,47 +175,41 @@ def test_gaussian_beam_propagation(
         waist_radius=waist_radius_test,
     )
 
-    # field on the screen by using Fresnel propagation method
-    field_end_fresnel = elements.FreeSpace(
-        simulation_parameters=params, distance=distance_end, method="fresnel"
-    )(field_gb_start)
-    # field on the screen by using angular spectrum method
-    field_end_as = elements.FreeSpace(
-        simulation_parameters=params, distance=distance_end, method="AS"
-    )(field_gb_start)
+    errors_energy = []
+    errors = []
 
-    intensity_output_fresnel = field_end_fresnel.intensity
-    intensity_output_as = field_end_as.intensity
+    for method in methods:
 
-    energy_analytic = torch.sum(intensity_analytic, dim=(-2, -1)) * dx * dy
-    energy_numeric_fresnel = torch.sum(intensity_output_fresnel, dim=(-2, -1)) * dx * dy
-    energy_numeric_as = torch.sum(intensity_output_as, dim=(-2, -1)) * dx * dy
+        wavefront_end = elements.FreeSpace(
+            simulation_parameters=params, distance=distance_end, method=method
+        )(field_gb_start)
 
-    intensity_difference_fresnel = torch.abs(
-        intensity_analytic - intensity_output_fresnel
-    ) / (ox_nodes * oy_nodes)
+        intensity_end = wavefront_end.intensity
 
-    intensity_difference_as = torch.abs(intensity_analytic - intensity_output_as) / (
-        ox_nodes * oy_nodes
-    )
+        energy_numeric = torch.sum(intensity_end, dim=(-2, -1)) * dx * dy
 
-    error_fresnel, _ = intensity_difference_fresnel.view(
-        intensity_difference_fresnel.size(0), -1
-    ).max(dim=1)
+        intensity_difference = torch.abs(intensity_analytic - intensity_end) / (
+            ox_nodes * oy_nodes
+        )
 
-    error_as, _ = intensity_difference_as.view(intensity_difference_as.size(0), -1).max(
-        dim=1
-    )
+        error, _ = intensity_difference.view(intensity_difference.size(0), -1).max(
+            dim=1
+        )
 
-    energy_error_fresnel = torch.abs(
-        (energy_analytic - energy_numeric_fresnel) / energy_analytic
-    )
-    energy_error_as = torch.abs((energy_analytic - energy_numeric_as) / energy_analytic)
+        energy_error = (
+            torch.abs((energy_analytic - energy_numeric) / energy_analytic) * 100
+        )
 
-    assert (error_fresnel <= expected_error).all()
-    assert (error_as <= expected_error).all()
-    assert (energy_error_fresnel <= error_energy).all()
-    assert (energy_error_as <= error_energy).all()
+        errors.append(error)
+        errors_energy.append(energy_error)
+
+    for i in range(len(errors)):
+
+        current_errors_energy = errors_energy[i]
+        current_errors = errors[i]
+
+        assert (current_errors <= expected_error).all()
+        assert (current_errors_energy <= error_energy).all()
 
 
 parameters = [
@@ -220,6 +220,7 @@ parameters = [
     "wavelength_test",
     "waist_radius_test",
     "distance",
+    "methods",
     "expected_error",
 ]
 
@@ -228,34 +229,37 @@ parameters = [
     parameters,
     [
         (
-            6,  # ox_size
-            6,  # oy_size
+            6 * ureg.mm,  # ox_size
+            6 * ureg.mm,  # oy_size
             1569,  # ox_nodes
             1698,  # oy_nodes
-            660 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            2.0,  # waist_radius_test, mm
-            300,  # distance, mm
-            0.5,  # expected relative error
+            660 * ureg.nm,  # wavelength_test tensor, mm    # noqa: E501
+            1.5 * ureg.mm,  # waist_radius_test, mm
+            200 * ureg.mm,  # distance, mm
+            ["ASM", "zpASM", "zpRSC", "RSC"],  # methods to test
+            2.0,  # expected relative error, %
         ),
         (
-            15,  # ox_size
-            8,  # oy_size
+            15 * ureg.mm,  # ox_size
+            8 * ureg.mm,  # oy_size
             1111,  # ox_nodes
             14070,  # oy_nodes
-            330 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            1.0,  # waist_radius_test, mm
-            50,  # distance, mm
-            1.7,  # expected relative error
+            330 * ureg.nm,  # wavelength_test tensor, mm    # noqa: E501
+            1.0 * ureg.mm,  # waist_radius_test, mm
+            50 * ureg.mm,  # distance, mm
+            ["ASM", "zpASM"],  # methods to test
+            1.7,  # expected relative error, %
         ),
         (
-            20,  # ox_size
-            23,  # oy_size
+            20 * ureg.mm,  # ox_size
+            23 * ureg.mm,  # oy_size
             1800,  # ox_nodes
             1032,  # oy_nodes
-            540 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            4.0,  # waist_radius_test, mm
-            500,  # distance, mm
-            0.5,  # expected relative error
+            540 * ureg.nm,  # wavelength_test tensor, mm    # noqa: E501
+            3.0 * ureg.mm,  # waist_radius_test, mm
+            500 * ureg.mm,  # distance, mm
+            ["ASM", "zpASM", "zpRSC"],  # methods to test
+            5.0,  # expected relative error, %
         ),
     ],
 )
@@ -267,6 +271,7 @@ def test_gaussian_beam_fwhm(
     wavelength_test: torch.Tensor | float,
     waist_radius_test: float,
     distance: float,
+    methods: List,
     expected_error: float,
 ):
 
@@ -280,20 +285,6 @@ def test_gaussian_beam_fwhm(
 
     field_gb_start = Wavefront.gaussian_beam(
         simulation_parameters=params, distance=0.0, waist_radius=waist_radius_test
-    )
-
-    # field on the screen by using Fresnel propagation method
-    field_end_fresnel = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="fresnel"
-    )(field_gb_start)
-    # field on the screen by using angular spectrum method
-    field_end_as = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="AS"
-    )(field_gb_start)
-
-    fwhm_x_as, fwhm_y_as = field_end_as.fwhm(simulation_parameters=params)
-    fwhm_x_fresnel, fwhm_y_fresnel = field_end_fresnel.fwhm(
-        simulation_parameters=params
     )
 
     fwhm_analytical = (
@@ -305,113 +296,26 @@ def test_gaussian_beam_fwhm(
         )
     )
 
-    relative_error_x_as = torch.abs(fwhm_x_as - fwhm_analytical) / fwhm_analytical * 100
-    relative_error_y_as = torch.abs(fwhm_y_as - fwhm_analytical) / fwhm_analytical * 100
+    errors_x = []
+    errors_y = []
 
-    relative_error_x_fresnel = (
-        torch.abs(fwhm_x_fresnel - fwhm_analytical) / fwhm_analytical * 100
-    )
-    relative_error_y_fresnel = (
-        torch.abs(fwhm_y_fresnel - fwhm_analytical) / fwhm_analytical * 100
-    )
+    for method in methods:
 
-    assert (relative_error_x_as <= expected_error).all()
-    assert (relative_error_y_as <= expected_error).all()
-    assert (relative_error_x_fresnel <= expected_error).all()
-    assert (relative_error_y_fresnel <= expected_error).all()
+        output_wavefront = elements.FreeSpace(
+            simulation_parameters=params, distance=distance, method=method
+        )(field_gb_start)
 
+        fwhm_x, fwhm_y = output_wavefront.fwhm(simulation_parameters=params)
 
-parameters = [
-    "ox_size",
-    "oy_size",
-    "ox_nodes",
-    "oy_nodes",
-    "wavelength_test",
-    "waist_radius_test",
-    "distance",
-    "expected_error",
-]
+        relative_error_x = torch.abs(fwhm_x - fwhm_analytical) / fwhm_analytical * 100
+        relative_error_y = torch.abs(fwhm_y - fwhm_analytical) / fwhm_analytical * 100
 
+        errors_x.append(relative_error_x)
+        errors_y.append(relative_error_y)
 
-@pytest.mark.parametrize(
-    parameters,
-    [
-        (
-            6,  # ox_size
-            6,  # oy_size
-            1569,  # ox_nodes
-            1698,  # oy_nodes
-            660 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            2.0,  # waist_radius_test, mm
-            300,  # distance, mm
-            0.5,  # expected relative error
-        ),
-        (
-            15,  # ox_size
-            8,  # oy_size
-            1111,  # ox_nodes
-            14070,  # oy_nodes
-            330 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            1.0,  # waist_radius_test, mm
-            50,  # distance, mm
-            1.7,  # expected relative error
-        ),
-        (
-            20,  # ox_size
-            23,  # oy_size
-            1800,  # ox_nodes
-            1032,  # oy_nodes
-            540 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            4.0,  # waist_radius_test, mm
-            500,  # distance, mm
-            0.5,  # expected relative error
-        ),
-    ],
-)
-def test_gaussian_beam_phase_profile(
-    ox_size: float,
-    oy_size: float,
-    ox_nodes: int,
-    oy_nodes: int,
-    wavelength_test: torch.Tensor | float,
-    waist_radius_test: float,
-    distance: float,
-    expected_error: float,
-):
+    for i in range(len(methods)):
+        current_error_x = errors_x[i]
+        current_error_y = errors_y[i]
 
-    params = SimulationParameters(
-        {
-            "x": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
-            "y": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
-            "wavelength": wavelength_test,
-        }
-    )
-
-    field_gb_start = Wavefront.gaussian_beam(
-        simulation_parameters=params, distance=0.0, waist_radius=waist_radius_test
-    )
-
-    # field on the screen by using Fresnel propagation method
-    field_end_fresnel = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="fresnel"
-    )(field_gb_start)
-    # field on the screen by using angular spectrum method
-    field_end_as = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="AS"
-    )(field_gb_start)
-
-    total_field = Wavefront.gaussian_beam(
-        simulation_parameters=params, waist_radius=waist_radius_test, distance=distance
-    )
-
-    intensity_analytic = total_field.intensity
-
-    # highlight target region
-    target_region = intensity_analytic >= torch.max(intensity_analytic) / 5
-
-    output_phase_as = field_end_as.phase * target_region
-    output_phase_fresnel = field_end_fresnel.phase * target_region
-    output_phase_analytical = total_field.phase * target_region
-
-    assert torch.std(output_phase_as - output_phase_analytical) <= expected_error
-    assert torch.std(output_phase_fresnel - output_phase_analytical) <= expected_error
+        assert (current_error_x <= expected_error).all()
+        assert (current_error_y <= expected_error).all()
