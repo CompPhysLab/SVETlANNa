@@ -1,7 +1,7 @@
 import torch
 from .simulation_parameters import SimulationParameters
 from typing import Any, Self, Iterable, cast, TYPE_CHECKING
-from scipy.special import hermite
+
 
 class Wavefront(torch.Tensor):
     """Class that represents wavefront.
@@ -253,104 +253,104 @@ class Wavefront(torch.Tensor):
         return cls(field)
 
     @classmethod
-def hermite_gauss(
-    cls,
-    simulation_parameters: SimulationParameters,
-    waist_radius: float,
-    distance: float = 0.0,
-    dx: float = 0.0,
-    dy: float = 0.0,
-    m: int = 0,
-    n: int = 0,
-    amplitude: float = 1.0,
-) -> Self:
-    r"""Generate Hermite-Gaussian mode wavefront.
+    def hermite_gauss(
+        cls,
+        simulation_parameters: SimulationParameters,
+        waist_radius: float,
+        distance: float = 0.0,
+        dx: float = 0.0,
+        dy: float = 0.0,
+        m: int = 0,
+        n: int = 0,
+        amplitude: float = 1.0,
+    ) -> Self:
+        r"""Generate Hermite-Gaussian mode wavefront.
 
-    The field is defined (in the waist plane) as:
-    $$
-    E(x, y) = A \, H_m\left(\frac{\sqrt{2}(x-d_x)}{w_0}\right)
-                H_n\left(\frac{\sqrt{2}(y-d_y)}{w_0}\right)
-                \exp\left(-\frac{(x-d_x)^2+(y-d_y)^2}{w_0^2}\right)
-    $$
-    For propagation distance $z \neq 0$, the beam parameters evolve:
-    $w(z)=w_0\sqrt{1+(z/z_R)^2}$, $R(z)=z\left(1+(z_R/z)^2\right)$,
-    and the Gouy phase becomes $(m+n+1)\arctan(z/z_R)$.
+        The field is defined (in the waist plane) as:
+        $$
+        E(x, y) = A \, H_m\left(\frac{\sqrt{2}(x-d_x)}{w_0}\right)
+                    H_n\left(\frac{\sqrt{2}(y-d_y)}{w_0}\right)
+                    \exp\left(-\frac{(x-d_x)^2+(y-d_y)^2}{w_0^2}\right)
+        $$
+        For propagation distance $z \neq 0$, the beam parameters evolve:
+        $w(z)=w_0\sqrt{1+(z/z_R)^2}$, $R(z)=z\left(1+(z_R/z)^2\right)$,
+        and the Gouy phase becomes $(m+n+1)\arctan(z/z_R)$.
 
-    Parameters
-    ----------
-    simulation_parameters : SimulationParameters
-        Simulation parameters.
-    waist_radius : float
-        Beam waist radius ($w_0$).
-    distance : float, optional
-        Propagation distance $z$ from the waist, by default 0.
-    dx, dy : float, optional
-        Beam center offset, by default 0.
-    m, n : int, optional
-        Mode indices (x and y directions), by default 0 (fundamental mode).
-    amplitude : float, optional
-        Peak amplitude, by default 1.0.
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Simulation parameters.
+        waist_radius : float
+            Beam waist radius ($w_0$).
+        distance : float, optional
+            Propagation distance $z$ from the waist, by default 0.
+        dx, dy : float, optional
+            Beam center offset, by default 0.
+        m, n : int, optional
+            Mode indices (x and y directions), by default 0 (fundamental mode).
+        amplitude : float, optional
+            Peak amplitude, by default 1.0.
 
-    Returns
-    -------
-    Wavefront
-        Hermite-Gaussian field.
-    """
-    sim_params = simulation_parameters
-    wavelength = sim_params.cast(sim_params.wavelength, "wavelength")
-    x = sim_params.cast(sim_params.x, "x")   # expected 2D tensor
-    y = sim_params.cast(sim_params.y, "y")   # expected 2D tensor
+        Returns
+        -------
+        Wavefront
+            Hermite-Gaussian field.
+        """
+        sim_params = simulation_parameters
+        wavelength = sim_params.cast(sim_params.wavelength, "wavelength")
+        x = sim_params.cast(sim_params.x, "x")   # expected 2D tensor
+        y = sim_params.cast(sim_params.y, "y")   # expected 2D tensor
 
-    # Shift coordinates
-    X = x - dx
-    Y = y - dy
+        # Shift coordinates
+        X = x - dx
+        Y = y - dy
 
-    wave_number = 2 * torch.pi / wavelength
-    z_R = torch.pi * waist_radius**2 / wavelength  # Rayleigh range
+        wave_number = 2 * torch.pi / wavelength
+        z_R = torch.pi * waist_radius**2 / wavelength  # Rayleigh range
 
-    # Polynomial Hermite using recurrence (PyTorch implementation)
-    def hermite_poly(n: int, xi: torch.Tensor) -> torch.Tensor:
-        """Evaluate Hermite polynomial H_n(xi) using recurrence."""
-        if n == 0:
-            return torch.ones_like(xi)
-        if n == 1:
-            return 2 * xi
-        H_prev2 = torch.ones_like(xi)
-        H_prev1 = 2 * xi
-        for k in range(2, n + 1):
-            H_curr = 2 * xi * H_prev1 - 2 * (k - 1) * H_prev2
-            H_prev2, H_prev1 = H_prev1, H_curr
-        return H_prev1
+        # Polynomial Hermite using recurrence (PyTorch implementation)
+        def hermite_poly(n: int, xi: torch.Tensor) -> torch.Tensor:
+            """Evaluate Hermite polynomial H_n(xi) using recurrence."""
+            if n == 0:
+                return torch.ones_like(xi)
+            if n == 1:
+                return 2 * xi
+            H_prev2 = torch.ones_like(xi)
+            H_prev1 = 2 * xi
+            for k in range(2, n + 1):
+                H_curr = 2 * xi * H_prev1 - 2 * (k - 1) * H_prev2
+                H_prev2, H_prev1 = H_prev1, H_curr
+            return H_prev1
 
-    # Beam parameters at distance z
-    if distance == 0:
-        # Waist plane
-        w = waist_radius
-        R = torch.tensor(float('inf'))  # infinite radius
-        gouy = torch.tensor(0.0)
-    else:
-        w = waist_radius * torch.sqrt(1 + (distance / z_R) ** 2)
-        R = distance * (1 + (z_R / distance) ** 2)
-        gouy = (m + n + 1) * torch.arctan(distance / z_R)
+        # Beam parameters at distance z
+        if distance == 0:
+            # Waist plane
+            w = waist_radius
+            R = torch.tensor(float('inf'))  # infinite radius
+            gouy = torch.tensor(0.0)
+        else:
+            w = waist_radius * torch.sqrt(1 + (distance / z_R) ** 2)
+            R = distance * (1 + (z_R / distance) ** 2)
+            gouy = (m + n + 1) * torch.arctan(distance / z_R)
 
-    # Scaled coordinates
-    xi_x = torch.sqrt(torch.tensor(2.0)) * X / w
-    xi_y = torch.sqrt(torch.tensor(2.0)) * Y / w
+        # Scaled coordinates
+        xi_x = torch.sqrt(torch.tensor(2.0)) * X / w
+        xi_y = torch.sqrt(torch.tensor(2.0)) * Y / w
 
-    Hm = hermite_poly(m, xi_x)
-    Hn = hermite_poly(n, xi_y)
+        Hm = hermite_poly(m, xi_x)
+        Hn = hermite_poly(n, xi_y)
 
 
-    # Transverse profile
-    field = Hm * Hn * torch.exp(-(X**2 + Y**2) / w**2)
+        # Transverse profile
+        field = Hm * Hn * torch.exp(-(X**2 + Y**2) / w**2)
 
-    if distance != 0:
-        # Add phase terms: propagation phase, curvature, and Gouy phase
-        field = field * torch.exp(1j * wave_number * distance)
-        field = field * torch.exp(1j * wave_number * (X**2 + Y**2) / (2 * R))
-        field = field * torch.exp(-1j * gouy)
+        if distance != 0:
+            # Add phase terms: propagation phase, curvature, and Gouy phase
+            field = field * torch.exp(1j * wave_number * distance)
+            field = field * torch.exp(1j * wave_number * (X**2 + Y**2) / (2 * R))
+            field = field * torch.exp(-1j * gouy)
 
-    return cls(field)
+        return cls(field)
     # === methods below are added for typing only ===
 
     if TYPE_CHECKING:
