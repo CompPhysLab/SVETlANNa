@@ -14,32 +14,31 @@ from svetlanna import Wavefront, SimulationParameters
 
 def hermite_gauss_numerical(x, y, w0, wavelength, z, m, n, dx=0, dy=0):
     """
-    Численная реализация Hermite-Gauss моды для сравнения.
-    Использует scipy.special.hermite для полиномов.
+    Analytic realisation of Hermite-Gauss modes using scipy
     """
     k = 2 * np.pi / wavelength
     zR = np.pi * w0**2 / wavelength
     
-    # Координаты относительно центра
+    # Coordinates
     X = x - dx
     Y = y - dy
     
     if z == 0:
-        # В перетяжке
+        # Calculation at waist point
         xi_x = np.sqrt(2) * X / w0
         xi_y = np.sqrt(2) * Y / w0
         
         Hx = hermite(n)(xi_x)
         Hy = hermite(m)(xi_y)
         
-        # Нормировка
+        # Norm
         norm = np.sqrt(2 / (2**n * np.math.factorial(n) * np.pi)) * \
                np.sqrt(2 / (2**m * np.math.factorial(m) * np.pi))
         
         E = norm / w0 * Hx * Hy * np.exp(-(X**2 + Y**2) / w0**2)
         
     else:
-        # При распространении
+        # Calculating for propagation case
         w = w0 * np.sqrt(1 + (z / zR)**2)
         R = z * (1 + (zR / z)**2)
         gouy = (m + n + 1) * np.arctan(z / zR)
@@ -60,14 +59,14 @@ def hermite_gauss_numerical(x, y, w0, wavelength, z, m, n, dx=0, dy=0):
     return E
 
 
-@pytest.mark.parametrize("distance", [0.1, 0.5, 1.0, 2.0])  # Никогда не используем 0
+@pytest.mark.parametrize("distance", [0.1, 0.5, 1.0, 2.0])  
 @pytest.mark.parametrize("waist_radius", [0.3, 0.7])
 @pytest.mark.parametrize("m,n", [(0,0), (1,0), (0,1), (1,1), (2,0), (0,2)])
 def test_hermite_gauss_vs_numerical(distance, waist_radius, m, n):
     """
-    Сравнение реализации svetlanna с численной реализацией.
+    SVETlANNa realisation
     """
-    # Параметры
+    # Params
     wavelength = 0.5
     sim_params = SimulationParameters({
         "x": torch.linspace(-3, 3, 150),
@@ -75,7 +74,7 @@ def test_hermite_gauss_vs_numerical(distance, waist_radius, m, n):
         "wavelength": wavelength,
     })
     
-    # Получаем поле из svetlanna
+    # SVETlANNa wavefront
     wf_svetlanna = Wavefront.hermite_gauss(
         sim_params,
         waist_radius=waist_radius,
@@ -84,39 +83,39 @@ def test_hermite_gauss_vs_numerical(distance, waist_radius, m, n):
         m=m, n=n
     )
     
-    # Создаем координатные сетки для численной реализации
+    # Grid for wavefront calc
     x_np = sim_params.x.numpy()
     y_np = sim_params.y.numpy()
     X, Y = np.meshgrid(x_np, y_np, indexing='ij')
     
-    # Численное поле
+    # Numeric field
     E_num = hermite_gauss_numerical(
         X, Y, waist_radius, wavelength, distance, m, n
     )
     
-    # Конвертируем поле из svetlanna
+    # SVETlANNa wavefront to numpy
     E_svet = wf_svetlanna.detach().cpu().numpy()
     
-    # Сравниваем интенсивности (они более стабильны)
+    
     I_svet = np.abs(E_svet)**2
     I_num = np.abs(E_num)**2
     
-    # Нормализуем
+   
     I_svet = I_svet / I_svet.max()
     I_num = I_num / I_num.max()
     
-    # Вычисляем метрики качества
+    # Quality metrics
     mse = np.mean((I_svet - I_num)**2)
     correlation = np.corrcoef(I_svet.flatten(), I_num.flatten())[0, 1]
     
-    # Пороговые значения
-    assert correlation > 0.98, f"Низкая корреляция: {correlation:.4f} для HG{m}{n}, z={distance}"
-    assert mse < 0.01, f"Высокая MSE: {mse:.4f} для HG{m}{n}, z={distance}"
+    
+    assert correlation > 0.98, f"Low correlation: {correlation:.4f} for HG{m}{n}, z={distance}"
+    assert mse < 0.01, f"HIGH MSE: {mse:.4f} for HG{m}{n}, z={distance}"
 
 
 def test_hermite_gauss_orthogonality():
     """
-    Проверка ортогональности разных мод.
+    Modes Orthogonality check
     """
     sim_params = SimulationParameters({
         "x": torch.linspace(-5, 5, 300),
@@ -145,7 +144,7 @@ def test_hermite_gauss_orthogonality():
                               (sim_params.x[1]-sim_params.x[0]) * 
                               (sim_params.y[1]-sim_params.y[0]))
             
-            # Интеграл перекрытия
+            # Overlap integral
             overlap = torch.sum(torch.conj(wf1) * wf2) * \
                      (sim_params.x[1]-sim_params.x[0]) * \
                      (sim_params.y[1]-sim_params.y[0])
@@ -153,12 +152,12 @@ def test_hermite_gauss_orthogonality():
             overlap_normalized = torch.abs(overlap) / (norm1 * norm2)
             overlap_matrix[i, j] = overlap_normalized.item()
     
-    # Диагональные элементы должны быть 1, недиагональные - близки к 0
+    
     for i in range(len(modes)):
-        assert abs(overlap_matrix[i, i] - 1.0) < 0.1, f"Диагональ {i}: {overlap_matrix[i, i]}"
+        assert abs(overlap_matrix[i, i] - 1.0) < 0.1, f"Diag {i}: {overlap_matrix[i, i]}"
         for j in range(len(modes)):
             if i != j:
-                assert overlap_matrix[i, j] < 0.1, f"Недиагональ {i},{j}: {overlap_matrix[i, j]}"
+                assert overlap_matrix[i, j] < 0.1, f"Non-diag {i},{j}: {overlap_matrix[i, j]}"
 
 
 @pytest.mark.parametrize("m,n,expected_nodes_x,expected_nodes_y", [
@@ -171,7 +170,7 @@ def test_hermite_gauss_orthogonality():
 ])
 def test_hermite_gauss_nodes(m, n, expected_nodes_x, expected_nodes_y):
     """
-    Тщательная проверка количества узлов с пороговой обработкой.
+    Number of nodes check
     """
     sim_params = SimulationParameters({
         "x": torch.linspace(-5, 5, 500),
@@ -189,42 +188,42 @@ def test_hermite_gauss_nodes(m, n, expected_nodes_x, expected_nodes_y):
     
     intensity = wf.intensity.numpy()
     
-    # Берем центральные сечения
+    # Central sections
     cx, cy = intensity.shape[0]//2, intensity.shape[1]//2
     horizontal = intensity[cx, :]
     vertical = intensity[:, cy]
     
-    # Нормализуем
+    
     horizontal = horizontal / horizontal.max()
     vertical = vertical / vertical.max()
     
-    # Находим узлы (локальные минимумы ниже порога)
+    
     threshold = 0.05
     
     def count_nodes(line):
-        # Находим области ниже порога
+        # Areas lower than threshold
         below = line < threshold
-        # Находим переходы
+        # Finding changes
         changes = np.where(np.diff(below.astype(int)) != 0)[0]
-        # Количество узлов = количество переходов вниз
+        # Number of nodes = number of transitions down
         nodes = 0
         for i in changes:
-            if below[i+1] and not below[i]:  # Переход вниз
+            if below[i+1] and not below[i]:  
                 nodes += 1
         return nodes
     
     nodes_x = count_nodes(horizontal)
     nodes_y = count_nodes(vertical)
     
-    # Для отладки выведем информацию
-    print(f"\nHG{m}{n}: Ожидалось узлов: ({expected_nodes_x}, {expected_nodes_y})")
-    print(f"Получено узлов: ({nodes_x}, {nodes_y})")
     
-    # Проверяем с запасом (иногда узлы могут сливаться)
-    assert nodes_x >= expected_nodes_x - 1, f"По x: ожидалось ~{expected_nodes_x}, получено {nodes_x}"
-    assert nodes_x <= expected_nodes_x + 1, f"По x: ожидалось ~{expected_nodes_x}, получено {nodes_x}"
-    assert nodes_y >= expected_nodes_y - 1, f"По y: ожидалось ~{expected_nodes_y}, получено {nodes_y}"
-    assert nodes_y <= expected_nodes_y + 1, f"По y: ожидалось ~{expected_nodes_y}, получено {nodes_y}"
+    print(f"\nHG{m}{n}: Nodes expected: ({expected_nodes_x}, {expected_nodes_y})")
+    print(f"Recieved nodes: ({nodes_x}, {nodes_y})")
+    
+    # check with a margin (sometimes nodes can merge)
+    assert nodes_x >= expected_nodes_x - 1, f"X: expected ~{expected_nodes_x}, recieved {nodes_x}"
+    assert nodes_x <= expected_nodes_x + 1, f"X: expected ~{expected_nodes_x}, recieved {nodes_x}"
+    assert nodes_y >= expected_nodes_y - 1, f"Y: expected ~{expected_nodes_y}, recieved {nodes_y}"
+    assert nodes_y <= expected_nodes_y + 1, f"Y: expected ~{expected_nodes_y}, recieved {nodes_y}"
 
 
 if __name__ == "__main__":
