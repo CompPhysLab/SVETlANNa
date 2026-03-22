@@ -18,8 +18,8 @@ def test_autoencoder_forward(sim_params_simple: SimulationParameters):
         sim_params_simple, mask=torch.rand(sim_params_simple.axis_sizes(("y", "x")))
     )
     autoencoder = LinearAutoencoder(
-        encoder_element=encoder,
-        decoder_element=decoder,
+        encoder_elements=[encoder],
+        decoder_elements=[decoder],
     )
 
     wf_encoded = autoencoder.encode(test_wavefront)
@@ -38,18 +38,22 @@ def test_device(device_simple: str):
 
     assert sim_params.device == torch.get_default_device()
     autoencoder = LinearAutoencoder(
-        encoder_element=DiffractiveLayer(
-            sim_params,
-            mask=torch.rand(
-                sim_params.axis_sizes(("y", "x")),
-            ),
-        ),
-        decoder_element=DiffractiveLayer(
-            sim_params,
-            mask=torch.rand(
-                sim_params.axis_sizes(("y", "x")),
-            ),
-        ),
+        encoder_elements=[
+            DiffractiveLayer(
+                sim_params,
+                mask=torch.rand(
+                    sim_params.axis_sizes(("y", "x")),
+                ),
+            )
+        ],
+        decoder_elements=[
+            DiffractiveLayer(
+                sim_params,
+                mask=torch.rand(
+                    sim_params.axis_sizes(("y", "x")),
+                ),
+            )
+        ],
     )
     autoencoder.to(device=device_simple)
 
@@ -60,18 +64,22 @@ def test_device(device_simple: str):
 
     assert sim_params.device.type == device_simple
     autoencoder = LinearAutoencoder(
-        encoder_element=DiffractiveLayer(
-            sim_params,
-            mask=torch.rand(
-                sim_params.axis_sizes(("y", "x")), device=sim_params.device
-            ),
-        ),
-        decoder_element=DiffractiveLayer(
-            sim_params,
-            mask=torch.rand(
-                sim_params.axis_sizes(("y", "x")), device=sim_params.device
-            ),
-        ),
+        encoder_elements=[
+            DiffractiveLayer(
+                sim_params,
+                mask=torch.rand(
+                    sim_params.axis_sizes(("y", "x")), device=sim_params.device
+                ),
+            )
+        ],
+        decoder_elements=[
+            DiffractiveLayer(
+                sim_params,
+                mask=torch.rand(
+                    sim_params.axis_sizes(("y", "x")), device=sim_params.device
+                ),
+            )
+        ],
     )
 
     assert autoencoder(wavefront).device.type == device_simple
@@ -84,18 +92,22 @@ def test_to_specs():
     )
 
     autoencoder = LinearAutoencoder(
-        encoder_element=DiffractiveLayer(
-            sim_params,
-            mask=torch.rand(
-                sim_params.axis_sizes(("y", "x")), device=sim_params.device
-            ),
-        ),
-        decoder_element=DiffractiveLayer(
-            sim_params,
-            mask=torch.rand(
-                sim_params.axis_sizes(("y", "x")), device=sim_params.device
-            ),
-        ),
+        encoder_elements=[
+            DiffractiveLayer(
+                sim_params,
+                mask=torch.rand(
+                    sim_params.axis_sizes(("y", "x")), device=sim_params.device
+                ),
+            )
+        ],
+        decoder_elements=[
+            DiffractiveLayer(
+                sim_params,
+                mask=torch.rand(
+                    sim_params.axis_sizes(("y", "x")), device=sim_params.device
+                ),
+            )
+        ],
     )
 
     assert autoencoder.to_specs()

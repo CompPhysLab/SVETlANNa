@@ -1,8 +1,9 @@
-from typing import TYPE_CHECKING, Iterable, cast
+from typing import TYPE_CHECKING, Iterable
 from torch import nn
-from svetlanna.specs import ParameterSpecs, SubelementSpecs, Specsable
-from .base import LinearOpticalSetupLike
+from svetlanna.specs import ParameterSpecs, SubelementSpecs
 from svetlanna import Wavefront
+from svetlanna import LinearOpticalSetup
+from svetlanna.elements import Element
 
 
 class LinearAutoencoder(nn.Module):
@@ -13,21 +14,21 @@ class LinearAutoencoder(nn.Module):
 
     def __init__(
         self,
-        encoder_element: LinearOpticalSetupLike,
-        decoder_element: LinearOpticalSetupLike,
+        encoder_elements: Iterable[Element],
+        decoder_elements: Iterable[Element],
     ):
         """
         Parameters
         ----------
-        encoder_element : LinearOpticalSetupLike
-            The encoder element.
-        decoder_element : LinearOpticalSetupLike
-            The decoder element.
+        encoder_elements : Iterable[Element]
+            The encoder elements.
+        decoder_elements : Iterable[Element]
+            The decoder elements.
         """
         super().__init__()
 
-        self.encoder_element = encoder_element
-        self.decoder_element = decoder_element
+        self.encoder = LinearOpticalSetup(encoder_elements)
+        self.decoder = LinearOpticalSetup(decoder_elements)
 
     def encode(self, input_wavefront: Wavefront) -> Wavefront:
         """
@@ -38,7 +39,7 @@ class LinearAutoencoder(nn.Module):
         Wavefront
             An encoded input wavefront.
         """
-        return self.encoder_element(input_wavefront)
+        return self.encoder(input_wavefront)
 
     def decode(self, wavefront_encoded: Wavefront) -> Wavefront:
         """
@@ -49,7 +50,7 @@ class LinearAutoencoder(nn.Module):
         Wavefront
             A decoded wavefront.
         """
-        return self.decoder_element(wavefront_encoded)
+        return self.decoder(wavefront_encoded)
 
     def forward(self, input_wavefront: Wavefront) -> Wavefront:
         wavefront_encoded = self.encode(input_wavefront)
@@ -57,17 +58,11 @@ class LinearAutoencoder(nn.Module):
         return wavefront_decoded
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
-        specs = []
 
-        if hasattr(self.encoder_element, "to_specs"):
-            encoder_element = cast(Specsable, self.encoder_element)
-            specs.append(SubelementSpecs("Encoder", encoder_element))
-
-        if hasattr(self.decoder_element, "to_specs"):
-            decoder_element = cast(Specsable, self.decoder_element)
-            specs.append(SubelementSpecs("Decoder", decoder_element))
-
-        return specs
+        return [
+            SubelementSpecs("Encoder", self.encoder),
+            SubelementSpecs("Decoder", self.decoder),
+        ]
 
     if TYPE_CHECKING:
 
