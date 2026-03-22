@@ -298,8 +298,8 @@ class Wavefront(torch.Tensor):
         """
         sim_params = simulation_parameters
         wavelength = sim_params.cast(sim_params.wavelength, "wavelength")
-        x = sim_params.cast(sim_params.x, "x")   # expected 2D tensor
-        y = sim_params.cast(sim_params.y, "y")   # expected 2D tensor
+        x = sim_params.cast(sim_params.x, "x")  # expected 2D tensor
+        y = sim_params.cast(sim_params.y, "y")  # expected 2D tensor
 
         # Shift coordinates
         X = x - dx
@@ -323,10 +323,11 @@ class Wavefront(torch.Tensor):
             return H_prev1
 
         # Beam parameters at distance z
+        w: float | torch.Tensor
         if distance == 0:
             # Waist plane
             w = waist_radius
-            R = torch.tensor(float('inf'))  # infinite radius
+            R = torch.tensor(float("inf"))  # infinite radius
             gouy = torch.tensor(0.0)
         else:
             w = waist_radius * torch.sqrt(1 + (distance / z_R) ** 2)
@@ -340,7 +341,6 @@ class Wavefront(torch.Tensor):
         Hm = hermite_poly(m, xi_x)
         Hn = hermite_poly(n, xi_y)
 
-
         # Transverse profile
         field = Hm * Hn * torch.exp(-(X**2 + Y**2) / w**2)
 
@@ -351,6 +351,7 @@ class Wavefront(torch.Tensor):
             field = field * torch.exp(-1j * gouy)
 
         return cls(field)
+
     # === methods below are added for typing only ===
 
     if TYPE_CHECKING:
