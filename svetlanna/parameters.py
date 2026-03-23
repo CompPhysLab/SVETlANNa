@@ -260,5 +260,3 @@ OptimizableTensor: TypeAlias = torch.Tensor | torch.nn.Parameter | Parameter
 """Union type for tensor values that can be optimized.
 Accepts tensor values, `torch.nn.Parameter`, or [Parameter][svetlanna.Parameter] instances.
 """
-
-BoundedParameter = ConstrainedParameter
