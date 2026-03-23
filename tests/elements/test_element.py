@@ -1,7 +1,7 @@
 import svetlanna
 import svetlanna.elements
 import torch
-from svetlanna.elements.element import INNER_PARAMETER_SUFFIX, _BufferedValueContainer
+from svetlanna.elements.element import INNER_STORAGE_SUFFIX, _BufferedValueContainer
 import pytest
 
 import svetlanna.specs
@@ -44,7 +44,7 @@ def test_setattr():
     element = ElementToTest(sim_params, test_parameter=test_parameter, test_buffer=None)
 
     # check if inner storage of the parameter has been saved
-    parameter_name = "test_parameter" + INNER_PARAMETER_SUFFIX
+    parameter_name = "test_parameter" + INNER_STORAGE_SUFFIX
     assert getattr(element, parameter_name) is test_parameter.inner_storage
     assert element.test_parameter.inner_parameter in element.parameters()
 

@@ -11,7 +11,7 @@ from ..wavefront import Wavefront
 from warnings import warn
 
 
-INNER_PARAMETER_SUFFIX = "_svtlnn_inner_parameter"
+INNER_STORAGE_SUFFIX = "_svtlnn_inner_storage"
 
 _T = TypeVar("_T", Tensor, None)
 _V = TypeVar("_V")
@@ -80,9 +80,9 @@ class Element(nn.Module, metaclass=ABCMeta):
                 return super().__setattr__(name, value)  # type: ignore
 
         # BoundedParameter and Parameter are handled by pointing
-        # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
+        # auxiliary attribute on them with a name plus INNER_STORAGE_SUFFIX
         if isinstance(value, Parameter):
-            super().__setattr__(name + INNER_PARAMETER_SUFFIX, value.inner_storage)
+            super().__setattr__(name + INNER_STORAGE_SUFFIX, value.inner_storage)
 
         return super().__setattr__(name, value)
 

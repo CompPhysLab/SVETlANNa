@@ -181,7 +181,7 @@ def test_set_debug_logging(input, output, capfd, caplog):
         "   <class 'torch.nn.modules.module.Module'>"
     )
     expected_output_2 = (
-        "Module of ElementLike was registered with name b_svtlnn_inner_parameter:\n"
+        "Module of ElementLike was registered with name b_svtlnn_inner_storage:\n"
         "   <class 'svetlanna.parameters.InnerParameterStorageModule'>"
     )
     expected_output_3 = (
