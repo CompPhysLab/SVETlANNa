@@ -1,8 +1,6 @@
 from svetlanna.axes_math import _append_slice, _axes_indices_to_sort, _swaps
 from svetlanna.axes_math import cast_tensor, _new_axes, _axis_to_tuple
 from svetlanna.axes_math import is_scalar, _check_axis, tensor_dot
-from svetlanna.wavefront import Wavefront, mul
-from svetlanna import SimulationParameters
 from itertools import permutations
 import torch
 import pytest
@@ -239,44 +237,3 @@ def test_tensor_dot():
     d[..., :] *= a[:]
     assert torch.allclose(c, d)
     assert c_axis == ("a", "b", "c")
-
-
-def test_mul():
-    wf = Wavefront([[1.0 + 1j]])
-
-    # test wf and non-tensor product
-    assert mul(wf, 123, ()) == wf * 123
-
-    # test default axes
-    wf = Wavefront([[1.0, 2], [3, 4]])
-    a = torch.tensor([10, 20])
-
-    assert torch.allclose(mul(wf, a, ("y")), wf * a[:, None])
-    assert torch.allclose(mul(wf, a, ("x")), wf * a[None, :])
-    with pytest.raises(AssertionError):
-        mul(wf, torch.tensor([123]), ("s"))
-
-    # test non default axes
-    sim_params1 = SimulationParameters(
-        {
-            "y": torch.linspace(-1, 1, 2),
-            "x": torch.linspace(-1, 1, 2),
-            "wavelength": torch.tensor([1]),
-        }
-    )
-
-    wf1 = Wavefront([[[1.0, 2], [3, 4]]])
-    assert torch.allclose(mul(wf1, 123, "wavelength", sim_params1), 123 * wf1)
-    r = wf1 * a[None, :]
-    assert torch.allclose(mul(wf1, a, "y", sim_params1), r)
-
-    # test the same product but with other simulation parameters
-    sim_params2 = SimulationParameters(
-        {
-            "wavelength": torch.tensor([1]),
-            "x": torch.linspace(-1, 1, 2),
-            "y": torch.linspace(-1, 1, 2),
-        }
-    )
-    wf2 = Wavefront(wf1.swapaxes(0, 2))
-    assert torch.allclose(mul(wf2, a, "y", sim_params2), r.swapaxes(0, 2))

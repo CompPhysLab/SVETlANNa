@@ -1,6 +1,6 @@
 import torch
 from .simulation_parameters import SimulationParameters
-from typing import Any, Self, Iterable, cast, TYPE_CHECKING
+from typing import Any, Self, TYPE_CHECKING
 
 
 class Wavefront(torch.Tensor):
@@ -377,43 +377,3 @@ DEFAULT_LAST_AXES_NAMES = (
     "y",
     "x",
 )
-
-
-def mul(
-    wf: Wavefront,
-    b: Any,
-    b_axis: str | Iterable[str],
-    sim_params: SimulationParameters | None = None,
-) -> Wavefront:
-    """Multiplication of the wavefront and tensor.
-
-    Parameters
-    ----------
-    wf : Wavefront
-        wavefront
-    b : Any
-        tensor
-    b_axis : str | Iterable[str]
-        tensor's axis name
-    sim_params : SimulationParameters | None, optional
-        simulation parameters, by default None
-
-    Returns
-    -------
-    Wavefront
-        product result
-    """
-
-    # if b is not a tensor, use default mul operation
-    if not isinstance(b, torch.Tensor):
-        return wf * b
-
-    if sim_params is None:
-        wf_axes = DEFAULT_LAST_AXES_NAMES
-    else:
-        wf_axes = sim_params.axis_names
-
-    from .axes_math import tensor_dot
-
-    res, _ = tensor_dot(wf, b, wf_axes, b_axis, preserve_a_axis=True)
-    return cast(Wavefront, res)
