@@ -4,6 +4,7 @@ from svetlanna.specs import ParameterSpecs, SubelementSpecs
 from svetlanna import Wavefront
 from svetlanna import LinearOpticalSetup
 from svetlanna.elements import Element
+from svetlanna.visualization import ElementHTML, jinja_env
 
 
 class LinearAutoencoder(nn.Module):
@@ -24,6 +25,38 @@ class LinearAutoencoder(nn.Module):
             The encoder elements.
         decoder_elements : Iterable[Element]
             The decoder elements.
+
+        Examples
+        --------
+        ```python
+        import svetlanna as sv
+        from svetlanna.visualization import show_structure
+
+        sim_params = ...
+
+        linear_autoencoder = sv.networks.LinearAutoencoder(
+            encoder_elements=(
+                sv.elements.FreeSpace(
+                    simulation_parameters=sim_params, distance=0.1, method="AS"
+                ),
+                sv.elements.ThinLens(simulation_parameters=sim_params, focal_length=0.1),
+                sv.elements.FreeSpace(
+                    simulation_parameters=sim_params, distance=0.1, method="AS"
+                ),
+            ),
+            decoder_elements=(
+                sv.elements.FreeSpace(
+                    simulation_parameters=sim_params, distance=0.1, method="AS"
+                ),
+            )
+        )
+
+        show_structure(linear_autoencoder)
+        ```
+        Output (in IPython environment):
+        <iframe
+        src="show_structure_LinearAutoencoder.html"
+        style="width:100%; height:400px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
         """
         super().__init__()
 
@@ -63,6 +96,14 @@ class LinearAutoencoder(nn.Module):
             SubelementSpecs("Encoder", self.encoder),
             SubelementSpecs("Decoder", self.decoder),
         ]
+
+    @staticmethod
+    def _widget_html_(
+        index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
+    ) -> str:
+        return jinja_env.get_template("widget_autoencoder.html.jinja").render(
+            index=index, name=name, subelements=subelements
+        )
 
     if TYPE_CHECKING:
 

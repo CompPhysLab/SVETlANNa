@@ -6,6 +6,7 @@ from svetlanna import elements
 from svetlanna import LinearOpticalSetup
 from svetlanna.specs import ParameterSpecs, SubelementSpecs
 from svetlanna.parameters import OptimizableFloat, OptimizableTensor
+from svetlanna.visualization import ElementHTML, jinja_env
 
 
 class ConvLayer4F(nn.Module):
@@ -27,13 +28,34 @@ class ConvLayer4F(nn.Module):
         simulation_parameters: SimulationParameters
             Simulation parameters.
         focal_length: OptimizableFloat
-            A focal length for ThinLense's in a 4f system.
+            A focal length for [ThinLens][svetlanna.elements.ThinLens]'s in a 4f system.
         conv_diffractive_mask: OptimizableTensor
-            An initial mask for a DiffractiveLayer placed between two lenses in the system.
+            An initial mask for a [DiffractiveLayer][svetlanna.elements.DiffractiveLayer] placed between two lenses in the system.
         conv_mask_norm: float
             A normalization factor for the convolutional mask.
         fs_method: Literal['fresnel', 'AS']
             A method for FreeSpace's in the system.
+
+        Examples
+        --------
+        ```python
+        import svetlanna as sv
+        from svetlanna.visualization import show_structure
+
+        sim_params = ...
+
+        conv_layer_4f = ConvLayer4F(
+            simulation_parameters=sim_params,
+            focal_length=0.1,
+            conv_diffractive_mask=torch.rand(sim_params.axis_sizes(("y", "x"))),
+        )
+
+        show_structure(conv_layer_4f)
+        ```
+        Output (in IPython environment):
+        <iframe
+        src="show_structure_ConvLayer4F.html"
+        style="width:100%; height:250px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
         """
         super().__init__()
 
@@ -47,6 +69,7 @@ class ConvLayer4F(nn.Module):
         # for FreeSpace
         self.fs_method = fs_method
 
+        # TODO: should the free spaces be singletons (one instance instead of 4)? Does the same apply to lenses?
         # compose a 4f system
         self.conv_layer_4f = LinearOpticalSetup(
             [
@@ -95,6 +118,14 @@ class ConvLayer4F(nn.Module):
             for i, element in enumerate(self.conv_layer_4f.elements)
         )
 
+    @staticmethod
+    def _widget_html_(
+        index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
+    ) -> str:
+        return jinja_env.get_template("widget_convlayer4f.html.jinja").render(
+            index=index, name=name, subelements=subelements
+        )
+
     if TYPE_CHECKING:
 
         def __call__(self, input_wavefront: Wavefront) -> Wavefront: ...
@@ -103,7 +134,7 @@ class ConvLayer4F(nn.Module):
 class ConvDiffNetwork4F(nn.Module):
     """
     A simple convolutional network with a 4f system as an optical convolutional layer.
-        Comment: -> [4f system (convolution)] -> [some system of elements] ->
+    It consists of a [ConvLayer4F][svetlanna.networks.ConvLayer4F] and a [LinearOpticalSetup][svetlanna.LinearOpticalSetup] after it.
     """
 
     def __init__(
@@ -123,13 +154,43 @@ class ConvDiffNetwork4F(nn.Module):
         network_elements : Iterable[elements.Element]
             List of Elements for a Network after a convolutional layer (4f system).
         focal_length: OptimizableFloat
-            A focal length for ThinLense's in a 4f system.
+            A focal length for [ThinLens][svetlanna.elements.ThinLens]'s in a 4f system.
         conv_diffractive_mask: OptimizableTensor
-            An initial mask for a DiffractiveLayer placed between two lenses in the system.
+            An initial mask for a [DiffractiveLayer][svetlanna.elements.DiffractiveLayer] placed between two lenses in the system.
         conv_mask_norm: float
             A normalization factor for the convolutional mask.
         fs_method: Literal['fresnel', 'AS']
             A method for FreeSpace's in the system.
+
+        Examples
+        --------
+        ```python
+        import svetlanna as sv
+        from svetlanna.visualization import show_structure
+
+        sim_params = ...
+
+        conv_diff_network_4f = ConvDiffNetwork4F(
+            simulation_parameters=sim_params,
+            network_elements=(
+                sv.elements.FreeSpace(
+                    simulation_parameters=sim_params, distance=0.1, method="AS"
+                ),
+                sv.elements.ThinLens(simulation_parameters=sim_params, focal_length=0.1),
+                sv.elements.FreeSpace(
+                    simulation_parameters=sim_params, distance=0.1, method="AS"
+                ),
+            ),
+            focal_length=0.1,
+            conv_diffractive_mask=torch.rand(sim_params.axis_sizes(("y", "x"))),
+        )
+
+        show_structure(conv_diff_network_4f)
+        ```
+        Output (in IPython environment):
+        <iframe
+        src="show_structure_ConvDiffNetwork4F.html"
+        style="width:100%; height:25rem; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
         """
         super().__init__()
 

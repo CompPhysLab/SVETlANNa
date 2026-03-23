@@ -46,15 +46,21 @@ class SimpleReservoir(torch.nn.Module):
         --------
         ```python
         import svetlanna as sv
+        from svetlanna.visualization import show_structure
 
-        ...
+        sim_params = ...
 
-        reservoir = sv.networks.SimpleReservoir(
-            nonlinear_element=nonlinear_element,
-            delay_element=delay_element,
-            delay=2,
-            feedback_gain=feedback_gain,
-            input_gain=input_gain,
+        reservoir = SimpleReservoir(
+            nonlinear_element=sv.elements.NonlinearElement(
+                simulation_parameters=sim_params,
+                response_function=lambda x: x**2,
+            ),
+            delay_element=sv.elements.FreeSpace(
+                simulation_parameters=sim_params, distance=0.2, method="AS"
+            ),
+            feedback_gain=0.5,
+            input_gain=0.5,
+            delay=3,
         )
 
         for input_wavefront in input_wavefront_sequence:
@@ -62,8 +68,15 @@ class SimpleReservoir(torch.nn.Module):
 
         # clear the delay line before the next sequence or batch
         reservoir.drop_feedback_queue()
+
+        show_structure(reservoir)
         ```
+        Output (in IPython environment):
+        <iframe
+        src="show_structure_SimpleReservoir.html"
+        style="width:100%; height:300px; border: 0; color-scheme: inherit;" allowtransparency="true"></iframe>
         """
+
         super().__init__()
 
         self.nonlinear_element = nonlinear_element
