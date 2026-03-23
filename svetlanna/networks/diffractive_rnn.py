@@ -1,3 +1,6 @@
+# type: ignore
+# TODO: refactor
+
 from typing import Iterable
 
 import torch
