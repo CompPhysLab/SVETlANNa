@@ -149,3 +149,4 @@ def test_to_specs():
 
     assert conv4f_net.to_specs()
     assert conv4f_net.conv_layer.to_specs()
+    assert isinstance(conv4f_net.conv_layer._widget_html_(0, "", None, []), str)

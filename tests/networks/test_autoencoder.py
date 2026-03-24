@@ -111,3 +111,4 @@ def test_to_specs():
     )
 
     assert autoencoder.to_specs()
+    assert isinstance(autoencoder._widget_html_(0, "", None, []), str)
