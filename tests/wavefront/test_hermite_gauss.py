@@ -1,72 +1,92 @@
 import torch
 import pytest
 import numpy as np
-from scipy.special import hermite, factorial
+import sympy as sp  # type: ignore
+from typing import Callable
 from svetlanna import Wavefront, SimulationParameters
 
+import scipy.special
+from svetlanna.wavefront import hermite_poly
 
-def hermite_gauss_numerical(x, y, w0, wavelength, z, m, n, dx=0, dy=0):
+
+def _hermite_gauss_symbolic():
+    x, y, w0, wavelength, z, dx, dy = sp.symbols("x y w0 wavelength z dx dy", real=True)
+    m, n = sp.symbols("m n", integer=True, nonnegative=True)
+
+    k = 2 * sp.pi / wavelength
+    zR = sp.pi * w0**2 / wavelength
+
+    w = w0 * sp.sqrt(1 + (z / zR) ** 2)
+    R = z * (1 + (zR / z) ** 2)
+    zeta = (1 + n + m) * sp.atan(z / zR)
+
+    r2 = (x - dx) ** 2 + (y - dy) ** 2
+
+    Hm = sp.hermite(m, sp.sqrt(2) * (x - dx) / w)
+    Hn = sp.hermite(n, sp.sqrt(2) * (y - dy) / w)
+
+    E = (
+        (w0 / w)
+        * Hn
+        * Hm
+        * sp.exp(-r2 / w**2)
+        * sp.exp(sp.I * (k * z + k * r2 / (2 * R) - zeta))
+    )
+    E = sp.simplify(E)
+
+    return sp.lambdify(
+        (x, y, w0, wavelength, z, dx, dy, m, n),
+        E,
+        modules=["numpy", {"hermite": scipy.special.eval_hermite}],
+    )
+
+
+hermite_gauss_analytical: Callable[..., np.ndarray] = _hermite_gauss_symbolic()
+
+
+@pytest.mark.parametrize("n", [0, 1, 2, 3, 4])
+def test_hermite_polynomial(n: int):
     """
-    Analytic realisation of Hermite-Gauss modes using scipy
+    Test that the first few Hermite polynomials are correct
     """
-    k = 2 * np.pi / wavelength
-    zR = np.pi * w0**2 / wavelength
+    x = torch.linspace(-3, 3, 200)
 
-    # Coordinates
-    X = x - dx
-    Y = y - dy
+    torch.testing.assert_close(
+        hermite_poly(n, x),
+        torch.from_numpy(scipy.special.hermite(n)(x.numpy()).astype(np.float32)),
+    )
 
-    if z == 0:
-        # Calculation at waist point
-        xi_x = np.sqrt(2) * X / w0
-        xi_y = np.sqrt(2) * Y / w0
 
-        Hx = hermite(n)(xi_x)
-        Hy = hermite(m)(xi_y)
+@pytest.mark.parametrize("distance", [0.1, 0.5, 1.0, 2.0])
+@pytest.mark.parametrize("waist_radius", [0.3, 0.7])
+def test_zero_orders(
+    distance: float, waist_radius: float, sim_params_simple: SimulationParameters
+):
+    """
+    Test that HG00 is the same as Gaussian beam
+    """
 
-        # Norm
-        norm = np.sqrt(2 / (2**n * factorial(n) * np.pi)) * np.sqrt(
-            2 / (2**m * factorial(m) * np.pi)
-        )
+    wf_hg00 = Wavefront.hermite_gauss(
+        sim_params_simple, waist_radius=waist_radius, distance=distance, m=0, n=0
+    )
+    wf_gauss = Wavefront.gaussian_beam(
+        sim_params_simple, waist_radius=waist_radius, distance=distance
+    )
 
-        E = norm / w0 * Hx * Hy * np.exp(-(X**2 + Y**2) / w0**2)
-
-    else:
-        # Calculating for propagation case
-        w = w0 * np.sqrt(1 + (z / zR) ** 2)
-        R = z * (1 + (zR / z) ** 2)
-        gouy = (m + n + 1) * np.arctan(z / zR)
-
-        xi_x = np.sqrt(2) * X / w
-        xi_y = np.sqrt(2) * Y / w
-
-        Hx = hermite(n)(xi_x)
-        Hy = hermite(m)(xi_y)
-
-        norm = np.sqrt(2 / (2**n * factorial(n) * np.pi)) * np.sqrt(
-            2 / (2**m * factorial(m) * np.pi)
-        )
-
-        E = (
-            (norm * w0 / w)
-            * Hx
-            * Hy
-            * np.exp(-(X**2 + Y**2) / w**2)
-            * np.exp(1j * (k * z + k * (X**2 + Y**2) / (2 * R) - gouy))
-        )
-
-    return E
+    torch.testing.assert_close(wf_hg00, wf_gauss)
 
 
 @pytest.mark.parametrize("distance", [0.1, 0.5, 1.0, 2.0])
 @pytest.mark.parametrize("waist_radius", [0.3, 0.7])
 @pytest.mark.parametrize("m,n", [(0, 0), (1, 0), (0, 1), (1, 1), (2, 0), (0, 2)])
-def test_hermite_gauss_vs_numerical(distance, waist_radius, m, n):
+@pytest.mark.parametrize("dx", (1.0, 3))
+@pytest.mark.parametrize("dy", (1.0, -3))
+@pytest.mark.parametrize("wavelength", (0.5, torch.tensor([0.5, 1.0])))
+def test_hermite_gauss(distance, waist_radius, m, n, dx, dy, wavelength):
     """
-    SVETlANNa realisation
+    Test that the Hermite-Gauss modes match the numerical implementation for a range of parameters
     """
     # Params
-    wavelength = 0.5
     sim_params = SimulationParameters(
         {
             "x": torch.linspace(-3, 3, 150),
@@ -75,23 +95,30 @@ def test_hermite_gauss_vs_numerical(distance, waist_radius, m, n):
         }
     )
 
-    # SVETlANNa wavefront
-    wf_svetlanna = Wavefront.hermite_gauss(
-        sim_params, waist_radius=waist_radius, distance=distance, dx=0, dy=0, m=m, n=n
+    # Grid for wavefront calc
+    x = sim_params.cast(sim_params.x, "x")
+    y = sim_params.cast(sim_params.y, "y")
+    wl = sim_params.cast(sim_params.wavelength, "wavelength")
+
+    E_svet = Wavefront.hermite_gauss(
+        sim_params,
+        waist_radius=waist_radius,
+        distance=distance,
+        dx=dx,
+        dy=dy,
+        m=m,
+        n=n,
+    )
+    E_num = hermite_gauss_analytical(
+        x.numpy(), y.numpy(), waist_radius, wl.numpy(), distance, dx, dy, m, n
+    ).astype(np.complex64)
+
+    torch.testing.assert_close(
+        E_svet,
+        torch.from_numpy(E_num),
     )
 
-    # Grid for wavefront calc
-    x_np = sim_params.x.numpy()
-    y_np = sim_params.y.numpy()
-    X, Y = np.meshgrid(x_np, y_np, indexing="ij")
-
-    # Numeric field
-    E_num = hermite_gauss_numerical(X, Y, waist_radius, wavelength, distance, m, n)
-
-    # SVETlANNa wavefront to numpy
-    E_svet = wf_svetlanna.detach().cpu().numpy()
-
-    I_svet = np.abs(E_svet) ** 2
+    I_svet = np.abs(E_svet.numpy()) ** 2
     I_num = np.abs(E_num) ** 2
 
     I_svet = I_svet / I_svet.max()
@@ -102,9 +129,9 @@ def test_hermite_gauss_vs_numerical(distance, waist_radius, m, n):
     correlation = np.corrcoef(I_svet.flatten(), I_num.flatten())[0, 1]
 
     assert (
-        correlation > 0.98
+        correlation >= 1.0 - 1e-6
     ), f"Low correlation: {correlation:.4f} for HG{m}{n}, z={distance}"
-    assert mse < 0.01, f"HIGH MSE: {mse:.4f} for HG{m}{n}, z={distance}"
+    assert mse < 1e-7, f"HIGH MSE: {mse:.4f} for HG{m}{n}, z={distance}"
 
 
 def test_hermite_gauss_orthogonality():

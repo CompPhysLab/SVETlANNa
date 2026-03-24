@@ -3,6 +3,21 @@ from .simulation_parameters import SimulationParameters
 from typing import Any, Self, TYPE_CHECKING
 
 
+# Polynomial Hermite using recurrence (PyTorch implementation)
+def hermite_poly(n: int, xi: torch.Tensor) -> torch.Tensor:
+    """Evaluate Hermite polynomial H_n(xi) using recurrence."""
+    if n == 0:
+        return torch.ones_like(xi)
+    if n == 1:
+        return 2 * xi
+    H_prev2 = torch.ones_like(xi)
+    H_prev1 = 2 * xi
+    for k in range(2, n + 1):
+        H_curr = 2 * xi * H_prev1 - 2 * (k - 1) * H_prev2
+        H_prev2, H_prev1 = H_prev1, H_curr
+    return H_prev1
+
+
 class Wavefront(torch.Tensor):
     """Class that represents wavefront.
     It is a subclass of `torch.Tensor` with additional properties and methods for wavefront analysis and generation.
@@ -262,13 +277,12 @@ class Wavefront(torch.Tensor):
         dy: float = 0.0,
         m: int = 0,
         n: int = 0,
-        amplitude: float = 1.0,
     ) -> Self:
         r"""Generate Hermite-Gaussian mode wavefront.
 
         The field is defined (in the waist plane) as:
         $$
-        E(x, y) = A \, H_m\left(\frac{\sqrt{2}(x-d_x)}{w_0}\right)
+        E(x, y) = H_m\left(\frac{\sqrt{2}(x-d_x)}{w_0}\right)
                     H_n\left(\frac{\sqrt{2}(y-d_y)}{w_0}\right)
                     \exp\left(-\frac{(x-d_x)^2+(y-d_y)^2}{w_0^2}\right)
         $$
@@ -288,67 +302,47 @@ class Wavefront(torch.Tensor):
             Beam center offset, by default 0.
         m, n : int, optional
             Mode indices (x and y directions), by default 0 (fundamental mode).
-        amplitude : float, optional
-            Peak amplitude, by default 1.0.
 
         Returns
         -------
         Wavefront
             Hermite-Gaussian field.
         """
+        # Cast axes
         sim_params = simulation_parameters
         wavelength = sim_params.cast(sim_params.wavelength, "wavelength")
-        x = sim_params.cast(sim_params.x, "x")  # expected 2D tensor
-        y = sim_params.cast(sim_params.y, "y")  # expected 2D tensor
+        x = sim_params.cast(sim_params.x, "x")
+        y = sim_params.cast(sim_params.y, "y")
 
         # Shift coordinates
         X = x - dx
         Y = y - dy
 
         wave_number = 2 * torch.pi / wavelength
-        z_R = torch.pi * waist_radius**2 / wavelength  # Rayleigh range
 
-        # Polynomial Hermite using recurrence (PyTorch implementation)
-        def hermite_poly(n: int, xi: torch.Tensor) -> torch.Tensor:
-            """Evaluate Hermite polynomial H_n(xi) using recurrence."""
-            if n == 0:
-                return torch.ones_like(xi)
-            if n == 1:
-                return 2 * xi
-            H_prev2 = torch.ones_like(xi)
-            H_prev1 = 2 * xi
-            for k in range(2, n + 1):
-                H_curr = 2 * xi * H_prev1 - 2 * (k - 1) * H_prev2
-                H_prev2, H_prev1 = H_prev1, H_curr
-            return H_prev1
+        rayleigh_range = torch.pi * waist_radius**2 / wavelength
 
-        # Beam parameters at distance z
-        w: float | torch.Tensor
-        if distance == 0:
-            # Waist plane
-            w = waist_radius
-            R = torch.tensor(float("inf"))  # infinite radius
-            gouy = torch.tensor(0.0)
-        else:
-            w = waist_radius * torch.sqrt(1 + (distance / z_R) ** 2)
-            R = distance * (1 + (z_R / distance) ** 2)
-            gouy = (m + n + 1) * torch.arctan(distance / z_R)
+        radial_distance_squared = X**2 + Y**2
 
-        # Scaled coordinates
-        xi_x = torch.sqrt(torch.tensor(2.0)) * X / w
-        xi_y = torch.sqrt(torch.tensor(2.0)) * Y / w
+        hyperbolic_relation = waist_radius * torch.sqrt(
+            1 + (distance / rayleigh_range) ** 2
+        )
 
+        inverse_radius_of_curvature = distance / (distance**2 + rayleigh_range**2)
+
+        gouy_phase = (m + n + 1) * torch.arctan(distance / rayleigh_range)
+
+        sqrt2 = torch.sqrt(torch.tensor(2.0, device=sim_params.device))
+        xi_x = sqrt2 * X / hyperbolic_relation
+        xi_y = sqrt2 * Y / hyperbolic_relation
         Hm = hermite_poly(m, xi_x)
         Hn = hermite_poly(n, xi_y)
 
-        # Transverse profile
-        field = Hm * Hn * torch.exp(-(X**2 + Y**2) / w**2)
-
-        if distance != 0:
-            # Add phase terms: propagation phase, curvature, and Gouy phase
-            field = field * torch.exp(1j * wave_number * distance)
-            field = field * torch.exp(1j * wave_number * (X**2 + Y**2) / (2 * R))
-            field = field * torch.exp(-1j * gouy)
+        field = waist_radius / hyperbolic_relation * Hm * Hn
+        field = field * torch.exp(-radial_distance_squared / hyperbolic_relation**2)
+        field = field * torch.exp(1j * wave_number * distance)
+        field = field * torch.exp(1j * wave_number * radial_distance_squared * inverse_radius_of_curvature / 2)  # fmt: skip
+        field = field * torch.exp(-1j * gouy_phase)
 
         return cls(field)
 
