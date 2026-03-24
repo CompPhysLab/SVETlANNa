@@ -166,7 +166,7 @@ class Wavefront(torch.Tensor):
     ) -> Self:
         r"""Generates the Gaussian beam wavefront defined by the formula
         $$
-        E(x, y) = \frac{w_0}{w(z)} \exp\left( -\frac{(x - d_x)^2 + (y - d_y)^2}{w(z)^2} \right) \exp\left( i \left( k z + k\frac{(x - d_x)^2 + (y - d_y)^2}{2 R(z)} - \zeta(z) \right) \right)
+        E(x, y) = \frac{w_0}{w(z)} \exp\left( -\frac{(x - d_x)^2 + (y - d_y)^2}{w(z)^2} \right) \newline \cdot \exp\left( i \left( k z + k\frac{(x - d_x)^2 + (y - d_y)^2}{2 R(z)} - \zeta(z) \right) \right)
         $$
         where $w(z) = w_0 \sqrt{1 + \left( \frac{z}{z_R} \right)^2}$,
         $R(z) = z \left( 1 + \left( \frac{z_R}{z} \right)^2 \right)$,
@@ -278,17 +278,14 @@ class Wavefront(torch.Tensor):
         m: int = 0,
         n: int = 0,
     ) -> Self:
-        r"""Generate Hermite-Gaussian mode wavefront.
-
-        The field is defined (in the waist plane) as:
+        r"""Generates the Hermite-Gaussian mode wavefront defined by the formula
         $$
-        E(x, y) = H_m\left(\frac{\sqrt{2}(x-d_x)}{w_0}\right)
-                    H_n\left(\frac{\sqrt{2}(y-d_y)}{w_0}\right)
-                    \exp\left(-\frac{(x-d_x)^2+(y-d_y)^2}{w_0^2}\right)
+        E(x, y) = \frac{w_0}{w(z)} H_m\left(\frac{\sqrt{2}(x-d_x)}{w_0}\right) H_n\left(\frac{\sqrt{2}(y-d_y)}{w_0}\right) \exp\left( -\frac{(x - d_x)^2 + (y - d_y)^2}{w(z)^2} \right) \newline \cdot \exp\left( i \left( k z + k\frac{(x - d_x)^2 + (y - d_y)^2}{2 R(z)} - \zeta(z) \right) \right)
         $$
-        For propagation distance $z \neq 0$, the beam parameters evolve:
-        $w(z)=w_0\sqrt{1+(z/z_R)^2}$, $R(z)=z\left(1+(z_R/z)^2\right)$,
-        and the Gouy phase becomes $(m+n+1)\arctan(z/z_R)$.
+        where $w(z) = w_0 \sqrt{1 + \left( \frac{z}{z_R} \right)^2}$,
+        $R(z) = z \left( 1 + \left( \frac{z_R}{z} \right)^2 \right)$,
+        $\zeta(z) = (m+n+1)\arctan\left( \frac{z}{z_R} \right)$,
+        and $z_R = \frac{\pi w_0^2}{\lambda}$ is the Rayleigh range.
 
         Parameters
         ----------
@@ -297,11 +294,15 @@ class Wavefront(torch.Tensor):
         waist_radius : float
             Beam waist radius ($w_0$).
         distance : float, optional
-            Propagation distance $z$ from the waist, by default 0.
-        dx, dy : float, optional
-            Beam center offset, by default 0.
-        m, n : int, optional
-            Mode indices (x and y directions), by default 0 (fundamental mode).
+            Free wave propagation distance $z$, by default 0.
+        dx : float, optional
+            Horizontal offset of the mode center ($d_x$), by default 0.
+        dy : float, optional
+            Vertical offset of the mode center ($d_y$), by default 0.
+        m : int, optional
+            Mode index in the x direction, by default 0 (fundamental mode).
+        n : int, optional
+            Mode index in the y direction, by default 0 (fundamental mode).
 
         Returns
         -------
