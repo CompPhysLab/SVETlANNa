@@ -126,6 +126,7 @@ class Wavefront(torch.Tensor):
         Wavefront
             Plane wave field.
         """
+
         # by default the wave propagates along z direction
         if wave_direction is None:
             wave_direction = [0.0, 0.0, 1.0]

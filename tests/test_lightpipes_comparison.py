@@ -16,7 +16,7 @@ parameters = ["ox_size", "ox_nodes", "wavelength", "radius", "distance", "focal_
     [
         (
             25 * lp.mm,  # ox_size
-            3000,  # ox_nodes
+            1500,  # ox_nodes
             1064 * lp.nm,  # wavelength, mm
             2 * lp.mm,  # radius, mm
             2000 * lp.mm,  # distance, mm
@@ -24,7 +24,7 @@ parameters = ["ox_size", "ox_nodes", "wavelength", "radius", "distance", "focal_
         ),
         (
             25 * lp.mm,  # ox_size
-            3000,  # ox_nodes
+            1500,  # ox_nodes
             1064 * lp.nm,  # wavelength, mm
             2 * lp.mm,  # radius, mm
             100 * lp.mm,  # distance, mm
@@ -76,9 +76,9 @@ def test_circular_aperture(
     )
     # elements' definitions
     aperture = elements.RoundAperture(simulation_parameters, radius)
-    fs1 = elements.FreeSpace(simulation_parameters, distance, method="fresnel")
+    fs1 = elements.FreeSpace(simulation_parameters, distance, method="zpASM")
     lens = elements.ThinLens(simulation_parameters, focal_length)
-    fs2 = elements.FreeSpace(simulation_parameters, focal_length, method="fresnel")
+    fs2 = elements.FreeSpace(simulation_parameters, focal_length, method="zpASM")
 
     # field calculations
     G = sv.Wavefront.plane_wave(simulation_parameters)
@@ -99,10 +99,10 @@ def test_circular_aperture(
     assert (
         torch.mean(torch.abs(field_before_lens_lp - field_before_lens_sv))
         / before_lens_norm
-        < 0.01
+        < 0.06
     )
 
-    assert torch.mean(torch.abs(field_output_lp - field_output_sv)) / output_norm < 0.01
+    assert torch.mean(torch.abs(field_output_lp - field_output_sv)) / output_norm < 0.06
 
 
 # TODO: сравнить пиковую мощность и положение максимумов

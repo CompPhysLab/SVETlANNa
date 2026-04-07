@@ -1,7 +1,7 @@
 import svetlanna.elements
-from svetlanna.logging import agr_short_description
-from svetlanna.logging import log_message
-from svetlanna.logging import forward_logging_hook, register_logging_hook
+from svetlanna.debug_logging import agr_short_description
+from svetlanna.debug_logging import log_message
+from svetlanna.debug_logging import forward_logging_hook, register_logging_hook
 import torch
 import svetlanna
 import logging

@@ -119,23 +119,28 @@ def test_devices(device_type: torch.device):
     tensors.append(layer.forward(gaussian_beam))
     tensors.append(layer.reverse(gaussian_beam))
 
-    free_space_as = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="AS"
+    free_space_asm = elements.FreeSpace(
+        simulation_parameters=params, distance=distance, method="ASM"
     )
 
-    tensors.append(free_space_as.forward(gaussian_beam))
+    tensors.append(free_space_asm.forward(gaussian_beam))
 
-    free_space_fresnel = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="fresnel"
+    free_space_zpasm = elements.FreeSpace(
+        simulation_parameters=params, distance=distance, method="zpASM"
     )
 
-    tensors.append(free_space_fresnel.forward(gaussian_beam))
+    tensors.append(free_space_zpasm.forward(gaussian_beam))
 
-    free_space_reverse = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="fresnel"
+    free_space_rsc = elements.FreeSpace(
+        simulation_parameters=params, distance=distance, method="RSC"
     )
 
-    tensors.append(free_space_reverse.reverse(gaussian_beam))
+    tensors.append(free_space_rsc.forward(gaussian_beam))
+
+    free_space_zprsc = elements.FreeSpace(
+        simulation_parameters=params, distance=distance, method="zpRSC"
+    )
+    tensors.append(free_space_zprsc.forward(gaussian_beam))
 
     nl = elements.NonlinearElement(
         simulation_parameters=params, response_function=lambda x: x**2
@@ -181,7 +186,7 @@ def test_device_setup(device_type: torch.device):
     # )
 
     free_space = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="AS"
+        simulation_parameters=params, distance=distance, method="zpASM"
     )
 
     circle = elements.RoundAperture(simulation_parameters=params, radius=radius)

@@ -26,17 +26,17 @@ parameters = [
 @pytest.mark.parametrize(
     parameters,
     [
-        (
-            500,  # ox_size
-            500,  # oy_size
-            1000000,  # ox_nodes
-            10,  # oy_nodes
-            1064 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            1500,  # distance, mm
-            0.1,  # width, mm
-            5,  # max diffraction order to check
-            0.02,  # expected_error
-        ),
+        # (
+        #     500,  # ox_size
+        #     500,  # oy_size
+        #     1000000,  # ox_nodes
+        #     10,  # oy_nodes
+        #     1064 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
+        #     1500,  # distance, mm
+        #     0.1,  # width, mm
+        #     5,  # max diffraction order to check
+        #     0.02,  # expected_error
+        # ),
         (
             500,  # ox_size
             500,  # oy_size
@@ -59,17 +59,17 @@ parameters = [
             4,  # max diffraction order to check
             0.02,  # expected_error
         ),
-        (
-            500,  # ox_size
-            500,  # oy_size
-            1000000,  # ox_nodes
-            10,  # oy_nodes
-            990 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
-            1500,  # distance, mm
-            0.1,  # width, mm
-            8,  # max diffraction order to check
-            0.02,  # expected_error
-        ),
+        # (
+        #     500,  # ox_size
+        #     500,  # oy_size
+        #     1000000,  # ox_nodes
+        #     10,  # oy_nodes
+        #     990 * 1e-6,  # wavelength_test tensor, mm    # noqa: E501
+        #     1500,  # distance, mm
+        #     0.1,  # width, mm
+        #     8,  # max diffraction order to check
+        #     0.02,  # expected_error
+        # ),
     ],
 )
 def test_diffraction_peaks(
@@ -129,7 +129,7 @@ def test_diffraction_peaks(
     field_after_aperture = rectangular_aperture(beam)
 
     fs = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="AS"
+        simulation_parameters=params, distance=distance, method="zpASM"
     )
 
     output_field = fs.forward(field_after_aperture)

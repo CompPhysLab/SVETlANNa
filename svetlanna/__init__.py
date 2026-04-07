@@ -3,7 +3,7 @@ from .partial_with_parameters import PartialWithParameters
 from .setup import LinearOpticalSetup
 from .simulation_parameters import SimulationParameters
 from .wavefront import Wavefront
-from .logging import set_debug_logging
+from .debug_logging import set_debug_logging
 from . import elements
 from . import units
 from . import specs
