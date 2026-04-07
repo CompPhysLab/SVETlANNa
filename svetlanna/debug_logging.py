@@ -10,7 +10,7 @@ from typing import Any, Literal
 from functools import partial
 
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("svetlanna.logging")
 
 __handles: None | tuple[RemovableHandle, ...] = None
 __logging_type: Literal["logging", "print"] = "print"
