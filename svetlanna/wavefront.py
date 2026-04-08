@@ -152,7 +152,11 @@ class Wavefront(torch.Tensor):
         kyy = wave_direction[1] * wave_number * y
         kzz = wave_direction[2] * wave_number * distance
 
-        field = torch.exp(1j * (kxx + kyy + kzz + initial_phase))
+        field = (
+            torch.exp(1j * (kxx))
+            * torch.exp(1j * (kyy))
+            * torch.exp(1j * (kzz + initial_phase))
+        )
 
         return cls(field)
 
