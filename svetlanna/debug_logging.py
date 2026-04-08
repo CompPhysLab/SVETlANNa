@@ -100,7 +100,7 @@ def set_debug_logging(mode: bool, type: Literal["logging", "print"] = "print"):
     ```python
     import svetlanna as sv
     import torch
-    from svetlanna.logging import set_debug_logging
+    from svetlanna import set_debug_logging
 
     set_debug_logging(True)
 
