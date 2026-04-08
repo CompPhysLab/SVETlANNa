@@ -93,6 +93,16 @@ class FreeSpace(Element):
         super().__init__(simulation_parameters)
 
         self.distance = self.process_parameter("distance", distance)
+        if method == "AS":
+            method = "ASM"
+            warn(
+                "Method 'AS' is renamed to 'ASM'. The alias 'AS' will be removed in future versions."
+            )
+        if method == "RS":
+            method = "RSC"
+            warn(
+                "Method 'RS' is renamed to 'RSC'. The alias 'RS' will be removed in future versions."
+            )
         self.method = self.process_parameter("method", method)
 
         self._total_paddings_x = self.process_parameter(
@@ -118,8 +128,8 @@ class FreeSpace(Element):
         self._y_nodes = y_nodes
 
         # Compute spatial grid spacing
-        dx = (x[1] - x[0]) if x_nodes > 1 else torch.tensor([1.0])
-        dy = (y[1] - y[0]) if y_nodes > 1 else torch.tensor([1.0])
+        dx = (x[1] - x[0]) if x_nodes > 1 else torch.tensor(1.0, device=x.device)
+        dy = (y[1] - y[0]) if y_nodes > 1 else torch.tensor(1.0, device=y.device)
 
         self._dx = self.make_buffer("_dx", dx)
         self._dy = self.make_buffer("_dy", dy)
