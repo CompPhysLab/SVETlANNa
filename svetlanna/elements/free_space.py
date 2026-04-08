@@ -63,6 +63,8 @@ class FreeSpace(Element):
         simulation_parameters: SimulationParameters,
         distance: OptimizableFloat,
         method: Literal["ASM", "zpASM", "RSC", "zpRSC"],
+        total_paddings_x: int | None = None,
+        total_paddings_y: int | None = None,
     ):
         # TODO: rewrite docstrings
 
@@ -70,6 +72,13 @@ class FreeSpace(Element):
 
         self.distance = self.process_parameter("distance", distance)
         self.method = self.process_parameter("method", method)
+
+        self._total_paddings_x = self.process_parameter(
+            "_total_paddings_x", total_paddings_x
+        )
+        self._total_paddings_y = self.process_parameter(
+            "_total_paddings_y", total_paddings_y
+        )
 
         self._x_index = self.simulation_parameters.index("x")
         self._y_index = self.simulation_parameters.index("y")
@@ -226,19 +235,9 @@ class FreeSpace(Element):
     def _calculate_wave_number_z(
         wave_number: torch.Tensor, kx2ky2: torch.Tensor
     ) -> torch.Tensor:
-        kz_squared = torch.pow(wave_number.abs(), 2) - kx2ky2
 
-        kz_squared_cond = kz_squared >= 0
-
-        # calculate kz for propagating waves
-        wave_number_z_non_negative = torch.sqrt(
-            kz_squared * kz_squared_cond + 0j
-        )  # 0j is required to convert argument to complex
-
-        # take into account evanescent waves
-        wave_number_z_negative = 1j * torch.sqrt(-kz_squared * ~kz_squared_cond + 0j)
-
-        wave_number_z = wave_number_z_non_negative + wave_number_z_negative
+        # other way
+        wave_number_z = torch.sqrt(wave_number**2 - kx2ky2 + 0j)
 
         return wave_number_z
 
@@ -340,12 +339,31 @@ class FreeSpace(Element):
             y_message=Y_MESSAGE_zpASM,
         )
 
-        self._x_paddings = (
-            self._x_nodes // 2 if self._x_nodes % 2 == 0 else (self._x_nodes // 2 + 1)
-        )
-        self._y_paddings = (
-            self._y_nodes // 2 if self._y_nodes % 2 == 0 else (self._y_nodes // 2 + 1)
-        )
+        if self._total_paddings_x is not None:
+            self._x_paddings = (
+                self._total_paddings_x // 2
+                if self._total_paddings_x % 2 == 0
+                else (self._total_paddings_x // 2 + 1)
+            )
+        else:
+            self._x_paddings = (
+                self._x_nodes // 2
+                if self._x_nodes % 2 == 0
+                else (self._x_nodes // 2 + 1)
+            )
+
+        if self._total_paddings_y is not None:
+            self._y_paddings = (
+                self._total_paddings_y // 2
+                if self._total_paddings_y % 2 == 0
+                else (self._total_paddings_y // 2 + 1)
+            )
+        else:
+            self._y_paddings = (
+                self._y_nodes // 2
+                if self._y_nodes % 2 == 0
+                else (self._y_nodes // 2 + 1)
+            )
 
         ndim = max(-self._x_index, -self._y_index)
 
@@ -448,12 +466,31 @@ class FreeSpace(Element):
 
         self._padding_order = [0] * (2 * ndim)
 
-        self._x_paddings = (
-            self._x_nodes // 2 if self._x_nodes % 2 == 0 else (self._x_nodes // 2 + 1)
-        )
-        self._y_paddings = (
-            self._y_nodes // 2 if self._y_nodes % 2 == 0 else (self._y_nodes // 2 + 1)
-        )
+        if self._total_paddings_x is not None:
+            self._x_paddings = (
+                self._total_paddings_x // 2
+                if self._total_paddings_x % 2 == 0
+                else (self._total_paddings_x // 2 + 1)
+            )
+        else:
+            self._x_paddings = (
+                self._x_nodes // 2
+                if self._x_nodes % 2 == 0
+                else (self._x_nodes // 2 + 1)
+            )
+
+        if self._total_paddings_y is not None:
+            self._y_paddings = (
+                self._total_paddings_y // 2
+                if self._total_paddings_y % 2 == 0
+                else (self._total_paddings_y // 2 + 1)
+            )
+        else:
+            self._y_paddings = (
+                self._y_nodes // 2
+                if self._y_nodes % 2 == 0
+                else (self._y_nodes // 2 + 1)
+            )
 
         self._padding_order[-(2 * self._x_index + 1)] = self._x_paddings
         self._padding_order[-(2 * self._x_index + 2)] = self._x_paddings

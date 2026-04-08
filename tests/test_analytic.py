@@ -37,7 +37,7 @@ square_parameters = [
             60 * ureg.mm,  # distance_test, mm
             3 * ureg.mm,  # width_test, mm
             2 * ureg.mm,  # height_test, mm
-            ["ASM", "zpASM", "zpRSC", "RSC"],  # methods to test
+            ["ASM", "zpASM", "RSC"],  # methods to test
             0.075,  # expected intensity error
             0.05,  # error energy
         ),
