@@ -66,7 +66,29 @@ class FreeSpace(Element):
         total_paddings_x: int | None = None,
         total_paddings_y: int | None = None,
     ):
-        # TODO: rewrite docstrings
+        """Init method for FreeSpace class. Defines the parameters and
+        precomputes the parameters for the chosen method of propagation.
+
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Simulation parameters of the system. Contains the information about
+            the spatial grid, wavelength, etc.
+        distance : OptimizableFloat
+            The propagation distance along the optical axis.
+        method : Literal["ASM", "zpASM", "RSC", "zpRSC"]
+            The method used for propagation.
+                1. ASM - Angular Spectrum Method
+                2. zpASM - zero-padded Angular Spectrum Method
+                3. RSC - Rayleigh-Sommerfeld Convolution
+                4. zpRSC - zero-padded Rayleigh-Sommerfeld Convolution
+        total_paddings_x : int | None, optional
+            The total padding in the x direction to avoid interference of
+            solutions caused by the FFT algorithm, by default None
+        total_paddings_y : int | None, optional
+            The total padding in the y direction to avoid interference of
+            solutions caused by the FFT algorithm, by default None
+        """
 
         super().__init__(simulation_parameters)
 
@@ -133,6 +155,25 @@ class FreeSpace(Element):
         nodes: Tuple[int, int],
         device: torch.device,
     ) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor]:
+        """Calculates the kx^2 + ky^2, kx and ky parameters
+
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Simulation parameters of the system. Contains the information about
+            the spatial grid, wavelength, etc.
+        sampling_intervals : Tuple[torch.Tensor, torch.Tensor]
+            The sampling intervals in the x and y directions (dy, dx).
+        nodes : Tuple[int, int]
+            The number of nodes in the x and y directions (y_nodes, x_nodes).
+        device : torch.device
+            The device on which to perform the computations.
+
+        Returns
+        -------
+        Tuple[torch.Tensor, torch.Tensor, torch.Tensor]
+            A tuple containing the kx^2 + ky^2, kx and ky parameters
+        """
 
         y_nodes, x_nodes = nodes
         dy, dx = sampling_intervals
@@ -150,29 +191,23 @@ class FreeSpace(Element):
         return kx2ky2, _kx, _ky
 
     @staticmethod
-    def _calculate_paddings(
-        wavelength: torch.Tensor,
-        distance: OptimizableFloat,
-        sampling_interval: torch.Tensor,
-    ) -> int:
-
-        total_num_of_paddings = torch.max(
-            distance
-            * wavelength
-            / (
-                2
-                * sampling_interval**2
-                * torch.sqrt(1 - (wavelength / (2 * sampling_interval)) ** 2)
-            )
-        )
-
-        num_of_paddings_rounded = torch.ceil(total_num_of_paddings / 2).to(torch.int)
-        return int(num_of_paddings_rounded.item())
-
-    @staticmethod
     def _impulse_response_angular_spectrum(
         distance: OptimizableFloat, wave_number_z: torch.Tensor
     ) -> torch.Tensor:
+        """Calculates the impulse-response function for angular spectrum method
+
+        Parameters
+        ----------
+        distance : OptimizableFloat
+            Propagation distance
+        wave_number_z : torch.Tensor
+            Wave number in the z direction, calculated as sqrt(k^2 - kx^2 - ky^2)
+
+        Returns
+        -------
+        torch.Tensor
+            The impulse-response function for the angular spectrum method
+        """
 
         return torch.exp(1j * distance * wave_number_z)
 
@@ -183,7 +218,29 @@ class FreeSpace(Element):
         nodes: Tuple[int, int],
         size: Tuple[torch.Tensor, torch.Tensor],
         distance: OptimizableFloat,
-    ):
+    ) -> torch.Tensor:
+        """Calculates the transfer function of Raleigh-Sommerfeld Convolution
+        method
+
+        Parameters
+        ----------
+        simulation_parameters : SimulationParameters
+            Simulation parameters of the system. Contains the information about
+            the spatial grid, wavelength, etc.
+        wave_number : torch.Tensor
+            Wave number calculated as 2*pi/wavelength
+        nodes : Tuple[int, int]
+            The number of nodes in the x and y directions (y_nodes, x_nodes).
+        size : Tuple[torch.Tensor, torch.Tensor]
+            The size of the spatial grid in the x and y directions (Ly, Lx).
+        distance : OptimizableFloat
+            Propagation distance.
+
+        Returns
+        -------
+        torch.Tensor
+            The transfer function for the Raleigh-Sommerfeld Convolution method
+        """
         y_nodes, x_nodes = nodes
 
         Ly, Lx = size
@@ -222,6 +279,25 @@ class FreeSpace(Element):
     def _calculate_critical_distances(
         nodes: int, total_paddings: int, wavelength: torch.Tensor, d: torch.Tensor
     ) -> torch.Tensor:
+        """Calculates critical distances which determine the limits of
+        applicability of the propagation method.
+
+        Parameters
+        ----------
+        nodes : int
+            Number of nodes in the corresponding direction
+        total_paddings : int
+            Total number of paddings in the corresponding direction
+        wavelength : torch.Tensor
+            Wavelength of the light
+        d : torch.Tensor
+            Spatial grid spacing in the corresponding direction
+
+        Returns
+        -------
+        torch.Tensor
+            Critical distances
+        """
         distances = (
             (nodes + total_paddings)
             * torch.sqrt(1 - (wavelength / (2 * d)) ** 2)
@@ -235,8 +311,21 @@ class FreeSpace(Element):
     def _calculate_wave_number_z(
         wave_number: torch.Tensor, kx2ky2: torch.Tensor
     ) -> torch.Tensor:
+        """Calculates the k_z component of the wave vector
 
-        # other way
+        Parameters
+        ----------
+        wave_number : torch.Tensor
+            Wave number
+        kx2ky2 : torch.Tensor
+            The sum of squares of the kx and ky components of the wave vector
+
+        Returns
+        -------
+        torch.Tensor
+            k_z component of the wave vector, calculated as sqrt(k^2 - kx^2 - ky^2)
+        """
+
         wave_number_z = torch.sqrt(wave_number**2 - kx2ky2 + 0j)
 
         return wave_number_z
@@ -248,6 +337,20 @@ class FreeSpace(Element):
         x_message: str,
         y_message: str,
     ) -> None:
+        """Validates the conditions for the applicability of the propagation
+        method and issues warnings if the conditions are not met.
+
+        Parameters
+        ----------
+        x_condition : torch.Tensor
+            Condition for the x direction
+        y_condition : torch.Tensor
+            Condition for the y direction
+        x_message : str
+            Message to display if the x condition is not met
+        y_message : str
+            Message to display if the y condition is not met
+        """
 
         if not torch.all(x_condition):
             warn(x_message)
@@ -255,6 +358,7 @@ class FreeSpace(Element):
             warn(y_message)
 
     def _init_asm(self) -> None:
+        """Method which initialize parameters for the ASM method"""
 
         kx2ky2, kx, ky = self._calculate_kx2ky2(
             simulation_parameters=self.simulation_parameters,
@@ -308,6 +412,7 @@ class FreeSpace(Element):
         self._wave_number_z = self.make_buffer("_wave_number_z", wave_number_z)
 
     def _init_zpasm(self) -> None:
+        """Method which initialize parameters for the zpASM method"""
 
         distances_x = self._calculate_critical_distances(
             nodes=self._x_nodes,
@@ -393,6 +498,7 @@ class FreeSpace(Element):
         self._wave_number_z = self.make_buffer("_wave_number_z", wave_number_z)
 
     def _init_rsc(self) -> None:
+        """Method which initialize parameters for the RSC method"""
 
         distances_x = self._calculate_critical_distances(
             nodes=self._x_nodes,
@@ -431,6 +537,7 @@ class FreeSpace(Element):
         self._Ly = self.make_buffer("_Ly", Ly)
 
     def _init_zprsc(self) -> None:
+        """Method which initialize parameters for the zpRSC method"""
 
         distances_x = self._calculate_critical_distances(
             nodes=self._x_nodes,
@@ -498,6 +605,18 @@ class FreeSpace(Element):
         self._padding_order[-(2 * self._y_index + 2)] = self._y_paddings
 
     def _propagate_by_asm(self, wavefront: Wavefront) -> Wavefront:
+        """Propagate the wavefront using ASM method
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Incident wavefront to propagate
+
+        Returns
+        -------
+        Wavefront
+            Propagated wavefront
+        """
 
         wavefront_fft = torch.fft.fft2(wavefront, dim=(self._y_index, self._x_index))
 
@@ -514,6 +633,18 @@ class FreeSpace(Element):
         return Wavefront(output_wavefront)
 
     def _propagate_by_zpasm(self, wavefront: Wavefront) -> Wavefront:
+        """Propagate wavefront using zpASM method
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Incident wavefront to propagate
+
+        Returns
+        -------
+        Wavefront
+            Propagated wavefront
+        """
 
         # add paddings
         wavefront_padded = Wavefront(
@@ -538,6 +669,18 @@ class FreeSpace(Element):
         return Wavefront(output_wavefront)
 
     def _propagate_by_rsc(self, wavefront: Wavefront) -> Wavefront:
+        """Propagate wavefront using RSC method
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Incident wavefront to propagate
+
+        Returns
+        -------
+        Wavefront
+            Propagated wavefront
+        """
 
         wavefront_fft = torch.fft.fft2(wavefront, dim=(self._y_index, self._x_index))
 
@@ -565,6 +708,18 @@ class FreeSpace(Element):
         return Wavefront(output_wavefront)
 
     def _propagate_by_zprsc(self, wavefront: Wavefront) -> Wavefront:
+        """Propagate wavefront using zpRSC method
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Incident wavefront to propagate
+
+        Returns
+        -------
+        Wavefront
+            Propagated wavefront
+        """
 
         # add paddings
         wavefront_padded = F.pad(
@@ -618,6 +773,25 @@ class FreeSpace(Element):
         return Wavefront(output_wavefront)
 
     def _propagate_wavefront(self, wavefront: Wavefront, method: str) -> Wavefront:
+        """Propagate wavefront using determined propagation method
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Incident wavefront to propagate
+        method : str
+            Propagation method
+
+        Returns
+        -------
+        Wavefront
+            Propagated wavefront
+
+        Raises
+        ------
+        ValueError
+            Occurs when a non-existent direct distribution method is chosen
+        """
 
         propagation_function = self._propagation_methods.get(method)
 
@@ -652,6 +826,15 @@ class FreeSpace(Element):
         return output_wavefront
 
     def to_specs(self) -> Iterable[ParameterSpecs]:
+        """Method which determining the specific parameters of the element for
+        visualization in the widget
+
+        Returns
+        -------
+        Iterable[ParameterSpecs]
+            Sequence of ParameterSpecs objects containing the parameters of the
+            element
+        """
         return [
             ParameterSpecs(
                 "distance",
@@ -665,6 +848,24 @@ class FreeSpace(Element):
     def _widget_html_(
         index: int, name: str, element_type: str | None, subelements: list[ElementHTML]
     ) -> str:
+        """Visualizing free space element in the widget
+
+        Parameters
+        ----------
+        index : int
+            _description_
+        name : str
+            _description_
+        element_type : str | None
+            _description_
+        subelements : list[ElementHTML]
+            _description_
+
+        Returns
+        -------
+        str
+            _description_
+        """
         return jinja_env.get_template("widget_free_space.html.jinja").render(
             index=index, name=name, subelements=subelements
         )
