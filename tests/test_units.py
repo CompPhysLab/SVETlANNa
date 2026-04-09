@@ -5,7 +5,7 @@ import pytest
 
 
 @pytest.mark.parametrize(
-    'other',
+    "other",
     (
         123,
         1.234,
@@ -15,24 +15,14 @@ import pytest
         np.array(123),
         np.array(1.234),
         np.array([[1.23, 4.56]]),
-    )
+    ),
 )
 def test_arithmetics(other):
-    torch.testing.assert_close(
-        other * ureg.mm, other * ureg.mm.value
-    )
-    torch.testing.assert_close(
-        ureg.mm * other, other * ureg.mm.value
-    )
-    torch.testing.assert_close(
-        other / ureg.mm, other / ureg.mm.value
-    )
-    torch.testing.assert_close(
-        ureg.mm / other, ureg.mm.value / other
-    )
-    torch.testing.assert_close(
-        ureg.mm ** other, ureg.mm.value ** other
-    )
+    torch.testing.assert_close(other * ureg.mm, other * ureg.mm.value)
+    torch.testing.assert_close(ureg.mm * other, other * ureg.mm.value)
+    torch.testing.assert_close(other / ureg.mm, other / ureg.mm.value)
+    torch.testing.assert_close(ureg.mm / other, ureg.mm.value / other)
+    torch.testing.assert_close(ureg.mm**other, ureg.mm.value**other)
 
 
 def test_array_api():

@@ -1,0 +1,49 @@
+<div style="
+    border: 1px solid gray;
+    margin: 0.0rem;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;">
+    <details>
+        <summary style="
+    padding: 0.5rem;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    background-color: #a0b8db;
+    color: black">
+            <div style="display: inline-block; vertical-align: top;" id="sv-{{ index }}"><b>({{ index }}) {{ name }}</b>
+                <div style="margin-left: auto; margin-right: auto; width: fit-content;">
+                    <pre style="background-color: transparent;">
+→  →│↘      ↗│→  →
+→  →│→  ▒▒  →│→  →
+→  →│↗      ↘│→  →
+</pre>
+                </div>
+            </div>
+        </summary>
+
+        <div style="padding: 0rem 1rem;">
+            <div style="display: flex; flex-direction: row; align-items: center;">
+
+                {% for subelement in subelements %}
+                {% if loop.index0 != 0 %}
+                <div style="
+        margin: 0.6rem;
+        font-size: 1rem;
+        cursor: default;">
+                    →
+                </div>
+                {% else %}
+                {% endif %}
+                <div style="margin: 0.2rem 0;">
+                    <div>
+                        {{ subelement.html }}
+                    </div>
+                </div>
+                {% endfor %}
+
+            </div>
+        </div>
+    </details>
+</div>

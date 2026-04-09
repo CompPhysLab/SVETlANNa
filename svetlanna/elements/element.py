@@ -6,15 +6,15 @@ from ..specs import PrettyReprRepr, ParameterSpecs, SubelementSpecs, Specsable
 from ..specs.specs_writer import write_specs_to_html, context_generator
 from io import StringIO
 from typing import Iterable, TypeVar, TYPE_CHECKING
-from ..parameters import ConstrainedParameter, Parameter
+from ..parameters import Parameter
 from ..wavefront import Wavefront
 from warnings import warn
 
 
-INNER_PARAMETER_SUFFIX = '_svtlnn_inner_parameter'
+INNER_STORAGE_SUFFIX = "_svtlnn_inner_storage"
 
-_T = TypeVar('_T', Tensor, None)
-_V = TypeVar('_V')
+_T = TypeVar("_T", Tensor, None)
+_V = TypeVar("_V")
 
 
 class _BufferedValueContainer(tuple):
@@ -22,56 +22,46 @@ class _BufferedValueContainer(tuple):
 
     It is used to prevent double __setattr__ calls with the same value in
     patterns like `self.x = self.make_buffer('x', x_value)`.
-    Inheriting from tuple is used for performance reasons, so the `__slots__`.
+    Inheriting from tuple is used for performance reasons, hence `__slots__`.
     This approach was identified by GPT as the fastest one.
     """
+
     __slots__ = ()
 
     def __new__(cls, obj: Tensor | None):
         return super().__new__(cls, (obj,))
 
 
-# TODO: check docstring
 class Element(nn.Module, metaclass=ABCMeta):
-    """A class that describes each element of the system"""
-
-    def __init__(
-        self,
-        simulation_parameters: SimulationParameters
-    ) -> None:
-        """A class that describes each element of the system
+    def __init__(self, simulation_parameters: SimulationParameters) -> None:
+        """
+        This is the abstract class for all optical elements in SVETlANNa.
+        It is inherited from `torch.nn.Module`, so it is PyTorch-compatible.
+        Each element takes an incident wavefront and produces a transmitted wavefront.
 
         Parameters
         ----------
         simulation_parameters : SimulationParameters
-            Class exemplar that describes the optical system
+            Simulation parameters.
         """
 
         super().__init__()
 
-        self.simulation_parameters = simulation_parameters
+        self.simulation_parameters = simulation_parameters.clone()
 
-    # TODO: check doctrings
     @abstractmethod
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
-
-        """Forward propagation through the optical element"""
+        """Forward propagation through the optical element."""
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
-
-        """Create specs"""
-
-        for (name, parameter) in self.named_parameters():
+        for name, parameter in self.named_parameters():
 
             yield ParameterSpecs(
-                parameter_name=name,
-                representations=(PrettyReprRepr(value=parameter),)
+                parameter_name=name, representations=(PrettyReprRepr(value=parameter),)
             )
 
     def __setattr__(
-        self,
-        name: str,
-        value: Tensor | nn.Module | _BufferedValueContainer
+        self, name: str, value: Tensor | nn.Module | _BufferedValueContainer
     ) -> None:
 
         if isinstance(value, _BufferedValueContainer):
@@ -87,26 +77,22 @@ class Element(nn.Module, metaclass=ABCMeta):
                     "internal type _BufferedValueContainer. "
                     "Make sure this is the intended behavior."
                 )
+                return super().__setattr__(name, value)  # type: ignore
 
         # BoundedParameter and Parameter are handled by pointing
-        # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
-        if isinstance(value, (ConstrainedParameter, Parameter)):
-            super().__setattr__(
-                name + INNER_PARAMETER_SUFFIX, value.inner_storage
-            )
+        # auxiliary attribute on them with a name plus INNER_STORAGE_SUFFIX
+        if isinstance(value, Parameter):
+            super().__setattr__(name + INNER_STORAGE_SUFFIX, value.inner_storage)
 
         return super().__setattr__(name, value)
 
     def _repr_html_(self) -> str:
-        stream = StringIO('')
+        stream = StringIO("")
 
         def write_element_details(element: Specsable):
             subelements: list[SubelementSpecs] = []
             writer_context_generator = context_generator(
-                element=element,
-                element_index=0,
-                directory='',
-                subelements=subelements
+                element=element, element_index=0, directory="", subelements=subelements
             )
             # Write element's parameter specs to the stream
             write_specs_to_html(element, 0, writer_context_generator, stream)
@@ -121,55 +107,44 @@ class Element(nn.Module, metaclass=ABCMeta):
                 )
                 element_name = subelement.subelement.__class__.__name__
                 # Write the element's name to the summary tag
-                stream.write(
-                    f'[{subelement.subelement_type}] <b>{element_name}</b>'
-                )
+                stream.write(f"[{subelement.subelement_type}] <b>{element_name}</b>")
 
                 # Close summary tag and open a new div for the subelement
                 stream.write(
-                    '</summary>'
-                    '<div style="margin-left:2rem;margin-right: 0.3rem">'
+                    "</summary>" '<div style="margin-left:2rem;margin-right: 0.3rem">'
                 )
                 # Repeat the process for the subelement
                 write_element_details(subelement.subelement)
                 # Close the div and the details tags
-                stream.write(
-                    '</div>'
-                    '</details>'
-                )
+                stream.write("</div>" "</details>")
 
         write_element_details(self)
         return stream.getvalue()
 
-    def make_buffer(
-        self,
-        name: str,
-        value: _T,
-        persistent: bool = False
-    ) -> _T:
+    def make_buffer(self, name: str, value: _T, persistent: bool = False) -> _T:
         """Make buffer for internal use.
 
-        Use case:
+        Use case in `__init__` method:
+        ```python linenums="0"
+        self.mask = self.make_buffer('mask', some_tensor)
         ```
-        self.mask = make_buffer('mask', some_tensor)
-        ```
-        This allow torch to properly process `.to` method on Element
-        by marking that `mask` should be transferred to required device.
+        This allow torch to properly process the `.to` method on the element, since the buffer `maask` will be transferred to the required device along with simulation parameters.
+        This allows torch to properly process the `.to` method on the element, since the buffer `mask` will be transferred to the required device along with simulation parameters.
 
         Parameters
         ----------
         name : str
-            name of the new buffer
-            (it is more convenient to use name of new attribute)
+            Name of the new buffer
+            (it is more convenient to use the name of the new attribute).
         value : _T
-            tensor to be buffered
+            Tensor to be buffered.
         persistent : bool, optional
-            see torch docs on buffers, by default False
+            See torch docs on buffers, by default `False`.
 
         Returns
         -------
         _T
-            the value passed to the method
+            The value passed to the method.
         """
 
         if value is not None:
@@ -179,54 +154,54 @@ class Element(nn.Module, metaclass=ABCMeta):
                     "the simulation parameters device."
                 )
 
-        self.register_buffer(
-            name, value, persistent=persistent
-        )
+        self.register_buffer(name, value, persistent=persistent)
 
         # The instance of _BufferedValueContainer is returned
         # to support `self.x = self.make_buffer('x', x_value)` pattern
         return _BufferedValueContainer(self.__getattr__(name))  # type: ignore
 
-    def process_parameter(
-        self,
-        name: str,
-        value: _V
-    ) -> _V:
+    def process_parameter(self, name: str, value: _V) -> _V:
         """Process element parameter passed by user.
         Automatically registers buffer for non-parametric tensors.
 
-        Use case:
-        ```
-        self.mask = process_parameter('mask', some_tensor)
+        Use case in `__init__` method:
+        ```python linenums="0"
+        class SomeElement(Element):
+            def __init__(self, simulation_parameters, mask, a):
+                super().__init__(simulation_parameters)
+
+                self.mask = self.process_parameter('mask', mask)
+                self.a = self.process_parameter('a', a)
+
+                ...
         ```
 
         Parameters
         ----------
         name : str
-            name of the new buffer
-            (it is more convenient to use name of new attribute)
+            Name of the new buffer
+            (it is more convenient to use the name of the new attribute).
         value : _V
-            the value of the element parameter
+            The value of the element parameter.
 
         Returns
         -------
         _V
-            the value passed to the method
+            The value passed to the method.
         """
         if isinstance(value, Tensor):
             if value.device != self.simulation_parameters.device:
                 raise ValueError(
-                    f"Parameter {name} must be on "
-                    "the simulation parameters device."
+                    f"Parameter {name} must be on " "the simulation parameters device."
                 )
         if isinstance(value, (nn.Parameter, Parameter)):
             return value
         if isinstance(value, Tensor):
-            return self.make_buffer(name, value, persistent=True)
+            return self.make_buffer(name, value, persistent=True)  # type: ignore
         return value
 
     # === methods below are added for typing only ===
 
     if TYPE_CHECKING:
-        def __call__(self, incident_wavefront: Wavefront) -> Wavefront:
-            ...
+
+        def __call__(self, incident_wavefront: Wavefront) -> Wavefront: ...
