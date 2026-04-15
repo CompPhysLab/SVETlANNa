@@ -297,21 +297,23 @@ class SpatialLightModulator(Element, Generic[_F]):
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
 
         wavefront = incident_wavefront * self._aperture + 0j
-
+        # Поправка для создания нового тензора. Исправление произведено для оптимизатора Adam
+        new_wavefront = wavefront.clone()
         phase = self._phase_mask()
-        wavefront[self._mesh_slice] = wavefront[self._mesh_slice] * torch.exp(
+        new_wavefront[self._mesh_slice] = wavefront[self._mesh_slice] * torch.exp(
             1j * phase
         )
 
-        return wavefront
+        return new_wavefront
 
     def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
 
         wavefront = transmission_wavefront * self._aperture + 0j
-
+        # Поправка для создания нового тензора. Исправление произведено для оптимизатора Adam
+        new_wavefront = wavefront.clone()
         phase = self._phase_mask()
-        wavefront[self._mesh_slice] = wavefront[self._mesh_slice] * torch.exp(
+        new_wavefront[self._mesh_slice] = wavefront[self._mesh_slice] * torch.exp(
             -1j * phase
         )
 
-        return wavefront
+        return new_wavefront
