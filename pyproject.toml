@@ -1,6 +1,6 @@
 [project]
 name = "svetlanna"
-version = "2.0.0"
+version = "2.0.1"
 description = "SVETlANNa is an open-source Python library for simulation of free-space optical set-ups and neuromorphic systems such as Diffractive Neural Networks."
 authors = [
     {name="Alexey A. Shcherbakov", email="cplab@metalab.ifmo.ru"},
