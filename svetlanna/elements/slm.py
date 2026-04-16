@@ -5,7 +5,7 @@ from ..simulation_parameters import SimulationParameters
 from ..parameters import OptimizableTensor
 from ..wavefront import Wavefront
 from typing import Callable, Tuple, Literal, Generic
-from typing import ParamSpec, Concatenate
+from typing import ParamSpec, Concatenate, cast
 from typing_extensions import TypeVar
 from torch.nn.functional import interpolate
 
@@ -297,8 +297,14 @@ class SpatialLightModulator(Element, Generic[_F]):
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
 
         wavefront = incident_wavefront * self._aperture + 0j
-        # Поправка для создания нового тензора. Исправление произведено для оптимизатора Adam
-        new_wavefront = wavefront.clone()
+
+        # TODO: maybe sould be like that?:
+        # phase = torch.torch.zeros_like(self._aperture)
+        # phase[self._mesh_slice] = self._phase_mask()
+        # wavefront = wavefront * torch.exp(1j * phase)
+        # return wavefront
+
+        new_wavefront = cast(Wavefront, wavefront.clone())
         phase = self._phase_mask()
         new_wavefront[self._mesh_slice] = wavefront[self._mesh_slice] * torch.exp(
             1j * phase
@@ -309,8 +315,8 @@ class SpatialLightModulator(Element, Generic[_F]):
     def reverse(self, transmission_wavefront: Wavefront) -> Wavefront:
 
         wavefront = transmission_wavefront * self._aperture + 0j
-        # Поправка для создания нового тензора. Исправление произведено для оптимизатора Adam
-        new_wavefront = wavefront.clone()
+
+        new_wavefront = cast(Wavefront, wavefront.clone())
         phase = self._phase_mask()
         new_wavefront[self._mesh_slice] = wavefront[self._mesh_slice] * torch.exp(
             -1j * phase
