@@ -1,4 +1,4 @@
-from typing import Iterable, Generator, cast
+from typing import Iterable, Generator
 from functools import cache
 from types import EllipsisType
 import torch
@@ -206,61 +206,3 @@ def _check_axis(a: torch.Tensor | float, a_axis: tuple[str, ...]):
             raise ValueError(
                 f"Number of axes in the tensor ({len(a.shape)}) should be larger than number of provided axes' names ({len(a_axis)})!"
             )
-
-
-def tensor_dot(
-    a: torch.Tensor | float,
-    b: torch.Tensor | float,
-    a_axis: str | Iterable[str],
-    b_axis: str | Iterable[str],
-    preserve_a_axis: bool = False,
-) -> tuple[torch.Tensor, tuple[str, ...]]:
-    """Perform tensor dot product.
-
-    Parameters
-    ----------
-    a : torch.Tensor | float
-        first tensor
-    b : torch.Tensor | float
-        second tensor
-    a_axis : str | Iterable[str]
-        axis name of the first tensor
-    b_axis : str | Iterable[str]
-        axis name of the second tensor
-    preserve_a_axis : bool, optional
-        check if the resulting tensor axes are coincide with the `a` tensor axes, by default False
-
-    Returns
-    -------
-    tuple[torch.Tensor, tuple[str, ...]]
-        Product result and its axes names
-    """
-
-    # axis to tuple
-    a_axis = _axis_to_tuple(a_axis)
-    b_axis = _axis_to_tuple(b_axis)
-
-    if is_scalar(a):
-        if not preserve_a_axis:
-            a_axis = tuple()
-    if is_scalar(b):
-        b_axis = tuple()
-
-    # check axes dims
-    _check_axis(a, a_axis)
-    _check_axis(b, b_axis)
-
-    # generate axes of the resulting tensor
-    new_axes = _new_axes(a_axis, b_axis)
-
-    if preserve_a_axis:
-        assert len(new_axes) == len(a_axis), "Can't preserve axes of the first tensor"
-
-    if not is_scalar(a):
-        a = cast(torch.Tensor, a)
-        a = cast_tensor(a, a_axis, new_axes)
-    if not is_scalar(b):
-        b = cast(torch.Tensor, b)
-        b = cast_tensor(b, b_axis, new_axes)
-
-    return a * b, new_axes

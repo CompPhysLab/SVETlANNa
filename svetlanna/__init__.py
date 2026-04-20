@@ -7,7 +7,6 @@ from .debug_logging import set_debug_logging
 from . import elements
 from . import units
 from . import specs
-from .clerk import Clerk
 from . import networks
 
 __all__ = [
@@ -21,6 +20,5 @@ __all__ = [
     "elements",
     "units",
     "specs",
-    "Clerk",
     "networks",
 ]

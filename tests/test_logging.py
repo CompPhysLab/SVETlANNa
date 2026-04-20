@@ -76,7 +76,7 @@ def test_forward_logging_hook(input, output, capfd):
 
     element = ElementLike(
         simulation_parameters=svetlanna.SimulationParameters(
-            axes={
+            {
                 "y": torch.linspace(-1, 1, 10),
                 "x": torch.linspace(-1, 1, 10),
                 "wavelength": 1.0,
@@ -119,7 +119,7 @@ def test_register_logging_hook(input, type_, capfd):
 
     element = ElementLike(
         simulation_parameters=svetlanna.SimulationParameters(
-            axes={
+            {
                 "y": torch.linspace(-1, 1, 10),
                 "x": torch.linspace(-1, 1, 10),
                 "wavelength": 1.0,
@@ -163,7 +163,7 @@ def test_set_debug_logging(input, output, capfd, caplog):
     def run_element():
         element = ElementLike(
             simulation_parameters=svetlanna.SimulationParameters(
-                axes={
+                {
                     "y": torch.linspace(-1, 1, 10),
                     "x": torch.linspace(-1, 1, 10),
                     "wavelength": 1.0,
@@ -172,12 +172,16 @@ def test_set_debug_logging(input, output, capfd, caplog):
         )
         element(*input)
 
+    expected_output_sim_params = (
+        "Module of ElementLike was registered with name simulation_parameters:\n"
+        "   <class 'svetlanna.simulation_parameters.SimulationParameters'>"
+    )
     expected_output_1 = (
         "Module of ElementLike was registered with name a:\n"
         "   <class 'torch.nn.modules.module.Module'>"
     )
     expected_output_2 = (
-        "Module of ElementLike was registered with name b_svtlnn_inner_parameter:\n"
+        "Module of ElementLike was registered with name b_svtlnn_inner_storage:\n"
         "   <class 'svetlanna.parameters.InnerParameterStorageModule'>"
     )
     expected_output_3 = (
@@ -191,6 +195,7 @@ def test_set_debug_logging(input, output, capfd, caplog):
         expected_output_4 += f"\n   output {i}: {type(_output)}"
 
     expected_outputs = [
+        expected_output_sim_params,
         expected_output_1,
         expected_output_2,
         expected_output_3,

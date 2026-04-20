@@ -1,7 +1,7 @@
 import svetlanna
 import svetlanna.elements
 import torch
-from svetlanna.elements.element import INNER_PARAMETER_SUFFIX, _BufferedValueContainer
+from svetlanna.elements.element import INNER_STORAGE_SUFFIX, _BufferedValueContainer
 import pytest
 
 import svetlanna.specs
@@ -21,6 +21,16 @@ class ElementToTest(svetlanna.elements.Element):
     def forward(self, incident_wavefront: svetlanna.Wavefront) -> svetlanna.Wavefront:
         return incident_wavefront
 
+    def to_specs(self):
+        for spec in super().to_specs():
+            yield spec
+        yield svetlanna.specs.SubelementSpecs(
+            subelement_type="TestSubelement",
+            subelement=svetlanna.elements.RoundAperture(
+                simulation_parameters=self.simulation_parameters, radius=1
+            ),
+        )
+
 
 def test_setattr():
     sim_params = svetlanna.SimulationParameters(
@@ -34,7 +44,7 @@ def test_setattr():
     element = ElementToTest(sim_params, test_parameter=test_parameter, test_buffer=None)
 
     # check if inner storage of the parameter has been saved
-    parameter_name = "test_parameter" + INNER_PARAMETER_SUFFIX
+    parameter_name = "test_parameter" + INNER_STORAGE_SUFFIX
     assert getattr(element, parameter_name) is test_parameter.inner_storage
     assert element.test_parameter.inner_parameter in element.parameters()
 
@@ -143,9 +153,11 @@ def test_to_specs():
     element = ElementToTest(sim_params, test_parameter=test_parameter, test_buffer=None)
 
     specs = list(element.to_specs())
-    assert len(specs) == 1
+    assert len(specs) == 2
     assert isinstance(specs[0], svetlanna.specs.specs.ParameterSpecs)
     assert specs[0].parameter_name == "test_parameter"
+    assert isinstance(specs[1], svetlanna.specs.specs.SubelementSpecs)
+    assert specs[1].subelement_type == "TestSubelement"
 
     representations = list(specs[0].representations)
     assert len(representations) == 1

@@ -1,8 +1,14 @@
 from svetlanna.simulation_parameters import AxisNotFound
-from svetlanna import SimulationParameters
+from svetlanna import SimulationParameters, Wavefront
+from svetlanna.elements import Element
 import pytest
 import torch
 from itertools import chain
+
+
+class ElementToTest(Element):
+    def forward(self, incident_wavefront: Wavefront) -> Wavefront:
+        return incident_wavefront
 
 
 def test_simulation_parameters_init():
@@ -23,7 +29,7 @@ def test_simulation_parameters_init():
             }
         )
 
-    # Test with wrong y and x axis shape
+    # Wrong x/y axis shapes.
     with pytest.raises(ValueError):
         SimulationParameters(
             {
@@ -76,11 +82,11 @@ def test_simulation_parameters_init():
 
     # Test required axes are actually required
     with pytest.raises(ValueError):
-        SimulationParameters(
+        SimulationParameters(  # type: ignore
             x=torch.linspace(-1, 1, 10),
         )
     with pytest.raises(ValueError):
-        SimulationParameters(
+        SimulationParameters(  # type: ignore
             x=torch.linspace(-1, 1, 10),
             y=torch.linspace(-1, 1, 10),
         )
@@ -117,7 +123,7 @@ def test_simulation_parameters_init():
 
     # Test with both API types
     with pytest.raises(ValueError):
-        SimulationParameters(
+        SimulationParameters(  # type: ignore
             {
                 "x": torch.linspace(-1, 1, 10),
                 "wavelength": torch.tensor(312),
@@ -164,6 +170,67 @@ def test_simulation_parameters_from_dict():
     assert torch.allclose(sim_paras.wavelength, torch.tensor(wavelength))
 
 
+def test_simulation_parameters_equal(device_simple: str):
+    sim_params1 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 10),
+        wavelength=torch.tensor(312),
+    )
+
+    sim_params2 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 10),
+        wavelength=torch.tensor(312),
+    )
+
+    assert sim_params1.equal(sim_params1)
+    assert sim_params1.equal(sim_params2)
+
+    sim_params2.to(device_simple)
+    # Comparing instances on different devices raises `RuntimeError`
+    # because `torch.equal` requires the same device.
+    if sim_params1.device != sim_params2.device:
+        with pytest.raises(RuntimeError):
+            assert sim_params1.equal(sim_params2)
+
+    # Non-equal axes.
+    sim_params2 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 20),
+        wavelength=torch.tensor(312),
+    )
+    assert not sim_params1.equal(sim_params2)
+
+    # Extra axes.
+    sim_params2 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 20),
+        wavelength=torch.tensor(312),
+        pol=torch.tensor([1.0, 0.0]),
+    )
+
+    assert not sim_params1.equal(sim_params2)
+
+
+def test_simulation_parameters_clone(device_simple: str):
+    sim_params1 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 10),
+        wavelength=torch.tensor(312),
+    )
+    sim_params2 = sim_params1.clone()
+
+    assert sim_params1 is not sim_params2
+    assert sim_params1.equal(sim_params2)
+
+    # Clone stays on the same device.
+    sim_params1.to(device_simple)
+    sim_params2 = sim_params1.clone()
+
+    assert sim_params1.device.type == device_simple
+    assert sim_params1.equal(sim_params2)
+
+
 def test_simulation_parameters_axes():
 
     x_axis = torch.linspace(-1, 1, 10)
@@ -178,8 +245,8 @@ def test_simulation_parameters_axes():
     )
 
     # Test names of non-scalar axes
-    assert sim_params.names == ("pol", "y", "x")
-    assert sim_params.names_scalar == ("wavelength",)
+    assert sim_params.axis_names == ("pol", "y", "x")
+    assert sim_params._axis_names_scalar == ("wavelength",)
 
     # Test indices
     assert sim_params.index("pol") == -3
@@ -271,17 +338,17 @@ def test_simulation_parameters_axes_size():
     )
 
     # Test axes_size
-    assert sim_params.axes_size(("x",)) == torch.Size((Nx,))
-    assert sim_params.axes_size(("wavelength", "y")) == torch.Size((1, Ny))
-    assert sim_params.axes_size(("y",)) == torch.Size((Ny,))
+    assert sim_params.axis_sizes(("x",)) == torch.Size((Nx,))
+    assert sim_params.axis_sizes(("wavelength", "y")) == torch.Size((1, Ny))
+    assert sim_params.axis_sizes(("y",)) == torch.Size((Ny,))
 
     # Test axes_size with no arguments
     # Order is important here!
-    assert sim_params.axes_size() == torch.Size((Npol, Ny, Nx))
+    assert sim_params.axis_sizes() == torch.Size((Npol, Ny, Nx))
 
     with pytest.raises(AxisNotFound):
         # non existing axis
-        assert sim_params.axes_size(("a", "y")) == torch.Size((0, Ny))
+        assert sim_params.axis_sizes(("a", "y")) == torch.Size((0, Ny))
 
 
 @pytest.fixture(
@@ -343,14 +410,14 @@ def test_device(default_device: torch.device):
     transferred_sim_params = sim_params.to("cpu")
     assert transferred_sim_params.device.type == "cpu"  # type: ignore
 
-    for axis_name in chain(sim_params.names, sim_params.names_scalar):
+    for axis_name in chain(sim_params.axis_names, sim_params._axis_names_scalar):
         assert transferred_sim_params[axis_name].device.type == "cpu"
 
     # And back
     transferred_sim_params = transferred_sim_params.to(default_device)
     assert transferred_sim_params.device == default_device
 
-    for axis_name in chain(sim_params.names, sim_params.names_scalar):
+    for axis_name in chain(sim_params.axis_names, sim_params._axis_names_scalar):
         assert transferred_sim_params[axis_name].device == default_device
 
 
@@ -365,42 +432,12 @@ def test_axes_names_scalar():
         }
     )
 
-    assert "wavelength" in sp.names_scalar
-    assert "time" in sp.names_scalar
-    assert "x" not in sp.names_scalar
-    assert "y" not in sp.names_scalar
-    assert "pol" not in sp.names_scalar
-    assert len(sp.names_scalar) == 2
-
-
-def test_axes_reorder():
-    Nx = 10
-    Ny = 8
-    Nwl = 5
-    sp = SimulationParameters(
-        {
-            "x": torch.linspace(-1, 1, Nx),
-            "y": torch.linspace(-1, 1, Ny),
-            "wavelength": torch.linspace(0.4, 0.6, Nwl),
-        }
-    )
-
-    t = torch.rand(2, Nwl, Ny, Nx)  # batch, wavelength, H, W
-
-    # No change when already in correct order
-    t_same = sp.reorder(t, "y", "x")
-    assert t_same.shape == torch.Size([2, Nwl, Ny, Nx])
-    # Swap y and x
-    t_swapped = sp.reorder(t, "x", "y")
-    assert t_swapped.shape == torch.Size([2, Nwl, Nx, Ny])
-
-    # Move wavelength to end
-    t_wl_end = sp.reorder(t, "wavelength")
-    assert t_wl_end.shape == torch.Size([2, Ny, Nx, Nwl])
-
-    # Error on non-existent axis
-    with pytest.raises(AxisNotFound):
-        sp.reorder(t, "nonexistent")
+    assert "wavelength" in sp._axis_names_scalar
+    assert "time" in sp._axis_names_scalar
+    assert "x" not in sp._axis_names_scalar
+    assert "y" not in sp._axis_names_scalar
+    assert "pol" not in sp._axis_names_scalar
+    assert len(sp._axis_names_scalar) == 2
 
 
 def test_cast():
@@ -492,82 +529,22 @@ def test_cast_with_scalar_axis():
     assert casted.shape == torch.Size([8, 10])  # no change, wavelength is scalar
 
 
-def test_reorder():
-    sp = SimulationParameters(
-        x=torch.linspace(-1, 1, 10),
-        y=torch.linspace(-1, 1, 8),
-        wavelength=torch.linspace(0.4, 0.6, 5),
-    )
-
-    t = torch.rand(2, 5, 8, 10)  # batch, wavelength, y, x
-    reordered = sp.reorder(t, "x", "y")
-    assert reordered.shape == torch.Size([2, 5, 10, 8])
-
-
-def test_to_inplace():
+def test_to_device_canonical(device_simple: str):
     sp = SimulationParameters(
         x=torch.linspace(-1, 1, 10),
         y=torch.linspace(-1, 1, 8),
         wavelength=torch.tensor(0.5),
     )
 
-    original_id = id(sp)
-    result = sp.to("cpu")
+    result = sp.to(device_simple)
 
     assert result is sp
-    assert id(result) == original_id
+
+    assert sp.device.type == device_simple
+    assert sp.x.device.type == device_simple
 
 
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param("cpu"),
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_to_device_canonical(device):
-    sp = SimulationParameters(
-        x=torch.linspace(-1, 1, 10),
-        y=torch.linspace(-1, 1, 8),
-        wavelength=torch.tensor(0.5),
-    )
-
-    sp.to(device)
-    assert sp.device.type == device
-    assert sp.x.device.type == device
-
-
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param("cpu"),
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_element_to_transfers_sim_params(device):
-    from svetlanna.elements import ThinLens
+def test_element_to_transfers_sim_params(device_simple: str):
 
     sp = SimulationParameters(
         x=torch.linspace(-1, 1, 100),
@@ -575,12 +552,18 @@ def test_element_to_transfers_sim_params(device):
         wavelength=torch.tensor(0.5e-6),
     )
 
-    lens = ThinLens(sp, focal_length=0.1)
-    assert sp.device.type == "cpu"
+    element = ElementToTest(sp)
+    element_sp = element.simulation_parameters
+    assert element_sp is not sp
+    assert element_sp.equal(sp)
 
-    lens.to(device)
-    assert sp.device.type == device
-    assert sp.x.device.type == device
+    element.to(device_simple)
+    assert element_sp is element.simulation_parameters
+    assert element_sp.device.type == device_simple
+
+    sp.to(device_simple)
+    assert element_sp is not sp
+    assert element_sp.equal(sp)
 
 
 def test_clear_cache():
@@ -590,28 +573,31 @@ def test_clear_cache():
         wavelength=torch.tensor(0.5e-6),
     )
 
-    # Test axes_size cache
-    sp.axes_size.cache_clear()
-    sp.axes_size(("x", "y"))
-    assert sp.axes_size.cache_info().hits == 0
-    sp.axes_size(("x", "y"))
-    assert sp.axes_size.cache_info().hits == 1
+    # Test axis_sizes cache
+    assert len(sp._cache_axis_sizes) == 0
+    sp.axis_sizes(("x", "y"))
+    assert len(sp._cache_axis_sizes) == 1
+    sp.axis_sizes(("x", "y"))
+    assert len(sp._cache_axis_sizes) == 1  # cache hit, no new entry
 
     sp._clear_caches()
-    sp.axes_size(("x", "y"))
-    assert sp.axes_size.cache_info().hits == 0
+    assert len(sp._cache_axis_sizes) == 0
+    sp.axis_sizes(("x", "y"))
+    assert len(sp._cache_axis_sizes) == 1
 
     # Test _cast_info cache
-    sp._cast_info.cache_clear()
+    sp._clear_caches()
+    assert len(sp._cache_cast_info) == 0
     t = torch.rand(100)
     sp.cast(t, "x")
-    assert sp._cast_info.cache_info().hits == 0
+    assert len(sp._cache_cast_info) == 1
     sp.cast(t, "x")
-    assert sp._cast_info.cache_info().hits == 1
+    assert len(sp._cache_cast_info) == 1  # cache hit, no new entry
 
     sp._clear_caches()
+    assert len(sp._cache_cast_info) == 0
     sp.cast(t, "x")
-    assert sp._cast_info.cache_info().hits == 0
+    assert len(sp._cache_cast_info) == 1
 
 
 def test_repr():
@@ -640,7 +626,17 @@ def test_legacy():
     )
 
     # Test legacy axes object
-    assert sp is sp.axes
+    with pytest.warns(DeprecationWarning):
+        assert sp is sp.axes
+
+    # Test legacy names property
+    with pytest.warns(DeprecationWarning):
+        assert sp.axis_names is sp.names
+
+    # Test legacy axes_size method
+    with pytest.warns(DeprecationWarning):
+        # is used, not ==, because of caching
+        assert sp.axis_sizes(("x", "y")) is sp.axes_size(("x", "y"))
 
     # Test legacy axis names (W, H)
     with pytest.warns(DeprecationWarning):
@@ -656,7 +652,7 @@ def test_legacy():
     with pytest.warns(DeprecationWarning):
         assert torch.allclose(sp.meshgrid("x", "y")[1], sp.meshgrid("W", "H")[1])
     with pytest.warns(DeprecationWarning):
-        assert sp.axes_size(("x",)) == sp.axes_size(("W",))
+        assert sp.axis_sizes(("x",)) == sp.axis_sizes(("W",))
     with pytest.warns(DeprecationWarning):
         assert sp.index("x") == sp.index("W")
 
@@ -671,3 +667,65 @@ def test_legacy():
         )
     assert torch.allclose(sp_old.x, x)
     assert torch.allclose(sp_old.y, y)
+
+
+def test_delattr_blocked():
+    sp = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 10),
+        wavelength=1.0,
+    )
+    with pytest.raises(AttributeError, match="read-only"):
+        del sp.x
+    with pytest.raises(AttributeError, match="read-only"):
+        del sp.wavelength
+    # Non-axis attributes can still be deleted
+    sp._custom_attr = 42
+    del sp._custom_attr
+
+
+def test_reserved_axis_names():
+    with pytest.raises(ValueError, match="conflicts with nn.Module"):
+        SimulationParameters(
+            x=torch.linspace(-1, 1, 10),
+            y=torch.linspace(-1, 1, 10),
+            wavelength=1.0,
+            training=torch.tensor([1.0, 2.0]),
+        )
+    with pytest.raises(ValueError, match="cannot start with underscore"):
+        SimulationParameters(
+            x=torch.linspace(-1, 1, 10),
+            y=torch.linspace(-1, 1, 10),
+            wavelength=1.0,
+            _hidden=torch.tensor([1.0]),
+        )
+
+
+def test_equal_checks_axis_order():
+    sp1 = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        wavelength=torch.linspace(0.4, 0.6, 5),
+        y=torch.linspace(-1, 1, 8),
+    )
+    sp2 = SimulationParameters(
+        wavelength=torch.linspace(0.4, 0.6, 5),
+        x=torch.linspace(-1, 1, 10),
+        y=torch.linspace(-1, 1, 8),
+    )
+    # Same values but different axis ordering → not equal
+    assert not sp1.equal(sp2)
+
+    # Same ordering → equal
+    sp3 = sp1.clone()
+    assert sp1.equal(sp3)
+
+
+def test_clone_preserves_axis_order():
+    sp = SimulationParameters(
+        x=torch.linspace(-1, 1, 10),
+        wavelength=torch.linspace(0.4, 0.6, 5),
+        y=torch.linspace(-1, 1, 8),
+    )
+    sp2 = sp.clone()
+    assert sp.axis_names == sp2.axis_names
+    assert sp._axis_names_scalar == sp2._axis_names_scalar

@@ -8,7 +8,7 @@ from svetlanna import SimulationParameters
 def test_aperture(sim_params_simple: SimulationParameters):
     """Test aperture transmission with an arbitrary mask."""
 
-    mask = torch.rand(sim_params_simple.axes_size(("y", "x")))
+    mask = torch.rand(sim_params_simple.axis_sizes(("y", "x")))
     aperture = elements.Aperture(simulation_parameters=sim_params_simple, mask=mask)
 
     transmission_function_expected = sim_params_simple.cast(mask, "y", "x")
@@ -94,28 +94,80 @@ def test_aperture_device(device_simple: str):
     wavefront = svetlanna.Wavefront.plane_wave(sim_params).to(device=device_simple)
 
     # Aperture
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     aperture = elements.Aperture(
         simulation_parameters=sim_params,
-        mask=torch.zeros(sim_params.axes_size(("y", "x"))),
-    ).to(device=device_simple)
+        mask=torch.zeros(sim_params.axis_sizes(("y", "x"))),
+    )
+    aperture.to(device=device_simple)
 
     assert aperture(wavefront).device.type == device_simple
 
     # Rectangular aperture
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     rectangular_aperture = elements.RectangularAperture(
         simulation_parameters=sim_params, height=1, width=1
-    ).to(device=device_simple)
+    )
+    rectangular_aperture.to(device=device_simple)
 
     assert rectangular_aperture(wavefront).device.type == device_simple
 
     # Round aperture
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     round_aperture = elements.RoundAperture(simulation_parameters=sim_params, radius=1)
     round_aperture.to(device=device_simple)
 
     assert round_aperture(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    # Aperture
+    assert sim_params.device.type == device_simple
+    aperture = elements.Aperture(
+        simulation_parameters=sim_params,
+        mask=torch.zeros(sim_params.axis_sizes(("y", "x"))).to(device=device_simple),
+    )
+
+    assert aperture(wavefront).device.type == device_simple
+
+    # Rectangular aperture
+    assert sim_params.device.type == device_simple
+    rectangular_aperture = elements.RectangularAperture(
+        simulation_parameters=sim_params, height=1, width=1
+    )
+
+    assert rectangular_aperture(wavefront).device.type == device_simple
+
+    # Round aperture
+    assert sim_params.device.type == device_simple
+    round_aperture = elements.RoundAperture(simulation_parameters=sim_params, radius=1)
+
+    assert round_aperture(wavefront).device.type == device_simple
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    aperture = elements.Aperture(
+        simulation_parameters=sim_params,
+        mask=torch.zeros(sim_params.axis_sizes(("y", "x"))),
+    )
+
+    assert aperture.to_specs()
+    assert isinstance(aperture._widget_html_(0, "", None, []), str)
+
+    rectangular_aperture = elements.RectangularAperture(
+        simulation_parameters=sim_params, height=1, width=1
+    )
+
+    assert rectangular_aperture.to_specs()
+    assert isinstance(rectangular_aperture._widget_html_(0, "", None, []), str)
+
+    round_aperture = elements.RoundAperture(simulation_parameters=sim_params, radius=1)
+
+    assert round_aperture.to_specs()
+    assert isinstance(round_aperture._widget_html_(0, "", None, []), str)

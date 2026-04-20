@@ -114,7 +114,7 @@ def test_diffraction_peaks(
     y_length = torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes)
 
     params = SimulationParameters(
-        axes={"x": x_length, "y": y_length, "wavelength": wavelength_test}
+        {"x": x_length, "y": y_length, "wavelength": wavelength_test}
     )
 
     beam = Wavefront.gaussian_beam(

@@ -36,7 +36,7 @@ class SpecsTestElement(Element):
 
 def test_context_generator(tmp_path):
     simulation_parameters = SimulationParameters(
-        axes={
+        {
             "x": torch.tensor([0]),
             "y": torch.tensor([0]),
             "wavelength": 1,
@@ -121,7 +121,7 @@ def test_context_generator(tmp_path):
 
 def test_ElementInTree():
     simulation_parameters = SimulationParameters(
-        axes={
+        {
             "x": torch.tensor([0]),
             "y": torch.tensor([0]),
             "wavelength": 1,
@@ -143,7 +143,7 @@ def test_ElementInTree():
 
 def test_ElementsIterator():
     simulation_parameters = SimulationParameters(
-        axes={
+        {
             "x": torch.tensor([0]),
             "y": torch.tensor([0]),
             "wavelength": 1,
@@ -223,7 +223,7 @@ def test_ElementsIterator():
 
 def test_write_tree(tmp_path):
     simulation_parameters = SimulationParameters(
-        axes={
+        {
             "x": torch.tensor([0]),
             "y": torch.tensor([0]),
             "wavelength": 1,
@@ -270,7 +270,7 @@ def test_write_tree(tmp_path):
 
 def test_write_specs(tmp_path):
     simulation_parameters = SimulationParameters(
-        axes={
+        {
             "x": torch.tensor([0]),
             "y": torch.tensor([0]),
             "wavelength": 1,

@@ -5,13 +5,13 @@ from ..simulation_parameters import SimulationParameters
 from ..specs import PrettyReprRepr, ParameterSpecs, SubelementSpecs, Specsable
 from ..specs.specs_writer import write_specs_to_html, context_generator
 from io import StringIO
-from typing import Iterable, TypeVar, TYPE_CHECKING, Self
+from typing import Iterable, TypeVar, TYPE_CHECKING
 from ..parameters import Parameter
 from ..wavefront import Wavefront
 from warnings import warn
 
 
-INNER_PARAMETER_SUFFIX = "_svtlnn_inner_parameter"
+INNER_STORAGE_SUFFIX = "_svtlnn_inner_storage"
 
 _T = TypeVar("_T", Tensor, None)
 _V = TypeVar("_V")
@@ -47,27 +47,11 @@ class Element(nn.Module, metaclass=ABCMeta):
 
         super().__init__()
 
-        self.simulation_parameters = simulation_parameters
+        self.simulation_parameters = simulation_parameters.clone()
 
     @abstractmethod
     def forward(self, incident_wavefront: Wavefront) -> Wavefront:
         """Forward propagation through the optical element."""
-
-    def to(self, *args, **kwargs) -> Self:
-        """
-        Move element to a different device/dtype.
-
-        Overrides `torch.nn.Module.to()` to also transfer simulation_parameters.
-        Since this method is inplace and idempotent,
-        multiple Elements sharing the same instance will work correctly.
-
-        Returns
-        -------
-        Self
-            The element itself, not a copy.
-        """
-        self.simulation_parameters.to(*args, **kwargs)
-        return super().to(*args, **kwargs)
 
     def to_specs(self) -> Iterable[ParameterSpecs | SubelementSpecs]:
         for name, parameter in self.named_parameters():
@@ -96,9 +80,9 @@ class Element(nn.Module, metaclass=ABCMeta):
                 return super().__setattr__(name, value)  # type: ignore
 
         # BoundedParameter and Parameter are handled by pointing
-        # auxiliary attribute on them with a name plus INNER_PARAMETER_SUFFIX
+        # auxiliary attribute on them with a name plus INNER_STORAGE_SUFFIX
         if isinstance(value, Parameter):
-            super().__setattr__(name + INNER_PARAMETER_SUFFIX, value.inner_storage)
+            super().__setattr__(name + INNER_STORAGE_SUFFIX, value.inner_storage)
 
         return super().__setattr__(name, value)
 

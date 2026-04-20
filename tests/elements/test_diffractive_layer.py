@@ -8,7 +8,7 @@ def test_diffractive_layer(
     sim_params_simple: SimulationParameters,
 ):
     """Test diffractive layer transmission."""
-    mask = torch.rand(sim_params_simple.axes_size(("y", "x")))
+    mask = torch.rand(sim_params_simple.axis_sizes(("y", "x")))
 
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=sim_params_simple,
@@ -38,13 +38,23 @@ def test_diffractive_layer_device(device_simple: str):
     )
     wavefront = svetlanna.Wavefront.plane_wave(sim_params).to(device=device_simple)
 
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=sim_params,
-        mask=torch.rand(sim_params.axes_size(("y", "x"))),
+        mask=torch.rand(sim_params.axis_sizes(("y", "x"))),
     )
     diffractive_layer.to(device=device_simple)
+
+    assert diffractive_layer(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    assert sim_params.device.type == device_simple
+    diffractive_layer = elements.DiffractiveLayer(
+        simulation_parameters=sim_params,
+        mask=torch.rand(sim_params.axis_sizes(("y", "x"))).to(device=device_simple),
+    )
 
     assert diffractive_layer(wavefront).device.type == device_simple
 
@@ -58,7 +68,7 @@ def test_reverse():
 
     diffractive_layer = elements.DiffractiveLayer(
         simulation_parameters=params,
-        mask=torch.rand(params.axes_size(("y", "x"))),
+        mask=torch.rand(params.axis_sizes(("y", "x"))),
     )
 
     # Validate that reverse(forward(x)) returns the original wavefront.
@@ -66,3 +76,18 @@ def test_reverse():
     assert torch.allclose(
         diffractive_layer.reverse(diffractive_layer.forward(wavefront)), wavefront
     )
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    diffractive_layer = elements.DiffractiveLayer(
+        simulation_parameters=sim_params,
+        mask=torch.zeros(sim_params.axis_sizes(("y", "x"))),
+    )
+
+    assert diffractive_layer.to_specs()
+    assert isinstance(diffractive_layer._widget_html_(0, "", None, []), str)

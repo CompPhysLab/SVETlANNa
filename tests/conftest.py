@@ -41,12 +41,12 @@ def sim_params_simple_cases() -> Generator[SimulationParameters, None, None]:
                 case["wavelength"] = wavelength
 
                 # no t axes
-                yield SimulationParameters(axes=_shuffle_dict(case))
+                yield SimulationParameters(**_shuffle_dict(case))
 
                 # with t axes
                 for t in t_cases:
                     case["t"] = t
-                    yield SimulationParameters(axes=_shuffle_dict(case))
+                    yield SimulationParameters(**_shuffle_dict(case))
                     del case["t"]
 
 

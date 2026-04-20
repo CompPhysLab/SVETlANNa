@@ -41,9 +41,10 @@ def test_init():
 
     assert isinstance(setup.net, torch.nn.Module)
 
-    x = torch.tensor(123)
+    x = Wavefront(torch.tensor(123))
     assert setup.net(x) == x * a**3
     assert setup.forward(x) == x * a**3
+    assert setup(x) == x * a**3
 
 
 def test_init_warning():
@@ -57,7 +58,7 @@ def test_init_warning():
     sim_params2 = SimulationParameters(
         {
             "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
-            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 20),
             "wavelength": 1,
         }
     )
@@ -70,24 +71,7 @@ def test_init_warning():
         LinearOpticalSetup(elements=[el1, el2])
 
 
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_to_device(device):
+def test_to_device(device_simple: str):
     sim_params = SimulationParameters(
         {
             "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
@@ -104,13 +88,26 @@ def test_to_device(device):
 
     setup = LinearOpticalSetup([el1, el2])
 
-    setup.net.to(device)
+    setup.net.to(device_simple)
 
-    assert el1.a.device.type == device
-    assert el1.a.inner_parameter.device.type == device
+    assert el1.a.device.type == device_simple
+    assert el1.a.inner_parameter.device.type == device_simple
 
-    assert el2.a.device.type == device
-    assert el2.a.inner_parameter.device.type == device
+    assert el2.a.device.type == device_simple
+    assert el2.a.inner_parameter.device.type == device_simple
+
+    # test warning when elements have different simulation_parameters devices
+    sim_params_cpu = SimulationParameters(
+        {
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
+        }
+    )
+    el3 = SimpleElement(a=torch.tensor(123), simulation_parameters=sim_params_cpu)
+    if el1.simulation_parameters.device != el3.simulation_parameters.device:
+        with pytest.warns(UserWarning):
+            LinearOpticalSetup(elements=[el1, el3])
 
 
 def test_reverse():
@@ -140,3 +137,47 @@ def test_reverse():
     el = ReversableSimpleElement(a=a, simulation_parameters=sim_params)
     setup = LinearOpticalSetup(elements=[el])
     torch.testing.assert_close(setup.reverse(wf), wf * a)
+
+
+def test_stepwise_forward():
+    sim_params = SimulationParameters(
+        {
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
+        }
+    )
+
+    a = torch.tensor(2)
+    el1 = SimpleElement(a=a, simulation_parameters=sim_params)
+    el2 = SimpleElement(a=a, simulation_parameters=sim_params)
+    el3 = SimpleElement(a=a, simulation_parameters=sim_params)
+
+    setup = LinearOpticalSetup(elements=[el1, el2, el3])
+
+    x = Wavefront(torch.tensor(1.0))
+    wavefronts = setup.stepwise_forward(x)
+    assert wavefronts[0] == x
+    assert wavefronts[1] == x * a
+    assert wavefronts[2] == x * a**2
+    assert wavefronts[3] == x * a**3
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        {
+            "x": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "y": torch.linspace(-5 * ureg.mm, 5 * ureg.mm, 10),
+            "wavelength": 1,
+        }
+    )
+
+    a = torch.tensor(2)
+    el1 = SimpleElement(a=a, simulation_parameters=sim_params)
+    el2 = SimpleElement(a=a, simulation_parameters=sim_params)
+    el3 = SimpleElement(a=a, simulation_parameters=sim_params)
+
+    setup = LinearOpticalSetup(elements=[el1, el2, el3])
+    assert setup.to_specs()
+    assert isinstance(setup._widget_html_(0, "", None, []), str)

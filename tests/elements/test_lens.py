@@ -69,12 +69,25 @@ def test_lens_device(device_simple: str):
     )
     wavefront = svetlanna.Wavefront.plane_wave(sim_params).to(device=device_simple)
 
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     lens = elements.ThinLens(
-        simulation_parameters=sim_params, focal_length=1.0, radius=5.0
+        simulation_parameters=sim_params,
+        focal_length=torch.tensor(1.0),
+        radius=5.0,
     )
     lens.to(device=device_simple)
+
+    assert lens(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    assert sim_params.device.type == device_simple
+    lens = elements.ThinLens(
+        simulation_parameters=sim_params,
+        focal_length=torch.tensor(1.0).to(device=device_simple),
+        radius=5.0,
+    )
 
     assert lens(wavefront).device.type == device_simple
 
@@ -91,3 +104,19 @@ def test_reverse():
     # Validate that reverse(forward(x)) returns the original wavefront.
     wavefront = svetlanna.Wavefront.plane_wave(params)
     assert torch.allclose(lens.reverse(lens.forward(wavefront)), wavefront)
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    lens = elements.ThinLens(
+        simulation_parameters=sim_params,
+        focal_length=1.0,
+        radius=5.0,
+    )
+
+    assert lens.to_specs()
+    assert isinstance(lens._widget_html_(0, "", None, []), str)

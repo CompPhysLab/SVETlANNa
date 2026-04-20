@@ -90,6 +90,26 @@ def test_image_repr_draw_image(tmp_path, mode):
     assert np.all(np.array(Image.open(path)) == np.array(image))
 
 
+def test_image_repr_draw_image_exceptions(tmp_path):
+    context = ParameterSaveContext(
+        parameter_name="test",
+        directory=tmp_path,
+    )
+
+    # test unsupported mode
+    image_to_draw = np.array([[1.0]])
+    repr = ImageRepr(value=image_to_draw, mode="NonExistingMode")  # type: ignore
+
+    with pytest.raises(ValueError, match=r"Unsupported mode: NonExistingMode"):
+        repr.draw_image(context, context.get_new_filepath("png"))
+
+    # test unsupported shape
+    for image_to_draw in [np.array([[[1.0]]]), np.array([1.0])]:
+        repr = ImageRepr(value=image_to_draw)
+        with pytest.raises(ValueError, match=r"Input array must have shape \(H, W\)"):
+            repr.draw_image(context, context.get_new_filepath("png"))
+
+
 def test_image_repr_to(tmp_path):
     context = ParameterSaveContext(
         parameter_name="test",

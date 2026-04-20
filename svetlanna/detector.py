@@ -113,7 +113,7 @@ class DetectorProcessorClf(nn.Module):
         else:  # detector is not segmented
             self.segmentation_type = segmentation_type
             if segments_zone_size is None:
-                sim_params_size = self.simulation_parameters.axes_size(
+                sim_params_size = self.simulation_parameters.axis_sizes(
                     axs=("y", "x")
                 )  # [y, x]
                 # make a detector segmentation according to self.segmentation_type
@@ -245,7 +245,7 @@ class DetectorProcessorClf(nn.Module):
                 detector_markup[:, ind_left_border:ind_right_border] = ind_class
 
         # add padding to match simulation parameters Wavefront shape
-        sim_params_size = self.simulation_parameters.axes_size(axs=("y", "x"))
+        sim_params_size = self.simulation_parameters.axis_sizes(axs=("y", "x"))
         if not sim_params_size == detector_shape:
             y_nodes, x_nodes = sim_params_size  # goal size
             y_mask, x_mask = detector_shape  # current size

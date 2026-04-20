@@ -11,8 +11,8 @@ from svetlanna.elements.slm import QuantizerFromStepFunction
 
 def test_slm(sim_params_simple: SimulationParameters):
     """Test SLM transmission with a mask aligned to the simulation grid."""
-
-    mask = torch.rand(sim_params_simple.axes_size(("y", "x")))
+    Ny, Nx = sim_params_simple.axis_sizes(("y", "x"))
+    mask = torch.rand(Ny, Nx)
 
     slm = elements.SpatialLightModulator(
         simulation_parameters=sim_params_simple,
@@ -34,6 +34,44 @@ def test_slm(sim_params_simple: SimulationParameters):
     torch.testing.assert_close(
         slm(wavefront), transmission_function_expected * wavefront
     )
+
+    with pytest.warns(UserWarning):
+        # small height
+        elements.SpatialLightModulator(
+            simulation_parameters=sim_params_simple,
+            mask=torch.rand(2 * Ny, Nx),
+            width=float(sim_params_simple.x[-1] - sim_params_simple.x[0]),
+            height=float(sim_params_simple.y[-1] - sim_params_simple.y[0]),
+        )
+    with pytest.warns(UserWarning):
+        # small width
+        elements.SpatialLightModulator(
+            simulation_parameters=sim_params_simple,
+            mask=torch.rand(Ny, 2 * Nx),
+            width=float(sim_params_simple.x[-1] - sim_params_simple.x[0]),
+            height=float(sim_params_simple.y[-1] - sim_params_simple.y[0]),
+        )
+
+
+def test_reverse():
+    # This test works only for SLM masks larger than the simulation grid,
+    # otherwise the reverse operation is not well-defined.
+    params = SimulationParameters(
+        x=torch.linspace(-10 / 2, 10 / 2, 10),
+        y=torch.linspace(-10 / 2, 10 / 2, 10),
+        wavelength=1,
+    )
+
+    slm = elements.SpatialLightModulator(
+        simulation_parameters=params,
+        mask=torch.rand(params.axis_sizes(("y", "x"))),
+        width=2 * float(params.x[-1] - params.x[0]),
+        height=1.5 * float(params.y[-1] - params.y[0]),
+    )
+
+    # Validate that reverse(forward(x)) returns the original wavefront.
+    wavefront = Wavefront.plane_wave(params)
+    assert torch.allclose(slm.reverse(slm.forward(wavefront)), wavefront)
 
 
 @pytest.mark.parametrize(
@@ -225,7 +263,6 @@ def test_slm_device(device_simple: str):
     )
     wavefront = Wavefront.plane_wave(sim_params).to(device=device_simple)
 
-    sim_params.to(torch.get_default_device())  # TODO: remove
     assert sim_params.device == torch.get_default_device()
     slm = elements.SpatialLightModulator(
         simulation_parameters=sim_params,
@@ -236,6 +273,21 @@ def test_slm_device(device_simple: str):
         height=1.0,
     )
     slm.to(device=device_simple)
+
+    assert slm(wavefront).device.type == device_simple
+
+    # Simulation parameters on device
+    sim_params.to(device=device_simple)
+
+    assert sim_params.device.type == device_simple
+    slm = elements.SpatialLightModulator(
+        simulation_parameters=sim_params,
+        mask=torch.ones(1, 1).to(device=device_simple),
+        mode="nearest",
+        center=(0, 0),
+        width=1.0,
+        height=1.0,
+    )
 
     assert slm(wavefront).device.type == device_simple
 
@@ -299,3 +351,20 @@ def test_quantizer_from_step_function():
     torch.testing.assert_close(grads[0], grads[-1])
     # Gradients should be non-negative.
     assert torch.all(grads >= 0)
+
+
+def test_to_specs():
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    slm = elements.SpatialLightModulator(
+        sim_params,
+        mask=torch.rand(sim_params.axis_sizes(("y", "x"))),
+        mode="nearest",
+        width=20.0,
+        height=20.0,
+    )
+
+    assert slm.to_specs()

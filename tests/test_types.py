@@ -38,16 +38,16 @@ def test_types(default_type: torch.dtype):
         default_complex_dtype = torch.complex64
 
     params = SimulationParameters(
-        axes={
+        {
             "x": torch.linspace(-ox_size / 2, ox_size / 2, ox_nodes),
             "y": torch.linspace(-oy_size / 2, oy_size / 2, oy_nodes),
             "wavelength": wavelength,
         }
     )
 
-    x_linear = params.axes.x
-    y_linear = params.axes.y
-    wavelength = params.axes.wavelength
+    x_linear = params.x
+    y_linear = params.y
+    wavelength = params.wavelength
 
     x_grid, y_grid = params.meshgrid(x_axis="x", y_axis="y")
 
@@ -87,12 +87,12 @@ def test_types(default_type: torch.dtype):
         simulation_parameters=params, distance=distance, method="AS"
     )(gaussian_beam)
 
-    free_space_fresnel = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="fresnel"
+    free_space_rs = elements.FreeSpace(
+        simulation_parameters=params, distance=distance, method="RS"
     )(gaussian_beam)
 
     free_space_reverse = elements.FreeSpace(
-        simulation_parameters=params, distance=distance, method="fresnel"
+        simulation_parameters=params, distance=distance, method="RS"
     ).reverse(transmission_wavefront=gaussian_beam)
 
     default_type = torch.get_default_dtype()
@@ -112,5 +112,5 @@ def test_types(default_type: torch.dtype):
     assert slm.dtype == default_complex_dtype
     assert layer.dtype == default_complex_dtype
     assert free_space_as.dtype == default_complex_dtype
-    assert free_space_fresnel.dtype == default_complex_dtype
+    assert free_space_rs.dtype == default_complex_dtype
     assert free_space_reverse.dtype == default_complex_dtype

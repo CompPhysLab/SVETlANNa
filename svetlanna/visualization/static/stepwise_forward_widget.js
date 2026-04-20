@@ -12,7 +12,7 @@ function render({ model, el }) {
 
     containerStructure.className = 'svetlanna-structure-container'
     const containerImagesInnerHTML = `
-    <div id="img-container" class="svetlanna-specs-container">
+    <div id="img-container" class="svetlanna-specs-container" style="font-family: monospace;">
         Click on any element
     </div>
     `
@@ -21,14 +21,14 @@ function render({ model, el }) {
     containerImages.innerHTML = containerImagesInnerHTML
 
     function insertElementSpecsHtml(el, element) {
-        let html = `<b>(${element.index}) ${element.name}</b> output:`
+        let html = `<div style="display:block;margin-bottom:6px;"><b>(${element.index}) ${element.name}</b> output:</div>`
 
         if (element.output_image === null) {
             html += '<p>No output has been captured</p>'
         } else if (element.output_image.startsWith('\n')) {
             html += `<p>During the calculations or plotting exception has been raised:${element.output_image}</p>`
         } else {
-            html += `<img src="data:image/png;base64,${element.output_image}" style="object-fit: contain; height:100%">`
+            html += `<img src="data:image/jpeg;base64,${element.output_image}" style="object-fit: contain; max-width: 100%; height: auto; width: auto; display: block;">`
         }
 
         el.querySelector('#img-container').innerHTML = html

@@ -1,3 +1,4 @@
+import svetlanna as sv
 from svetlanna.parameters import Parameter, ConstrainedParameter
 from svetlanna.parameters import InnerParameterStorageModule
 import torch
@@ -30,18 +31,16 @@ def test_inner_parameter_storage():
     # torch parameter should be registered as parameter
     assert torch_parameter in list(storage.parameters())
 
-    # tensors and svetlanna paramentes should be registered as buffers
+    # tensors should be registered as buffers
     assert torch_tensor in list(storage.buffers())
-    assert sv_parameter in list(storage.buffers())
-    assert sv_bounded_parameter in list(storage.buffers())
 
-    # test if non-tensors can not be used to create a storage
-    with pytest.raises(TypeError):
-        InnerParameterStorageModule(
-            {
-                "a": 123,  # type: ignore
-            }
-        )
+    # svetlanna parameters should be registered as buffers
+    assert sv_parameter is storage.value3
+    assert sv_parameter.inner_storage is getattr(storage, "value3_svtlnn_inner_storage")
+    assert sv_bounded_parameter is storage.value4
+    assert sv_bounded_parameter.inner_storage is getattr(
+        storage, "value4_svtlnn_inner_storage"
+    )
 
 
 @pytest.mark.parametrize(
@@ -141,24 +140,7 @@ def test_repr(parameter):
     assert repr(parameter)
 
 
-@pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-def test_storage_to_device(device):
+def test_storage_to_device(device_simple: str):
     torch_parameter = torch.nn.Parameter(torch.tensor(1.0))
     torch_tensor = torch.tensor(2.0)
     sv_parameter = Parameter(torch.tensor(3.0))
@@ -175,12 +157,12 @@ def test_storage_to_device(device):
         }
     )
 
-    storage.to(device=device)
+    storage.to(device=device_simple)
     # test if all values has been transferred to the device
-    assert storage.value1.device.type == device
-    assert storage.value2.device.type == device
-    assert storage.value3.device.type == device
-    assert storage.value4.device.type == device
+    assert storage.value1.device.type == device_simple
+    assert storage.value2.device.type == device_simple
+    assert storage.value3.device.type == device_simple
+    assert storage.value4.device.type == device_simple
 
     storage.to(device="cpu")
     # test if all values has been transferred to the cpu
@@ -191,23 +173,6 @@ def test_storage_to_device(device):
 
 
 @pytest.mark.parametrize(
-    ("device",),
-    [
-        pytest.param(
-            "cuda",
-            marks=pytest.mark.skipif(
-                not torch.cuda.is_available(), reason="cuda is not available"
-            ),
-        ),
-        pytest.param(
-            "mps",
-            marks=pytest.mark.skipif(
-                not torch.backends.mps.is_available(), reason="mps is not available"
-            ),
-        ),
-    ],
-)
-@pytest.mark.parametrize(
     "parameter",
     [
         Parameter(data=torch.tensor(123.0, dtype=torch.float32)),
@@ -216,10 +181,51 @@ def test_storage_to_device(device):
         ),
     ],
 )
-def test_parameter_to_device(device, parameter):
-    # transferred_parameter = parameter.to(device)
-    # assert transferred_parameter.device.type == device
-    # assert transferred_parameter.inner_storage.device.type == device
+def test_parameter_to_device(
+    device_simple: str, parameter: Parameter | ConstrainedParameter
+):
 
-    parameter.inner_storage.to(device=device)
-    assert parameter.inner_parameter.device.type == device
+    class E(sv.elements.Element):
+        def __init__(self, parameter: Parameter | ConstrainedParameter) -> None:
+            super().__init__(
+                simulation_parameters=sv.SimulationParameters(
+                    x=torch.linspace(0, 1, 10),
+                    y=torch.linspace(0, 1, 10),
+                    wavelength=1.0,
+                )
+            )
+            self.parameter = parameter
+
+        def forward(self, incident_wavefront: sv.Wavefront) -> sv.Wavefront:
+            return incident_wavefront
+
+    el = E(parameter)
+    el.to(device=device_simple)
+
+    assert el.parameter.device.type == device_simple
+    assert el.parameter.data.device.type == device_simple
+    assert el.parameter.inner_parameter.device.type == device_simple
+
+
+def test_constrained_parameter_attrs():
+    min_value = torch.tensor(0.0)
+    max_value = torch.tensor(10.0)
+
+    def bound_func(x: torch.Tensor) -> torch.Tensor:
+        return x
+
+    def inv_bound_func(x: torch.Tensor) -> torch.Tensor:
+        return x
+
+    parameter = ConstrainedParameter(
+        data=5.0,
+        min_value=min_value,
+        max_value=max_value,
+        bound_func=bound_func,
+        inv_bound_func=inv_bound_func,
+    )
+
+    assert parameter.min_value is min_value
+    assert parameter.max_value is max_value
+    assert parameter.bound_func is bound_func
+    assert parameter.inv_bound_func is inv_bound_func

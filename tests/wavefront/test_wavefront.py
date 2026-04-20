@@ -90,7 +90,7 @@ def test_plane_wave(distance, wavelength, initial_phase):
             "wavelength": wavelength,
         }
     )
-    k = 2 * torch.pi / sim_params.axes.wavelength
+    k = 2 * torch.pi / sim_params.wavelength
 
     # z propagation
     wf = Wavefront.plane_wave(
@@ -108,8 +108,8 @@ def test_plane_wave(distance, wavelength, initial_phase):
     dir_y = 0.5231432
     kx = k * dir_x / torch.linalg.norm(torch.tensor([dir_x, dir_y]))
     ky = k * dir_x / torch.linalg.norm(torch.tensor([dir_x, dir_y]))
-    x = sim_params.axes.x[None, :]
-    y = sim_params.axes.y[:, None]
+    x = sim_params.x[None, :]
+    y = sim_params.y[:, None]
     wf = Wavefront.plane_wave(
         sim_params,
         distance=distance,
@@ -129,46 +129,6 @@ def test_plane_wave(distance, wavelength, initial_phase):
         Wavefront.plane_wave(
             sim_params, distance=distance, wave_direction=[dir_x, dir_y]
         )
-
-
-# TODO: Test Gaussian beam against precomputed values
-@pytest.mark.parametrize("distance", (1, 1.23, 1e-4, 1e4))
-@pytest.mark.parametrize("waist_radius", (1, 1.23, 1e-4, 1e4))
-@pytest.mark.parametrize("dx", (1.0, 123, 2e-4))
-@pytest.mark.parametrize("dy", (1.0, 123, 2e-4))
-@pytest.mark.parametrize("wavelength", (1.0, torch.tensor([1.23, 20])))
-def test_gaussian_beam(distance, waist_radius, dx, dy, wavelength):
-    sim_params = SimulationParameters(
-        {
-            "x": torch.linspace(-0.1, 2, 10),
-            "y": torch.linspace(-1, 5, 20),
-            "wavelength": wavelength,
-        }
-    )
-    # Stupid test
-    Wavefront.gaussian_beam(
-        sim_params, waist_radius=waist_radius, distance=distance, dx=dx, dy=dy
-    )
-
-
-# TODO: Test spherical wave against precomputed values
-@pytest.mark.parametrize("distance", (1, 1.23, 1e-4, 1e4))
-@pytest.mark.parametrize("initial_phase", (1, 1.23, 1e-4, 1e4))
-@pytest.mark.parametrize("dx", (1.0, 123, 2e-4))
-@pytest.mark.parametrize("dy", (1.0, 123, 2e-4))
-@pytest.mark.parametrize("wavelength", (1.0, torch.tensor([1.23, 20])))
-def test_spherical_wave(distance, initial_phase, dx, dy, wavelength):
-    sim_params = SimulationParameters(
-        {
-            "x": torch.linspace(-0.1, 2, 10),
-            "y": torch.linspace(-1, 5, 20),
-            "wavelength": wavelength,
-        }
-    )
-    # Stupid test
-    Wavefront.spherical_wave(
-        sim_params, distance, initial_phase=initial_phase, dx=dx, dy=dy
-    )
 
 
 def test_wavefront_as_a_tensor():

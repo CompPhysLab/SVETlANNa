@@ -144,7 +144,7 @@ class GaussModulation(nn.Module):
         wf_gauss : Wavefront
             A gaussian distribution in a 2D plane.
         """
-        sim_nodes_shape = self.sim_params.axes_size(axs=("H", "W"))  # [H, W]
+        sim_nodes_shape = self.sim_params.axis_sizes(axs=("H", "W"))  # [H, W]
 
         if not wf.size()[-2:] == sim_nodes_shape:
             warnings.warn(

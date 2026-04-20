@@ -56,7 +56,7 @@ def test_drnn_forward(
     sequence_amplitudes,
 ):
     """Test forward function for a single Wavefront sequence."""
-    h, w = sim_params.axes_size(
+    h, w = sim_params.axis_sizes(
         axs=("y", "x")
     )  # size of a wavefront according to SimulationParameters
     wavefront_seq = Wavefront(
@@ -137,7 +137,7 @@ def test_drnn_batch_forward(
     sequence_amplitudes,
 ):
     """Test forward function for a batch of Wavefront sequences."""
-    h, w = sim_params.axes_size(
+    h, w = sim_params.axis_sizes(
         axs=("y", "x")
     )  # size of a wavefront according to SimulationParameters
     wavefront_seq_batch = Wavefront(
@@ -208,3 +208,24 @@ def test_drnn_device(sim_params, empty_layer, detector):
 
     assert isinstance(new_drnn, DiffractiveRNN)
     assert new_drnn.device == new_device
+
+
+def test_to_specs(empty_layer, detector):
+    """Stupid test to increase code coverage."""
+    sim_params = SimulationParameters(
+        x=torch.linspace(-10, 10, 20), y=torch.linspace(-10, 10, 20), wavelength=1.0
+    )
+
+    drnn = DiffractiveRNN(
+        sim_params,
+        sequence_len=3,
+        fusing_coeff=0.5,  # some values
+        read_in_layer=empty_layer,
+        memory_layer=empty_layer,
+        hidden_forward_layer=empty_layer,
+        read_out_layer=empty_layer,
+        detector_layer=detector,
+        device="cpu",
+    )
+
+    assert drnn.to_specs()

@@ -1,3 +1,6 @@
+# type: ignore
+# TODO: refactor
+
 from typing import Iterable
 
 import torch
@@ -53,7 +56,7 @@ class DiffractiveRNN(nn.Module):
         self.fusing_coeff = fusing_coeff
         self.sim_params = sim_params
 
-        self.h, self.w = self.sim_params.axes_size(
+        self.h, self.w = self.sim_params.axis_sizes(
             axs=("y", "x")
         )  # height and width for a wavefronts
 
