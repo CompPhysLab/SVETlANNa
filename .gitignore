@@ -168,3 +168,4 @@ cython_debug/
 # dev folders
 examples/
 experiments/
+local_examples/
