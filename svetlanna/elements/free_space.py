@@ -52,6 +52,16 @@ Y_MESSAGE_RSC = (
     "It is preferable to use the zpASM or ASM method."
 )
 
+X_MESSAGE_RSLC = (
+    "In RSLC method propagation distance is not large enough in the x direction."
+    "It is preferable to use the zpASM or ASM method."
+)
+
+Y_MESSAGE_RSLC = (
+    "In RSLC method propagation distance is not large enough in the y direction."
+    "It is preferable to use the zpASM or ASM method."
+)
+
 
 class FreeSpace(Element):
     """A class that describes a propagation of the wavefront in free space
@@ -62,7 +72,7 @@ class FreeSpace(Element):
         self,
         simulation_parameters: SimulationParameters,
         distance: OptimizableFloat,
-        method: Literal["ASM", "zpASM", "RSC", "zpRSC"],
+        method: Literal["ASM", "zpASM", "RSC", "zpRSC", "RSLC"],
         total_paddings_x: int | None = None,
         total_paddings_y: int | None = None,
     ):
@@ -76,12 +86,13 @@ class FreeSpace(Element):
             the spatial grid, wavelength, etc.
         distance : OptimizableFloat
             The propagation distance along the optical axis.
-        method : Literal["ASM", "zpASM", "RSC", "zpRSC"]
+        method : Literal["ASM", "zpASM", "RSC", "zpRSC", "RSLC"]
             The method used for propagation.
                 1. ASM - Angular Spectrum Method
                 2. zpASM - zero-padded Angular Spectrum Method
                 3. RSC - Rayleigh-Sommerfeld Convolution
                 4. zpRSC - zero-padded Rayleigh-Sommerfeld Convolution
+                5. RSLC - Rayleigh-Sommerfeld Linear Convolution
         total_paddings_x : int | None, optional
             The total padding in the x direction to avoid interference of
             solutions caused by the FFT algorithm, by default None
@@ -150,12 +161,15 @@ class FreeSpace(Element):
             self._init_rsc()
         elif self.method == "zpRSC":
             self._init_zprsc()
+        elif self.method == "RSLC":
+            self._init_rslc()
 
         self._propagation_methods = {
             "zpASM": self._propagate_by_zpasm,
             "ASM": self._propagate_by_asm,
             "zpRSC": self._propagate_by_zprsc,
             "RSC": self._propagate_by_rsc,
+            "RSLC": self._propagate_by_rslc,
         }
 
     @staticmethod
@@ -284,6 +298,46 @@ class FreeSpace(Element):
         transfer_function = first_factor + second_factor
 
         return transfer_function
+
+    @staticmethod
+    def _conv2d_fft_valid(
+        input: torch.Tensor,
+        weight: torch.Tensor,
+        fft_padding: int | Tuple[int, int],
+        dim: Tuple[int, int],
+    ) -> torch.Tensor:
+        """Calculates the valid part of a 2D convolution using FFT"""
+
+        y_dim, x_dim = dim
+
+        output_size = (
+            input.size(y_dim) - weight.size(y_dim) + 1,
+            input.size(x_dim) - weight.size(x_dim) + 1,
+        )
+
+        if isinstance(fft_padding, int):
+            fft_padding = (fft_padding, fft_padding)
+
+        fft_shape = (
+            input.size(y_dim) + fft_padding[0],
+            input.size(x_dim) + fft_padding[1],
+        )
+
+        input_fft = torch.fft.fft2(input, s=fft_shape, dim=(y_dim, x_dim))
+        weight_fft = torch.fft.fft2(
+            torch.flip(weight.conj(), dims=(y_dim, x_dim)),
+            s=fft_shape,
+            dim=(y_dim, x_dim),
+        )
+
+        output_fft = input_fft * weight_fft.conj()
+        output = torch.fft.ifft2(output_fft, dim=(y_dim, x_dim))
+
+        slices = [slice(None)] * output.ndim
+        slices[y_dim] = slice(0, output_size[0])
+        slices[x_dim] = slice(0, output_size[1])
+
+        return output[tuple(slices)]
 
     @staticmethod
     def _calculate_critical_distances(
@@ -512,14 +566,14 @@ class FreeSpace(Element):
 
         distances_x = self._calculate_critical_distances(
             nodes=self._x_nodes,
-            total_paddings=0,
+            total_paddings=self._x_nodes - 1,
             wavelength=self.simulation_parameters.wavelength,
             d=self._dx,
         )
 
         distances_y = self._calculate_critical_distances(
             nodes=self._y_nodes,
-            total_paddings=0,
+            total_paddings=self._y_nodes - 1,
             wavelength=self.simulation_parameters.wavelength,
             d=self._dy,
         )
@@ -549,40 +603,6 @@ class FreeSpace(Element):
     def _init_zprsc(self) -> None:
         """Method which initialize parameters for the zpRSC method"""
 
-        distances_x = self._calculate_critical_distances(
-            nodes=self._x_nodes,
-            total_paddings=self._x_nodes,
-            wavelength=self.simulation_parameters.wavelength,
-            d=self._dx,
-        )
-
-        distances_y = self._calculate_critical_distances(
-            nodes=self._y_nodes,
-            total_paddings=self._y_nodes,
-            wavelength=self.simulation_parameters.wavelength,
-            d=self._dy,
-        )
-
-        self._distances_x = self.make_buffer("_distances_x", distances_x)
-        self._distances_y = self.make_buffer("_distances_y", distances_y)
-
-        x_condition = self.distance >= self._distances_x
-        y_condition = self.distance >= self._distances_y
-
-        self._x_condition = self.make_buffer("_x_condition", x_condition)
-        self._y_condition = self.make_buffer("_y_condition", y_condition)
-
-        self._validate_conditions(
-            x_condition=self._x_condition,
-            y_condition=self._y_condition,
-            x_message=X_MESSAGE_zpRSC,
-            y_message=Y_MESSAGE_zpRSC,
-        )
-
-        ndim = max(-self._x_index, -self._y_index)
-
-        self._padding_order = [0] * (2 * ndim)
-
         if self._total_paddings_x is not None:
             self._x_paddings = (
                 self._total_paddings_x // 2
@@ -609,10 +629,77 @@ class FreeSpace(Element):
                 else (self._y_nodes // 2 + 1)
             )
 
+        distances_x = self._calculate_critical_distances(
+            nodes=self._x_nodes,
+            total_paddings=2 * self._x_paddings,
+            wavelength=self.simulation_parameters.wavelength,
+            d=self._dx,
+        )
+
+        distances_y = self._calculate_critical_distances(
+            nodes=self._y_nodes,
+            total_paddings=2 * self._y_paddings,
+            wavelength=self.simulation_parameters.wavelength,
+            d=self._dy,
+        )
+
+        self._distances_x = self.make_buffer("_distances_x", distances_x)
+        self._distances_y = self.make_buffer("_distances_y", distances_y)
+
+        x_condition = self.distance >= self._distances_x
+        y_condition = self.distance >= self._distances_y
+
+        self._x_condition = self.make_buffer("_x_condition", x_condition)
+        self._y_condition = self.make_buffer("_y_condition", y_condition)
+
+        self._validate_conditions(
+            x_condition=self._x_condition,
+            y_condition=self._y_condition,
+            x_message=X_MESSAGE_zpRSC,
+            y_message=Y_MESSAGE_zpRSC,
+        )
+
+        ndim = max(-self._x_index, -self._y_index)
+
+        self._padding_order = [0] * (2 * ndim)
+
         self._padding_order[-(2 * self._x_index + 1)] = self._x_paddings
         self._padding_order[-(2 * self._x_index + 2)] = self._x_paddings
         self._padding_order[-(2 * self._y_index + 1)] = self._y_paddings
         self._padding_order[-(2 * self._y_index + 2)] = self._y_paddings
+
+    def _init_rslc(self) -> None:
+        """Method which initialize parameters for the RSLC method"""
+
+        distances_x = self._calculate_critical_distances(
+            nodes=self._x_nodes,
+            total_paddings=self._x_nodes - 1,
+            wavelength=self.simulation_parameters.wavelength,
+            d=self._dx,
+        )
+
+        distances_y = self._calculate_critical_distances(
+            nodes=self._y_nodes,
+            total_paddings=self._y_nodes - 1,
+            wavelength=self.simulation_parameters.wavelength,
+            d=self._dy,
+        )
+
+        self._distances_x = self.make_buffer("_distances_x", distances_x)
+        self._distances_y = self.make_buffer("_distances_y", distances_y)
+
+        x_condition = self.distance >= self._distances_x
+        y_condition = self.distance >= self._distances_y
+
+        self._x_condition = self.make_buffer("_x_condition", x_condition)
+        self._y_condition = self.make_buffer("_y_condition", y_condition)
+
+        self._validate_conditions(
+            x_condition=self._x_condition,
+            y_condition=self._y_condition,
+            x_message=X_MESSAGE_RSLC,
+            y_message=Y_MESSAGE_RSLC,
+        )
 
     def _propagate_by_asm(self, wavefront: Wavefront) -> Wavefront:
         """Propagate the wavefront using ASM method
@@ -692,29 +779,134 @@ class FreeSpace(Element):
             Propagated wavefront
         """
 
-        wavefront_fft = torch.fft.fft2(wavefront, dim=(self._y_index, self._x_index))
+        y_kernel_nodes = 2 * self._y_nodes - 1
+        x_kernel_nodes = 2 * self._x_nodes - 1
 
         transfer_function = (
             self._transfer_function_rsc(
                 simulation_parameters=self.simulation_parameters,
                 wave_number=self._wave_number,
-                nodes=(self._y_nodes, self._x_nodes),
-                size=(self._Ly, self._Lx),
+                nodes=(y_kernel_nodes, x_kernel_nodes),
+                size=(
+                    2 * (self._y_nodes - 1) * self._dy,
+                    2 * (self._x_nodes - 1) * self._dx,
+                ),
                 distance=self.distance,
             )
             * self._dx
             * self._dy
         )
 
-        impulse_response_fft = torch.fft.fft2(
-            transfer_function, dim=(self._y_index, self._x_index)
+        output_wavefront = self._conv2d_fft_valid(
+            input=transfer_function,
+            weight=wavefront,
+            fft_padding=1,
+            dim=(self._y_index, self._x_index),
+        )
+        return Wavefront(output_wavefront)
+
+    def _propagate_by_rslc(self, wavefront: Wavefront) -> Wavefront:
+        """Propagate wavefront using RSLC method
+
+        Parameters
+        ----------
+        wavefront : Wavefront
+            Incident wavefront to propagate
+
+        Returns
+        -------
+        Wavefront
+            Propagated wavefront
+        """
+
+        y_kernel_nodes = 2 * self._y_nodes - 1
+        x_kernel_nodes = 2 * self._x_nodes - 1
+
+        transfer_function = (
+            self._transfer_function_rsc(
+                simulation_parameters=self.simulation_parameters,
+                wave_number=self._wave_number,
+                nodes=(y_kernel_nodes, x_kernel_nodes),
+                size=(
+                    2 * (self._y_nodes - 1) * self._dy,
+                    2 * (self._x_nodes - 1) * self._dx,
+                ),
+                distance=self.distance,
+            )
+            * self._dx
+            * self._dy
         )
 
-        output_wavefront_fft = wavefront_fft * impulse_response_fft
+        ndim = wavefront.ndim
+        y_index = self._y_index % ndim
+        x_index = self._x_index % ndim
+        non_spatial_indices = [
+            index for index in range(ndim) if index not in (y_index, x_index)
+        ]
+        permutation = non_spatial_indices + [y_index, x_index]
 
-        output_wavefront = torch.fft.ifftshift(
-            torch.fft.ifft2(output_wavefront_fft, dim=(self._y_index, self._x_index))
+        wavefront_permuted = wavefront.permute(permutation)
+        wavefront_non_spatial_shape = wavefront_permuted.shape[:-2]
+
+        transfer_ndim = transfer_function.ndim
+        transfer_y_index = self._y_index % transfer_ndim
+        transfer_x_index = self._x_index % transfer_ndim
+        transfer_non_spatial_indices = [
+            index
+            for index in range(transfer_ndim)
+            if index not in (transfer_y_index, transfer_x_index)
+        ]
+        transfer_permutation = transfer_non_spatial_indices + [
+            transfer_y_index,
+            transfer_x_index,
+        ]
+
+        transfer_function_permuted = transfer_function.permute(transfer_permutation)
+        transfer_non_spatial_shape = transfer_function_permuted.shape[:-2]
+
+        non_spatial_shape = torch.broadcast_shapes(
+            wavefront_non_spatial_shape, transfer_non_spatial_shape
         )
+        wavefront_permuted = wavefront_permuted.expand(
+            non_spatial_shape + wavefront_permuted.shape[-2:]
+        )
+        transfer_function_permuted = transfer_function_permuted.expand(
+            non_spatial_shape + transfer_function_permuted.shape[-2:]
+        )
+
+        batch = 1
+        for size in non_spatial_shape:
+            batch *= size
+
+        wavefront_reshaped = wavefront_permuted.reshape(
+            batch, 1, self._y_nodes, self._x_nodes
+        )
+        transfer_function_reshaped = transfer_function_permuted.reshape(
+            batch, 1, y_kernel_nodes, x_kernel_nodes
+        )
+        wavefront_reshaped = wavefront_reshaped.to(
+            dtype=transfer_function_reshaped.dtype
+        )
+
+        output_wavefront_full = F.conv2d(
+            wavefront_reshaped.transpose(0, 1),
+            torch.flip(transfer_function_reshaped, dims=(-2, -1)),
+            padding=(y_kernel_nodes - 1, x_kernel_nodes - 1),
+            groups=batch,
+        ).transpose(0, 1)
+
+        y_start = self._y_nodes - 1
+        y_end = y_start + self._y_nodes
+        x_start = self._x_nodes - 1
+        x_end = x_start + self._x_nodes
+
+        output_wavefront = output_wavefront_full[
+            :, :, y_start:y_end, x_start:x_end
+        ].reshape(non_spatial_shape + (self._y_nodes, self._x_nodes))
+
+        inverse_permutation = [permutation.index(index) for index in range(ndim)]
+        output_wavefront = output_wavefront.permute(inverse_permutation)
+
         return Wavefront(output_wavefront)
 
     def _propagate_by_zprsc(self, wavefront: Wavefront) -> Wavefront:
@@ -736,37 +928,56 @@ class FreeSpace(Element):
             wavefront, self._padding_order, mode="constant", value=0
         )
 
-        wavefront_padded_fft = torch.fft.fft2(
-            wavefront_padded, dim=(self._y_index, self._x_index)
-        )
+        x_nodes_padded = wavefront_padded.shape[self._x_index]
+        y_nodes_padded = wavefront_padded.shape[self._y_index]
 
-        x_nodes_padded = wavefront_padded_fft.shape[self._x_index]
-        y_nodes_padded = wavefront_padded_fft.shape[self._y_index]
-        _size = (self._dy * y_nodes_padded, self._dx * x_nodes_padded)
+        y_kernel_nodes = 2 * y_nodes_padded - 1
+        x_kernel_nodes = 2 * x_nodes_padded - 1
 
         transfer_function_padded = (
             self._transfer_function_rsc(
                 simulation_parameters=self.simulation_parameters,
                 wave_number=self._wave_number,
-                nodes=(y_nodes_padded, x_nodes_padded),
-                size=_size,
+                nodes=(y_kernel_nodes, x_kernel_nodes),
+                size=(
+                    2 * (y_nodes_padded - 1) * self._dy,
+                    2 * (x_nodes_padded - 1) * self._dx,
+                ),
                 distance=self.distance,
             )
             * self._dx
             * self._dy
         )
 
+        fft_shape = (
+            y_nodes_padded + y_kernel_nodes - 1,
+            x_nodes_padded + x_kernel_nodes - 1,
+        )
+
+        wavefront_padded_fft = torch.fft.fft2(
+            wavefront_padded, s=fft_shape, dim=(self._y_index, self._x_index)
+        )
+
         impulse_response_fft_padded = torch.fft.fft2(
-            transfer_function_padded, dim=(self._y_index, self._x_index)
+            transfer_function_padded, s=fft_shape, dim=(self._y_index, self._x_index)
         )
 
         output_wavefront_padded_fft = wavefront_padded_fft * impulse_response_fft_padded
 
-        output_wavefront_padded = torch.fft.ifftshift(
-            torch.fft.ifft2(
-                output_wavefront_padded_fft, dim=(self._y_index, self._x_index)
-            )
+        output_wavefront_full = torch.fft.ifft2(
+            output_wavefront_padded_fft, dim=(self._y_index, self._x_index)
         )
+
+        y_start_padded = y_nodes_padded - 1
+        y_end_padded = y_start_padded + y_nodes_padded
+        x_start_padded = x_nodes_padded - 1
+        x_end_padded = x_start_padded + x_nodes_padded
+
+        padded_slices = [slice(None)] * output_wavefront_full.ndim
+        padded_slices[self._y_index] = slice(y_start_padded, y_end_padded)
+        padded_slices[self._x_index] = slice(x_start_padded, x_end_padded)
+
+        output_wavefront_padded = output_wavefront_full[tuple(padded_slices)]
 
         y_start = self._y_paddings
         y_end = output_wavefront_padded.shape[self._y_index] - self._y_paddings
